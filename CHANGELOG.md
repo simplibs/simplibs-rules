@@ -44,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 #### Operational Helpers (`simplibs.rules.tools`)
 
-* `raise_invalid(value, rule, *, value_name=None, context=None)` — direct exception-raising helper that bypasses rule evaluation when application control flow guards have already detected an inline failure condition
+* `raise_invalid(value, rule, *, value_name=None, context=None)` — direct exception-raising helper that bypasses rule evaluation when application control flow guards have already detected an inline failure condition (relocated here from `simplibs-validate` during testing, once it became clear it only ever needs a `Rule`/callable and a value — no dependency on anything `simplibs-validate` adds on top)
 
 #### Annotation-Driven Rules (`simplibs.rules.predicates.typing`)
 
