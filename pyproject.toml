@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "simplibs-rules"
+version = "0.1.0"
+description = "Composable, explicit validation rules — pure predicates, zero transformation."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+keywords = [
+    "validation",
+    "validator",
+    "rules",
+    "predicates",
+    "data-validation",
+    "type-hints",
+    "testing",
+    "simplibs",
+    "simplibs-rules",
+    "developer-tools",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "simplibs-exception>=1.1.2",
+    "simplibs-sentinels>=0.1.0",
+]
+
+[[project.authors]]
+name = "Dalibor Sova (Sudip2708)"
+email = "daliborsova@seznam.cz"
+
+[project.urls]
+Homepage = "https://github.com/simplibs/simplibs-rules"
+Repository = "https://github.com/simplibs/simplibs-rules"
+Issues = "https://github.com/simplibs/simplibs-rules/issues"
+Changelog = "https://github.com/simplibs/simplibs-rules/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v"
+
+[tool.setuptools.packages.find]
+where = ["src"]
