@@ -17,7 +17,6 @@ def test_is_ascii_contract(subtests):
         rule=rule,
         valid_values=["", "hello", "123", "a-b_c!", "line\nbreak"],
         invalid_values=["příliš", "česky", "€", "©", 123, None, True],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

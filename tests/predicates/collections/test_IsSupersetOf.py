@@ -38,7 +38,6 @@ def test_is_superset_of_contract(subtests):
             ((123,), {}),       # Non-container reference parameter raises ParamError
             (("string",), {}),   # String reference raises ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

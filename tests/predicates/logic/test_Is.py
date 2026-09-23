@@ -21,7 +21,6 @@ def test_is_contract(subtests):
         rule=rule,
         valid_values=[SENTINEL],
         invalid_values=[object(), "SENTINEL", 123, None, []],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

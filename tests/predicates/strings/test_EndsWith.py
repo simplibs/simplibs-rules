@@ -23,7 +23,6 @@ def test_ends_with_contract(subtests):
             ((True,), {}),      # Boolean suffix -> ParamError
             (([],), {}),        # List suffix -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

@@ -18,7 +18,6 @@ def test_is_iterable_contract(subtests):
         rule=rule,
         valid_values=["text", [1, 2], (1, 2), {"a": 1}, {1, 2}, (x for x in range(3))],
         invalid_values=[123, 3.14, True, None],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

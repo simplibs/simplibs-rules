@@ -42,7 +42,6 @@ def test_has_attribute_contract(subtests):
             ((None,), {}),    # attr_name parameter must not be None -> ParamError
             (([],), {}),      # attr_name parameter must not be list -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

@@ -34,7 +34,6 @@ def test_compose_contract(subtests):
             (("not_callable", GreaterThan(0)), {}),  # Non-callable transformer raises ParamError
             ((int, "not_callable"), {}),             # Non-callable validator raises ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         check_value=False,  # Compose passes transformed value to exception (int -5 instead of str "-5")
         verbose=False,

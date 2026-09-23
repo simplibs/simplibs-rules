@@ -23,7 +23,6 @@ def test_starts_with_contract(subtests):
             ((True,), {}),      # Boolean prefix -> ParamError
             (([],), {}),        # List prefix -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

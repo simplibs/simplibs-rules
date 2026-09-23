@@ -35,7 +35,6 @@ def test_all_unique_contract(subtests):
             None,
         ],
         rule_factory=AllUnique,
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

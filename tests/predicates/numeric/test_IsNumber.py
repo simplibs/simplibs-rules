@@ -18,7 +18,6 @@ def test_is_number_contract(subtests):
         rule=rule,
         valid_values=[10, 10.5, Decimal("10.5"), complex(1, 2)],
         invalid_values=[True, False, "10", None, []],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

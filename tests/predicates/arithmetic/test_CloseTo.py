@@ -35,7 +35,6 @@ def test_close_to_contract(subtests):
             ((10.0,), {"abs_tol": None}),          # Non-numeric abs_tol raises ParamError
             ((10.0,), {"rel_tol": True}),          # Bool rel_tol raises ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

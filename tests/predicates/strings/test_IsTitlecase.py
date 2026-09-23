@@ -17,7 +17,6 @@ def test_is_titlecase_contract(subtests):
         rule=rule,
         valid_values=["Hello World", "Python", "A Book Title 123"],
         invalid_values=["", "123", "hello world", "HELLO WORLD", "Hello world", 123, None, True],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

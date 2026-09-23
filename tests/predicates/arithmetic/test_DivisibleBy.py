@@ -35,7 +35,6 @@ def test_divisible_by_contract(subtests):
             ((True,), {}),        # Bool divisor raises ParamError
             ((None,), {}),        # None divisor raises ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

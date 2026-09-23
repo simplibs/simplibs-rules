@@ -34,7 +34,6 @@ def test_any_of_contract(subtests):
         invalid_init_params=[
             ((), {}),  # AnyOf() with no arguments raises ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

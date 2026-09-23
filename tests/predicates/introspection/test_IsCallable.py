@@ -29,7 +29,6 @@ def test_is_callable_contract(subtests):
             str.upper,
         ],
         invalid_values=[123, "text", [1, 2], {"a": 1}, None, 3.14],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

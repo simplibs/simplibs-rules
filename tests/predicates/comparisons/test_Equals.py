@@ -18,7 +18,6 @@ def test_equals_contract(subtests):
         rule=rule,
         valid_values=["active"],
         invalid_values=["inactive", "ACTIVE", 123, None, False, ["active"]],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

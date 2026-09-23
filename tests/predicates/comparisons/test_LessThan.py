@@ -18,7 +18,6 @@ def test_less_than_contract(subtests):
         rule=rule,
         valid_values=[99, 0, -10, 99.9],
         invalid_values=[100, 101, 150, "50", None, [50]],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

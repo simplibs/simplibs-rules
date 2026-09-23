@@ -17,7 +17,6 @@ def test_not_blank_contract(subtests):
         rule=rule,
         valid_values=["hello", " a ", "123", "text\nwith\nlines"],
         invalid_values=["", " ", "   ", "\t", "\n", 123, None, True, []],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

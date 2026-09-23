@@ -26,7 +26,6 @@ def test_is_pi_contract(subtests):
             (("2",), {}),      # String in init -> ParamError
             ((True,), {}),     # Boolean in init -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

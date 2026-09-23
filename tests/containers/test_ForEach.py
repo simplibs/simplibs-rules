@@ -46,7 +46,6 @@ def test_for_each_contract(subtests):
             (("not_callable",), {}),  # Non-callable rule raises ParamError
             ((None,), {}),            # None instead of rule raises ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         check_value=False,  # ForEach delegates to collection elements -> exc.value is failed item, not whole collection
         verbose=False,

@@ -18,7 +18,6 @@ def test_is_zero_contract(subtests):
         rule=rule,
         valid_values=[0, 0.0, Decimal("0"), complex(0, 0)],
         invalid_values=[1, 0.1, Decimal("0.1"), complex(1, 0), True, False, "0", None],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

@@ -6,7 +6,6 @@ from .asserts.assert_rule_is_valid import assert_rule_is_valid
 from .asserts.assert_rule_validate import assert_rule_validate
 from .asserts.assert_rule_build_exception import assert_rule_build_exception
 from .asserts.assert_rule_param_error import assert_rule_param_error
-from .asserts.assert_rule_raise_invalid import assert_rule_raise_invalid
 
 
 def assert_rule_contract(
@@ -22,48 +21,22 @@ def assert_rule_contract(
     sample_label: str = "target_var",
     sample_context: str = "test_execution_context",
     check_value: bool = True,
-    check_raise_invalid: bool = False,
     verbose: bool = True,
     intro: str = "",
     deep_check: bool = True,
 ) -> None:
-    """Master orchestrator for testing rule compliance against the simplibs-validate contract.
+    """Master orchestrator for testing rule compliance against the simplibs-rules contract.
 
     Runs the full battery of deterministic checks a well-formed `Rule` subclass must
     satisfy: the `is_valid()`/`__call__` boolean contract, the `validate()` mode matrix,
     the `build_exception()` diagnostic card contract, and — optionally — the constructor's
-    `ParamError` guard and the standalone `raise_invalid()` dispatcher.
+    `ParamError` guard.
 
     Everything checked here is deterministic given valid_values/invalid_values, so a single
     call replaces most of what a hand-written test module for a Rule subclass would need.
     Anything rule-specific beyond this (e.g. asserting exact `problem`/`how_to_fix` wording
     for one particular invalid value) is expected to be written as an additional, focused
     test alongside this call — not folded into the generic contract.
-
-    Args:
-        subtests: The native pytest subtests fixture manager instance.
-        rule: The Rule instance under test.
-        valid_values: Values that must satisfy the rule.
-        invalid_values: Values that must fail the rule and produce a diagnostic exception.
-        expected_error_name: If provided, asserted against every raised exception's error_name.
-        expected_exception_type: If provided, asserted against every raised exception's
-            wrapped `exception` attribute.
-        rule_factory: The rule class (or a factory callable) used to test constructor
-            guards. Required, together with invalid_init_params, to run the constructor
-            ParamError check.
-        invalid_init_params: A list of (args, kwargs) pairs expected to raise ParamError
-            when passed to rule_factory. Required, together with rule_factory, to run the
-            constructor ParamError check.
-        sample_label: The value_name used when probing build_exception()/raise_invalid().
-        sample_context: The context used when probing build_exception().
-        check_value: If True, asserts that exc.value strictly matches the raw invalid value.
-            Set to False for rules that modify/transform values before failure (e.g. Compose).
-        check_raise_invalid: If True, additionally verifies the standalone raise_invalid()
-            function against this rule.
-        verbose: If True, registers individual checks as isolated pytest subtests.
-        intro: Optional prefix string added to the generated subtest identity name.
-        deep_check: If True, triggers exhaustive diagnostic field inspection in the
-            build_exception and constructor checks.
     """
     assert isinstance(rule, Rule), (
         f"assert_rule_contract expects a Rule instance, got {type(rule).__name__}."
@@ -107,17 +80,7 @@ def assert_rule_contract(
         intro=prefix,
     )
 
-    # 4. Optional: standalone raise_invalid() dispatcher
-    if check_raise_invalid:
-        assert_rule_raise_invalid(
-            subtests,
-            rule,
-            invalid_values,
-            verbose=verbose,
-            intro=prefix,
-        )
-
-    # 5. Optional constructor ParamError check
+    # 4. Optional constructor ParamError check
     if deep_check and invalid_init_params and rule_factory:
         assert_rule_param_error(
             subtests,
@@ -132,7 +95,7 @@ _DESIGN_NOTES = """
 # assert_rule_contract (Master Rule Compliance Orchestrator)
 
 ## Purpose
-The single entry point for testing any `simplibs-validate` `Rule` subclass.
+The single entry point for testing any `simplibs-rules` `Rule` subclass.
 Mirrors the Facade pattern used by `assert_exception_function` /
 `assert_exception_class` in `simplibs-exception`: one call, fed with data
 (valid/invalid values, and optionally constructor misuse cases), exercises
@@ -146,15 +109,11 @@ every deterministic corner of the `Rule` contract.
 2. **`validate` check** — the `validate()` mode matrix (raise / return_value / return_bool).
 3. **`build_exception` check** — `build_exception()` produces a well-formed, raisable card.
    Supports `check_value=False` for transformation rules (e.g. `Compose`).
-4. **`raise_invalid` check** (opt-in via `check_raise_invalid`) — the standalone
-   `raise_invalid()` dispatcher agrees with `build_exception()`.
-5. **constructor `ParamError` check** (opt-in via `rule_factory` +
+4. **constructor `ParamError` check** (opt-in via `rule_factory` +
    `invalid_init_params`) — the constructor rejects bad configuration with `ParamError`.
 
-Steps 4 and 5 are opt-in because not every rule has constructor parameters
-worth misuse-testing (e.g. `IsNone`, `IsTrue`), and `raise_invalid` is a
-thin, generic dispatcher shared by every rule — most callers won't need to
-re-verify it per rule.
+Step 4 is opt-in because not every rule has constructor parameters
+worth misuse-testing (e.g. `IsNone`, `IsTrue`).
 
 ---
 

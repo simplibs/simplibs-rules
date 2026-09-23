@@ -17,7 +17,6 @@ def test_is_alnum_contract(subtests):
         rule=rule,
         valid_values=["abc", "123", "a1b2c3", "Python3"],
         invalid_values=["", "hello world", "a-b", "test!", 123, None, True, []],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

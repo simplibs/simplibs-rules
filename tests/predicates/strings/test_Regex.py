@@ -22,7 +22,6 @@ def test_regex_contract(subtests):
             ((None,), {}),      # None parameter -> ParamError (TypeError)
             (("[a-z",), {}),    # Invalid regex syntax -> ParamError (re.error)
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

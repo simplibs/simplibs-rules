@@ -37,7 +37,6 @@ def test_has_remainder_contract(subtests):
             ((3, 4), {}),         # Remainder greater than divisor raises ParamError
             ((3, True), {}),      # Bool remainder raises ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

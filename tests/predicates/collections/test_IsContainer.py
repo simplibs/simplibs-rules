@@ -38,7 +38,6 @@ def test_is_container_contract(subtests):
             None,
         ],
         rule_factory=IsContainer,
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

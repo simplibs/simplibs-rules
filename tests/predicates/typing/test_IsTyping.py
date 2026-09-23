@@ -31,7 +31,6 @@ def test_is_typing_contract_primitive(subtests):
         valid_values=[1, 42, -100],
         invalid_values=["1", 3.14, None, [1]],
         rule_factory=lambda: IsTyping(int),
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )
@@ -47,7 +46,6 @@ def test_is_typing_contract_complex_generic(subtests):
         valid_values=[[1, 2, 3], [], None],
         invalid_values=["not_a_list", [1, "2"], 123],
         rule_factory=lambda: IsTyping(list[int] | None),
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

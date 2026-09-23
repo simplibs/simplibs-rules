@@ -35,7 +35,6 @@ def test_has_item_contract(subtests):
             None,
         ],
         rule_factory=HasItem,
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

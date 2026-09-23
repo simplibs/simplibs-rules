@@ -18,7 +18,6 @@ def test_is_infinity_contract(subtests):
         valid_values=[float("inf"), float("-inf")],
         # float("nan") excluded because NaN == NaN evaluates to False in Python
         invalid_values=[0.0, 10.5, 100, "inf", True, None],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

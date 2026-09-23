@@ -34,7 +34,6 @@ def test_has_key_contract(subtests):
             None,
         ],
         rule_factory=HasKey,
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

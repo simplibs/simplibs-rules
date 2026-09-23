@@ -23,7 +23,6 @@ def test_contains_contract(subtests):
             ((True,), {}),      # Boolean parameter -> ParamError
             (([],), {}),        # List parameter -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

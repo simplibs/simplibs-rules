@@ -121,7 +121,7 @@ def test_assert_rule_contract_fails_on_non_rule_instance(subtests):
 
 
 def test_assert_rule_contract_full_success(subtests):
-    """Verify complete successful run through all 5 orchestrator stages."""
+    """Verify complete successful run through all 4 orchestrator stages."""
     rule = DummyValidRule(limit=10)
     assert_rule_contract(
         subtests,
@@ -133,7 +133,6 @@ def test_assert_rule_contract_full_success(subtests):
         invalid_init_params=[
             ((-5,), {}),  # limit <= 0 -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )
@@ -207,7 +206,7 @@ def test_assert_rule_contract_fails_on_build_exception_stage(subtests):
 
 
 def test_assert_rule_contract_fails_on_param_error_stage(subtests):
-    """Verify error catching in Stage 5 (constructor requiring ParamError)."""
+    """Verify error catching in Stage 4 (constructor requiring ParamError)."""
     rule = DummyBrokenConstructorRule()
     with pytest.raises((AssertionError, Failed)):
         assert_rule_contract(

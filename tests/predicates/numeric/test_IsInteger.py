@@ -21,7 +21,6 @@ def test_is_integer_contract(subtests):
         rule=rule,
         valid_values=[0, 10, -5],
         invalid_values=[10.5, "10", True, False, None, []],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

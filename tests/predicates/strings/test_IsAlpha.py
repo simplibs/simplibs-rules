@@ -17,7 +17,6 @@ def test_is_alpha_contract(subtests):
         rule=rule,
         valid_values=["abc", "Hello", "Příliš"],
         invalid_values=["", "abc1", "hello world", "a-b", 123, None, True],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

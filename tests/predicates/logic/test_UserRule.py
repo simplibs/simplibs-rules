@@ -26,7 +26,6 @@ def test_user_rule_contract(subtests):
             ((lambda: True,), {}),     # Zero-arg function wrong arity -> ParamError
             ((lambda a, b: a + b,), {}),  # Two-arg function wrong arity -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

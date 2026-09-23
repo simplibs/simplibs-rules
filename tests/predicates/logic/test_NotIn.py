@@ -28,7 +28,6 @@ def test_not_in_contract(subtests):
             (("string",), {}),  # String is not an allowed container -> ParamError
             ((None,), {}),      # None is not a container -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

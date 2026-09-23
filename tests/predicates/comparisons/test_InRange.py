@@ -26,7 +26,6 @@ def test_in_range_contract(subtests):
             ((10, 1), {}),         # Swapped bounds (min > max) raise ParamError
             ((1, "10"), {}),       # Incomparable bound types raise ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

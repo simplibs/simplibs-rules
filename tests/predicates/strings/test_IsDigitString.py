@@ -17,7 +17,6 @@ def test_is_digit_string_contract(subtests):
         rule=rule,
         valid_values=["123", "007", "0"],
         invalid_values=["", "12.3", "-5", "123a", "abc", 123, None, True],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

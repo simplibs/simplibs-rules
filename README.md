@@ -106,22 +106,6 @@ typing_rule.is_valid({"apples": 5, "oranges": 10})   # -> True
 typing_rule.is_valid({"apples": "5"})                # -> False
 ```
 
-### Level 4: Unconditional direct triggers
-
-When control flow guards in your application have already detected a failure condition
-inline, use `raise_invalid()` to bypass rule evaluation entirely and construct the
-diagnostic exception immediately:
-
-```python
-from simplibs.rules import raise_invalid, is_integer
-
-value = -5
-
-if value < 0:
-    # Bypasses evaluation and directly raises the structured exception card
-    raise_invalid(value, is_integer, value_name="age", context="Must be non-negative")
-```
-
 ---
 
 ## 🛠️ Architecture & Package Structure
@@ -142,8 +126,6 @@ src/simplibs/rules/
 │   ├── numeric/              ◄── IsBool, IsInteger, IsFloat, IsDecimal, IsNumber, IsPrimitiveNumber, IsZero, IsNan, IsInfinity, IsPi
 │   ├── strings/              ◄── IsString, Contains, IsSubstringOf, StartsWith, EndsWith, Regex, IsBlank, NotBlank
 │   └── typing/                ◄── Annotation-driven evaluation (IsAny, IsTyping, build_typing_rule)
-├── tools/                    ◄── Operational helper utilities
-│   └── raise_invalid.py      ◄── Unconditional exception trigger (bypasses logic evaluation)
 └── testing/                  ◄── Testing contracts for Rule implementations
     └── assert_rule_contract.py
 ```
@@ -271,8 +253,8 @@ mechanism that also powers `simplibs-validate`'s `validate_call`/`validate_datac
 `simplibs-rules` includes its own contract testing tools to ensure custom or existing `Rule`
 implementations strictly follow all rules and return modes:
 
-* **`assert_rule_contract`**: Verifies `is_valid`, direct calling, `validate()` matrix,
-  return modes, exception generation, and `raise_invalid()` consistency for any `Rule` instance.
+assert_rule_contract: Verifies is_valid, direct calling, validate() matrix, return modes, 
+and exception generation consistency for any Rule instance.
 
 ➡️ [README_TESTING_ASSERTS_RULE_CONTRACT](https://github.com/simplibs/simplibs-rules/blob/main/docs/testing/README_TESTING_ASSERTS_RULE_CONTRACT.md)
 
@@ -280,7 +262,7 @@ implementations strictly follow all rules and return modes:
 
 ## ⚠️ Exceptions
 
-Diagnostic exceptions built by `build_exception()`/`raise_invalid()` are structured
+Diagnostic exceptions built by `build_exception()` are structured
 [`simplibs.exception.SimpleException`](https://pypi.org/project/simplibs-exception/) cards
 rather than bare tracebacks. `simplibs-validate` builds its own `ValidateError` hierarchy
 on top of the same mechanism for the higher-level entry points (`validate()`,
@@ -291,9 +273,8 @@ on top of the same mechanism for the higher-level entry points (`validate()`,
 ## 🔗 Related libraries
 
 * **[`simplibs-validate`](https://pypi.org/project/simplibs-validate/)** — the `validate()`
-  entry point, ready-made `validate_*` wrappers, and self-validating decorators
-  (`validate_call`, `validate_dataclass`) built on top of `Rule`. `raise_invalid()`
-  lives here, in `simplibs-rules`, not there.
+  entry point, ready-made validate_* wrappers, operational tools (raise_invalid, validated_type), 
+  and self-validating decorators (validate_call, validate_dataclass) built on top of Rule.
 * **`simplibs-types`** *(in progress)* — reusable, named validated types (`Annotated[type,
   Rule]` combinations) built on `Rule`, for sharing a single constraint definition across
   many annotations.

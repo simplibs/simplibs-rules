@@ -19,7 +19,6 @@ def test_is_true_contract(subtests):
         valid_values=[True],
         invalid_values=[False, 1, "True", [1], None],
         rule_factory=IsTrue,
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

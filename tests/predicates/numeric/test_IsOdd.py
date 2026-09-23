@@ -17,7 +17,6 @@ def test_is_odd_contract(subtests):
         rule=rule,
         valid_values=[1, -1, 3, -5, 99],
         invalid_values=[0, 2, -4, 1.0, -3.0, True, False, "1", None, []],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

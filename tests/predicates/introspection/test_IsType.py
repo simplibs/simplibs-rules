@@ -22,7 +22,6 @@ def test_is_type_contract(subtests):
         rule=rule,
         valid_values=[int, str, object, DummyClass, type],
         invalid_values=[123, "text", DummyClass(), None, [1, 2]],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

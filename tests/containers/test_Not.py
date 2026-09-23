@@ -36,7 +36,6 @@ def test_not_contract(subtests):
             (("string",), {}),  # Non-callable parameter raises ParamError
             ((None,), {}),      # None instead of rule raises ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

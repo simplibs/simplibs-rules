@@ -21,7 +21,6 @@ def test_is_not_contract(subtests):
         rule=rule,
         valid_values=[object(), "FORBIDDEN", 123, None, []],
         invalid_values=[FORBIDDEN],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

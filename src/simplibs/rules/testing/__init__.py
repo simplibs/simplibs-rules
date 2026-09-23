@@ -5,7 +5,6 @@ from .asserts import (
     assert_rule_build_exception,
     assert_rule_is_valid,
     assert_rule_param_error,
-    assert_rule_raise_invalid,
     assert_rule_validate,
 )
 
@@ -14,7 +13,6 @@ __all__ = [
     "assert_rule_build_exception",
     "assert_rule_is_valid",
     "assert_rule_param_error",
-    "assert_rule_raise_invalid",
     "assert_rule_validate",
 ]
 
@@ -35,6 +33,5 @@ implementations across the library ecosystem.
 | `assert_rule_build_exception`  | Function | Verifies that `build_exception()` yields expected `ValidationError` cards.  |
 | `assert_rule_is_valid`         | Function | Asserts boolean `is_valid()` results across valid and invalid inputs.        |
 | `assert_rule_param_error`      | Function | Verifies that rule instantiation fails properly on invalid init arguments.  |
-| `assert_rule_raise_invalid`    | Function | Verifies that `raise_invalid()` raises the expected `ValidationError`.      |
 | `assert_rule_validate`         | Function | Verifies `validate()` execution, pass-through return values, and errors.    |
 """

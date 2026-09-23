@@ -26,7 +26,6 @@ def test_is_any_contract(subtests):
         valid_values=[1, "string", [1, 2], {"a": 1}, None, True, object()],
         invalid_values=[],  # IsAny acceptuje absolutně cokoliv
         rule_factory=IsAny,
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

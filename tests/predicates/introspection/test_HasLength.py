@@ -28,7 +28,6 @@ def test_has_length_exact_contract(subtests):
             ((-1,), {}),                            # Negative length -> ParamError
             (("3",), {}),                           # String length -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )
@@ -48,7 +47,6 @@ def test_has_length_range_contract(subtests):
             ((), {"min_length": -1}),                  # Negative min_length -> ParamError
             ((), {"max_length": 1.5}),                 # Non-integer max_length -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

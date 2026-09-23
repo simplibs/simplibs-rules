@@ -26,7 +26,6 @@ def test_is_finite_contract(subtests):
             None,
             [],
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

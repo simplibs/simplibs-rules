@@ -17,7 +17,6 @@ def test_is_lowercase_contract(subtests):
         rule=rule,
         valid_values=["hello", "hello123", "a-b-c!"],
         invalid_values=["", "123", "Hello", "HELLO", "hello World", 123, None, True],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

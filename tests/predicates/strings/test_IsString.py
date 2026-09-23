@@ -21,7 +21,6 @@ def test_is_string_contract(subtests):
         rule=rule,
         valid_values=["", "hello", "123", "   "],
         invalid_values=[123, 10.5, True, None, [], {}],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

@@ -23,7 +23,6 @@ def test_is_instance_contract(subtests):
             ((123,), {}),         # Passed parameter is not a type -> ParamError
             ((int, "str"), {}),   # One parameter is not a type -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

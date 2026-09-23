@@ -17,7 +17,6 @@ def test_is_even_contract(subtests):
         rule=rule,
         valid_values=[0, 2, -4, 100, -100],
         invalid_values=[1, -3, 99, 2.0, -4.0, True, False, "2", None, []],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

@@ -18,7 +18,6 @@ def test_not_equals_contract(subtests):
         rule=rule,
         valid_values=[1, -1, "0", None, [0]],
         invalid_values=[0, 0.0, False],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

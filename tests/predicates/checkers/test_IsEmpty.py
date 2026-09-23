@@ -19,7 +19,6 @@ def test_is_empty_contract(subtests):
         valid_values=[[], {}, "", set(), tuple()],
         invalid_values=[[1], {"a": 1}, "text", {1}, (1,), 0, None, True],
         rule_factory=IsEmpty,
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

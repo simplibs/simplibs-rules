@@ -19,7 +19,6 @@ def test_is_none_contract(subtests):
         valid_values=[None],
         invalid_values=[False, 0, "", [], True],
         rule_factory=IsNone,
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

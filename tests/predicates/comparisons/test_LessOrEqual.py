@@ -18,7 +18,6 @@ def test_less_or_equal_contract(subtests):
         rule=rule,
         valid_values=[100, 99, 0, -10, 100.0],
         invalid_values=[100.1, 101, 150, "50", None, [50]],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

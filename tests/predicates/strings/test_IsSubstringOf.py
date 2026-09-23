@@ -23,7 +23,6 @@ def test_is_substring_of_contract(subtests):
             ((True,), {}),      # Boolean parameter -> ParamError
             (([],), {}),        # List parameter -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

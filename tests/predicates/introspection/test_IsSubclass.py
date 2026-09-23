@@ -30,7 +30,6 @@ def test_is_subclass_contract(subtests):
             ((), {}),             # No type -> ParamError
             ((123,), {}),         # Parameter is not a type -> ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

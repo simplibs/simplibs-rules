@@ -118,9 +118,6 @@ from .predicates.typing import (
     is_supported_annotation
 )
 
-# Tools
-from .tools import raise_invalid
-
 
 # ============================================================================
 # Rule shortcuts
@@ -570,9 +567,6 @@ __all__ = [
     "get_supported_origins",
     "is_supported_annotation",
 
-    # tools
-    "raise_invalid",
-
     # shortcuts
     "all_of",
     "any_of",
@@ -935,9 +929,4 @@ are compound names rather than the keywords themselves.
 | `is_any`       | —            | Alias for `always_true` (accepts any value).    |
 | `is_typing`    | `annotation` | Value must satisfy the given typing annotation. |
 
-## 6. Tools (`tools/`)
-Provides execution utilities for direct exception management and control flow optimization:
-- `raise_invalid`: Directly builds and triggers a structured `ValidationError` for 
-a failed `Rule` or plain callable predicate. Used in "happy path" control flow guards 
-where a condition failure has already been determined inline, avoiding redundant rule re-evaluation.
 """

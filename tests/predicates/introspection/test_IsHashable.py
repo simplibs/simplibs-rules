@@ -22,7 +22,6 @@ def test_is_hashable_contract(subtests):
         rule=rule,
         valid_values=[123, "text", (1, 2), True, None, float],
         invalid_values=[[1, 2], {"a": 1}, {1, 2}, UnhashableClass()],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

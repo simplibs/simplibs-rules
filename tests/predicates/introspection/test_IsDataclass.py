@@ -29,7 +29,6 @@ def test_is_dataclass_contract(subtests):
         rule=rule,
         valid_values=[instance, SampleDataclass],
         invalid_values=[RegularClass(), RegularClass, "text", 123, None, [1, 2]],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

@@ -33,7 +33,6 @@ def test_is_bool_contract(subtests):
             {},
         ],  # Ints (even though bool inherits from int in Python), floats, strs, etc. must fail
         rule_factory=IsBool,
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

@@ -18,7 +18,6 @@ def test_is_float_contract(subtests):
         # float("nan") excluded because NaN == NaN returns False per IEEE 754
         valid_values=[0.0, 10.5, -1.23, float("inf")],
         invalid_values=[10, "10.5", True, None, []],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )

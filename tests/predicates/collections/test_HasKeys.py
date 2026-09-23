@@ -35,7 +35,6 @@ def test_has_keys_contract(subtests):
         invalid_init_params=[
             ((), {}),  # No arguments raises ParamError
         ],
-        check_raise_invalid=True,
         deep_check=True,
         verbose=False,
     )
