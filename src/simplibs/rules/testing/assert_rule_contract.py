@@ -1,11 +1,11 @@
-from typing import Any, Callable
+from typing import Any, Callable, Sequence
 # Outers
 from ..base_class import Rule
 # Inners
-from .asserts.assert_rule_is_valid import assert_rule_is_valid
-from .asserts.assert_rule_validate import assert_rule_validate
 from .asserts.assert_rule_build_exception import assert_rule_build_exception
+from .asserts.assert_rule_is_valid import assert_rule_is_valid
 from .asserts.assert_rule_param_error import assert_rule_param_error
+from .asserts.assert_rule_validate import assert_rule_validate
 
 
 def assert_rule_contract(
@@ -14,8 +14,8 @@ def assert_rule_contract(
     valid_values: list[Any],
     invalid_values: list[Any],
     *,
-    expected_error_name: str | None = None,
-    expected_exception_type: type[Exception] | None = None,
+    expected_error_name: str | Sequence[str | None] | None = None,
+    expected_exception_type: type[Exception] | Sequence[type[Exception] | None] | None = None,
     rule_factory: Callable[..., Any] | None = None,
     invalid_init_params: list[tuple[tuple[Any, ...], dict[str, Any]]] | None = None,
     sample_label: str = "target_var",
@@ -108,7 +108,8 @@ every deterministic corner of the `Rule` contract.
 1. **`is_valid` check** — `is_valid()` / `__call__` boolean contract.
 2. **`validate` check** — the `validate()` mode matrix (raise / return_value / return_bool).
 3. **`build_exception` check** — `build_exception()` produces a well-formed, raisable card.
-   Supports `check_value=False` for transformation rules (e.g. `Compose`).
+   Supports `check_value=False` for transformation rules (e.g. `Compose`) and accepts either
+   scalar expected error details or sequences index-matched to `invalid_values`.
 4. **constructor `ParamError` check** (opt-in via `rule_factory` +
    `invalid_init_params`) — the constructor rejects bad configuration with `ParamError`.
 
@@ -134,6 +135,11 @@ worth misuse-testing (e.g. `IsNone`, `IsTrue`).
   (built from `intro` and the rule's class name) passed as `intro` into
   every delegated call is what provides the grouping/readability benefit,
   without a redundant, effectively-always-green wrapper subtest.
+* **Flexible Diagnostic Card Matching:**
+  `expected_error_name` and `expected_exception_type` pass straight through to
+  `assert_rule_build_exception`. Accepting `Sequence` allows callers testing compound
+  rules (like `AllOf` or `AnyOf`) to supply distinct expected error names or wrapper exceptions
+  for each respective item in `invalid_values`.
 * **`deep_check` Scope:**
   Gates both the exhaustive diagnostic-field inspection inside
   `build_exception` checking and the optional constructor `ParamError`

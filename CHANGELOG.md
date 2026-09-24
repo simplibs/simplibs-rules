@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.2.2] - 2026-09-24
+
+### 📋 Improved
+
+#### Testing Utils (`simplibs.rules.testing`)
+
+* **Enhanced Contract Assertions for `Sequence` Inputs**:
+  * Updated `assert_rule_build_exception` and `assert_rule_contract` to accept index-matched `Sequence` instances (or `Sequence[... | None]`) for both `expected_error_name` and `expected_exception_type`.
+  * Enables testing compound rules (such as `AllOf` or `AnyOf`) where different invalid inputs trigger distinct sub-rule error names or exception types.
+  * Added runtime sequence length validation with early fail-fast `ValueError` checks to prevent confusing `IndexError` exceptions.
+  * Explicitly guarded `str` and `type` objects from being misinterpreted as sequences during parameter resolution.
+
+---
+
 ## [0.2.1] - 2026-09-24
 
 ### ✨ Added

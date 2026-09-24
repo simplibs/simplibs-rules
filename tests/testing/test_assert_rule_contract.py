@@ -35,6 +35,26 @@ class DummyValidRule(Rule):
         )
 
 
+class DummyCompoundRule(Rule):
+    """Rule returning different error names based on input value."""
+    def is_valid(self, value: Any) -> bool:
+        return False
+
+    def build_exception(
+        self, value: Any, value_name: str = "value", context: str = ""
+    ) -> ValidationError:
+        err_name = "LIMIT_ERROR" if isinstance(value, int) else "TYPE_ERROR"
+        return ValidationError(
+            problem="Value is invalid.",
+            expected="Valid integer.",
+            how_to_fix="Provide integer.",
+            label=value_name,
+            value=value,
+            context=context,
+            error_name=err_name,
+        )
+
+
 class DummyTransformingRule(Rule):
     """Rule that transforms input string into int in exception (e.g. Compose)."""
     def is_valid(self, value: Any) -> bool:
@@ -133,6 +153,20 @@ def test_assert_rule_contract_full_success(subtests):
         invalid_init_params=[
             ((-5,), {}),  # limit <= 0 -> ParamError
         ],
+        deep_check=True,
+        verbose=False,
+    )
+
+
+def test_assert_rule_contract_sequence_expected_error_name_success(subtests):
+    """Verify orchestrator passing sequences of expected_error_name through to build_exception."""
+    rule = DummyCompoundRule()
+    assert_rule_contract(
+        subtests,
+        rule=rule,
+        valid_values=[],
+        invalid_values=[15, "str_val"],
+        expected_error_name=["LIMIT_ERROR", "TYPE_ERROR"],
         deep_check=True,
         verbose=False,
     )

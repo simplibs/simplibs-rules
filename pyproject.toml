@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "simplibs-rules"
-version = "0.2.1"
+version = "0.2.2"
 description = "Composable, explicit validation rules — pure predicates, zero transformation."
 readme = "README.md"
 license = "MIT"

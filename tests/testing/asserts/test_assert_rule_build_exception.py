@@ -33,6 +33,33 @@ class DummyValidRule(Rule):
         )
 
 
+class DummyCompoundRule(Rule):
+    """Rule that returns different error names and exception types based on input value."""
+    def is_valid(self, value: Any) -> bool:
+        return False
+
+    def build_exception(
+        self, value: Any, value_name: str = "value", context: str = ""
+    ) -> ValidationError:
+        if value == "invalid_1":
+            err_name = "FIRST_ERROR"
+            exc_type = TypeError
+        else:
+            err_name = "SECOND_ERROR"
+            exc_type = ValueError
+
+        return ValidationError(
+            problem="Value is invalid.",
+            expected="Valid value.",
+            how_to_fix="Fix it.",
+            label=value_name,
+            value=value,
+            context=context,
+            error_name=err_name,
+            exception=exc_type,
+        )
+
+
 class DummyTransformingRule(Rule):
     """Rule that transforms the perceived value (e.g. string "-5" to int -5)."""
     def is_valid(self, value: Any) -> bool:
@@ -114,6 +141,56 @@ def test_assert_rule_build_exception_success(subtests):
         expected_exception_type=TypeError,
         deep_check=True,
     )
+
+
+def test_assert_rule_build_exception_sequence_success(subtests):
+    """Verify sequence-based expected_error_name and expected_exception_type matching per index."""
+    rule = DummyCompoundRule()
+    assert_rule_build_exception(
+        subtests,
+        rule=rule,
+        invalid_values=["invalid_1", "invalid_2"],
+        expected_error_name=["FIRST_ERROR", "SECOND_ERROR"],
+        expected_exception_type=(TypeError, ValueError),
+        deep_check=True,
+    )
+
+
+def test_assert_rule_build_exception_sequence_with_none_elements(subtests):
+    """Verify sequence matching when some elements are None (bypassing check for specific index)."""
+    rule = DummyCompoundRule()
+    assert_rule_build_exception(
+        subtests,
+        rule=rule,
+        invalid_values=["invalid_1", "invalid_2"],
+        expected_error_name=["FIRST_ERROR", None],  # Second item error_name not checked
+        expected_exception_type=[None, ValueError],  # First item exception_type not checked
+        deep_check=True,
+    )
+
+
+def test_assert_rule_build_exception_sequence_length_mismatch_error_name(subtests):
+    """Verify ValueError when expected_error_name sequence length doesn't match invalid_values."""
+    rule = DummyCompoundRule()
+    with pytest.raises(ValueError, match="expected_error_name sequence must have the same length"):
+        assert_rule_build_exception(
+            subtests,
+            rule=rule,
+            invalid_values=["invalid_1", "invalid_2"],
+            expected_error_name=["ONLY_ONE_ERROR"],  # Length 1 vs 2 invalid values
+        )
+
+
+def test_assert_rule_build_exception_sequence_length_mismatch_exception_type(subtests):
+    """Verify ValueError when expected_exception_type sequence length doesn't match invalid_values."""
+    rule = DummyCompoundRule()
+    with pytest.raises(ValueError, match="expected_exception_type sequence must have the same length"):
+        assert_rule_build_exception(
+            subtests,
+            rule=rule,
+            invalid_values=["invalid_1", "invalid_2"],
+            expected_exception_type=[TypeError, ValueError, KeyError],  # Length 3 vs 2
+        )
 
 
 def test_assert_rule_build_exception_transforming_rule_fails_by_default(subtests):

@@ -1,6 +1,6 @@
-from typing import Any
-from simplibs.exception.testing import assert_exception_function, maybe_subtest
+from typing import Any, Sequence
 from simplibs.exception import ValidationError
+from simplibs.exception.testing import assert_exception_function, maybe_subtest
 # Outers
 from ...base_class import Rule
 
@@ -11,8 +11,8 @@ def assert_rule_build_exception(
     rule: Rule,
     invalid_values: list[Any],
     *,
-    expected_error_name: str | None = None,
-    expected_exception_type: type[Exception] | None = None,
+    expected_error_name: str | Sequence[str | None] | None = None,
+    expected_exception_type: type[Exception] | Sequence[type[Exception] | None] | None = None,
     sample_label: str = "target_var",
     sample_context: str = "test_execution_context",
     check_value: bool = True,
@@ -26,8 +26,12 @@ def assert_rule_build_exception(
         subtests: The native pytest subtests fixture manager instance.
         rule: The Rule instance under test.
         invalid_values: Values expected to produce a diagnostic exception card.
-        expected_error_name: If provided, asserted against exc.error_name for every value.
-        expected_exception_type: If provided, asserted against exc.exception for every value.
+        expected_error_name: If provided, asserted against exc.error_name. Can be
+            a single string (applied to all values) or a sequence matching invalid_values
+            by index.
+        expected_exception_type: If provided, asserted against exc.exception. Can be
+            a single Exception class (applied to all values) or a sequence matching
+            invalid_values by index.
         sample_label: The value_name passed into build_exception() for every check.
         sample_context: The context passed into build_exception() for every check.
         check_value: If True, asserts that exc.value strictly matches the raw invalid value.
@@ -59,10 +63,36 @@ def assert_rule_build_exception(
         if check_value:
             kwargs["value"] = val
 
+        # 1. Per-index evaluation of expected_error_name with sequence length guard
         if expected_error_name is not None:
-            kwargs["error_name"] = expected_error_name
+            if isinstance(expected_error_name, Sequence) and not isinstance(expected_error_name, str):
+                if len(expected_error_name) != len(invalid_values):
+                    raise ValueError(
+                        "expected_error_name sequence must have the same length as invalid_values."
+                    )
+                current_error_name = expected_error_name[index]
+            else:
+                current_error_name = expected_error_name
+
+            if current_error_name is not None:
+                kwargs["error_name"] = current_error_name
+
+        # 2. Per-index evaluation of expected_exception_type with sequence length guard
         if expected_exception_type is not None:
-            kwargs["exception"] = expected_exception_type
+            if (
+                isinstance(expected_exception_type, Sequence)
+                and not isinstance(expected_exception_type, type)
+            ):
+                if len(expected_exception_type) != len(invalid_values):
+                    raise ValueError(
+                        "expected_exception_type sequence must have the same length as invalid_values."
+                    )
+                current_exception_type = expected_exception_type[index]
+            else:
+                current_exception_type = expected_exception_type
+
+            if current_exception_type is not None:
+                kwargs["exception"] = current_exception_type
 
         exc = assert_exception_function(
             subtests,
@@ -109,11 +139,11 @@ re-implementing raise/type/field checking here.
 * **Basic Metadata via `assert_exception_function`:**
   Delegates the type check (`ValidationError`), and the `label`/`context`/
   `value` echo-back checks, to `assert_exception_function`.
-* **Optional Strict Fields:**
-  `expected_error_name` and `expected_exception_type` are opt-in — when
-  the calling test knows a rule's fixed `error_name` or wrapped
-  `exception` class, it can assert them across every invalid value in one
-  call.
+* **Flexible Expected Fields (Scalar vs Sequence):**
+  `expected_error_name` and `expected_exception_type` support both single values
+  (applied uniformly across all `invalid_values`) and index-matched `Sequence`s
+  (for compound rules like `AllOf`/`AnyOf` where different invalid inputs trigger
+  different sub-rule failures).
 * **Value Echo Bypass (`check_value=False`):**
   Rules that transform values before evaluating inner bounds (such as `Compose`)
   will legitimately report the *transformed* value inside `exc.value` instead
@@ -130,7 +160,23 @@ re-implementing raise/type/field checking here.
 
 ---
 
-## 2. Fixed Bug: deep_check Was Silently Disabling All Field Checks
+## 2. Sequence Handling & Boundary Guards
+
+* **`str` and `type` Exclusion:**
+  Python's `str` implements `Sequence`, and custom exception classes (`type`)
+  may occasionally match sequence protocols. The checks explicitly exclude
+  `str` (`not isinstance(val, str)`) and `type` (`not isinstance(val, type)`) to
+  prevent strings from being iterated as character sequences or classes from being
+  misinterpreted as multi-item inputs.
+* **Fail-Fast Length Validation:**
+  When a sequence is provided for expected errors or types, its length must
+  strictly equal `len(invalid_values)`. An early `ValueError` is raised before
+  entering the subtest execution loop, avoiding confusing downstream `IndexError`
+  exceptions inside individual test checkpoints.
+
+---
+
+## 3. Fixed Bug: deep_check Was Silently Disabling All Field Checks
 
 An earlier revision passed `deep_check=False` straight through to the
 delegated `assert_exception_function` call, tying it to this function's
