@@ -106,7 +106,10 @@ from .predicates.strings import (
     IsAscii,
     IsLowercase,
     IsUppercase,
-    IsTitlecase
+    IsTitlecase,
+    IsIdentifier,
+    IsPrintable,
+    IsWhitespace,
 )
 
 # Predicates — typing
@@ -238,6 +241,9 @@ is_ascii            = IsAscii()
 is_lowercase        = IsLowercase()
 is_uppercase        = IsUppercase()
 is_titlecase        = IsTitlecase()
+is_identifier       = IsIdentifier()
+is_printable        = IsPrintable()
+is_whitespace       = IsWhitespace()
 
 # ---- predicates/typing -------------------------------------------------------
 
@@ -343,6 +349,9 @@ rule_class = SimpleNamespace(
     IsLowercase=IsLowercase,
     IsUppercase=IsUppercase,
     IsTitlecase=IsTitlecase,
+    IsIdentifier=IsIdentifier,
+    IsPrintable=IsPrintable,
+    IsWhitespace=IsWhitespace,
 
     # typing
     IsAny=IsAny,
@@ -455,6 +464,9 @@ rules = SimpleNamespace(
     is_lowercase=is_lowercase,
     is_uppercase=is_uppercase,
     is_titlecase=is_titlecase,
+    is_identifier=is_identifier,
+    is_printable=is_printable,
+    is_whitespace=is_whitespace,
 
     # typing
     always_false=always_false,
@@ -559,6 +571,9 @@ __all__ = [
     "IsLowercase",
     "IsUppercase",
     "IsTitlecase",
+    "IsIdentifier",
+    "IsPrintable",
+    "IsWhitespace",
 
     # typing
     "IsAny",
@@ -648,6 +663,9 @@ __all__ = [
     "is_lowercase",
     "is_uppercase",
     "is_titlecase",
+    "is_identifier",
+    "is_printable",
+    "is_whitespace",
     "is_typing",
     "always_false",
     "always_true",
@@ -918,6 +936,9 @@ are compound names rather than the keywords themselves.
 | `regex`           | `pattern`       | Regex search finds a match in the string.            |
 | `starts_with`     | `prefix`        | Value starts with the prefix.                        |
 | `is_substring_of` | `target_string` | String value must be a substring of a target string. |
+| `is_identifier`   | —               | String is a valid Python identifier.                 |
+| `is_printable`    | —               | String consists entirely of printable characters.    |
+| `is_whitespace`   | —               | String consists entirely of whitespace (non-empty).  |
 
 
 ### `typing/`

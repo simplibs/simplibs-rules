@@ -40,6 +40,9 @@ reaches the second.
 * [`IsLowercase`](#islowercase)
 * [`IsTitlecase`](#istitlecase)
 * [`IsUppercase`](#isuppercase)
+* [`IsIdentifier`](#isidentifier)
+* [`IsPrintable`](#isprintable)
+* [`IsWhitespace`](#iswhitespace)
 
 [⬅️ Back to main README](../../README.md#predicatesstrings--string-content)
 
@@ -450,6 +453,102 @@ def is_valid(self, value: Any) -> bool:
 ```
 
 On failure, the diagnostic distinguishes non-string types from strings containing lowercase characters or lacking cased characters.
+
+[▲ Back to top](#-table-of-contents)
+
+---
+
+### `IsIdentifier`
+
+String value must be a valid Python identifier (letters, digits, underscores, not starting with a digit).
+
+**Parameters:**
+
+* *(none — takes only `self`)*
+
+**Example usage:**
+
+```python
+validate(value, IsIdentifier())
+
+```
+
+**Under the hood** *(`is_valid`)*:
+
+```python
+def is_valid(self, value: Any) -> bool:
+    return (
+        isinstance(value, str)
+        and value.isidentifier()
+    )
+
+```
+
+On failure, the diagnostic distinguishes non-string types from invalid Python identifier strings.
+
+[▲ Back to top](#-table-of-contents)
+
+---
+
+### `IsPrintable`
+
+String value must consist entirely of printable characters or be empty.
+
+**Parameters:**
+
+* *(none — takes only `self`)*
+
+**Example usage:**
+
+```python
+validate(value, IsPrintable())
+
+```
+
+**Under the hood** *(`is_valid`)*:
+
+```python
+def is_valid(self, value: Any) -> bool:
+    return (
+        isinstance(value, str)
+        and value.isprintable()
+    )
+
+```
+
+On failure, the diagnostic distinguishes non-string types from strings containing unprintable/control characters.
+
+[▲ Back to top](#-table-of-contents)
+
+---
+
+### `IsWhitespace`
+
+String value must be non-empty and consist solely of whitespace characters.
+
+**Parameters:**
+
+* *(none — takes only `self`)*
+
+**Example usage:**
+
+```python
+validate(value, IsWhitespace())
+
+```
+
+**Under the hood** *(`is_valid`)*:
+
+```python
+def is_valid(self, value: Any) -> bool:
+    return (
+        isinstance(value, str)
+        and value.isspace()
+    )
+
+```
+
+On failure, the diagnostic distinguishes non-string types from empty or non-whitespace strings.
 
 [▲ Back to top](#-table-of-contents)
 

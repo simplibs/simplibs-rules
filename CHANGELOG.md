@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.2.1] - 2026-09-24
+
+### ✨ Added
+
+#### Predicate Rules (`simplibs.rules.predicates.strings`)
+
+* **`IsIdentifier`**: Rule validating whether a string is a valid Python identifier (matching `str.isidentifier()`). Includes `is_identifier` shortcut and namespace exports.
+* **`IsPrintable`**: Rule validating whether a string contains only printable characters or is empty (matching `str.isprintable()`). Includes `is_printable` shortcut and namespace exports.
+* **`IsWhitespace`**: Rule validating whether a string consists entirely of whitespace characters and is non-empty (matching `str.isspace()`). Includes `is_whitespace` shortcut and namespace exports.
+
+---
+
 ## [0.2.0] - 2026-09-23
 
 ### 🗑️ Removed & Breaking Changes

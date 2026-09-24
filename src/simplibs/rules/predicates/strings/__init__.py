@@ -13,6 +13,9 @@ from .IsAscii import IsAscii
 from .IsLowercase import IsLowercase
 from .IsUppercase import IsUppercase
 from .IsTitlecase import IsTitlecase
+from .IsIdentifier import IsIdentifier, is_identifier
+from .IsPrintable import IsPrintable, is_printable
+from .IsWhitespace import IsWhitespace, is_whitespace
 
 
 _DESIGN_NOTES = """
@@ -41,4 +44,7 @@ and affix checks, and blank/non-blank content checks.
 | `IsLowercase`  | Class | String must be entirely lowercase (with at least one cased character).   |
 | `IsUppercase`  | Class | String must be entirely uppercase (with at least one cased character).   |
 | `IsTitlecase`  | Class | String must be title-cased.                                              |
+| `IsIdentifier` | Class | String must be a valid Python identifier.                                |
+| `IsPrintable`  | Class | String must consist entirely of printable characters.                    |
+| `IsWhitespace` | Class | String must consist entirely of whitespace characters (non-empty).      |
 """
