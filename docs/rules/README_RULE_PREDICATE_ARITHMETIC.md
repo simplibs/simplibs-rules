@@ -29,7 +29,7 @@ shows only its target (the tolerances stay in the failure card); `DivisibleBy` a
 * [`DivisibleBy`](#divisibleby)
 * [`HasRemainder`](#hasremainder)
 
-[⬅️ Back to main README](../../README.md#predicatesarithmetic--numeric-relationships)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)
 
 ---
 
@@ -144,4 +144,4 @@ concrete example value that would satisfy the rule.
 
 ---
 
-[⬅️ Back to main README](../../README.md#predicatesarithmetic--numeric-relationships)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)

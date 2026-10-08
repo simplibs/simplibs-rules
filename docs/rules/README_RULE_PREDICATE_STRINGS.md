@@ -55,7 +55,7 @@ card is unchanged.
 * [`IsPrintable`](#isprintable)
 * [`IsWhitespace`](#iswhitespace)
 
-[⬅️ Back to main README](../../README.md#predicatesstrings--string-content)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)
 
 ---
 
@@ -601,4 +601,4 @@ On failure, the diagnostic distinguishes non-string types from empty or non-whit
 
 ---
 
-[⬅️ Back to main README](../../README.md#predicatesstrings--string-content)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)

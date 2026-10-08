@@ -45,7 +45,7 @@ its own*.
 * [`HasAttribute`](#hasattribute)
 * [`HasLength`](#haslength)
 
-[⬅️ Back to main README](../../README.md#predicatesintrospection--structural--reflective-checks)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)
 
 ---
 
@@ -324,4 +324,4 @@ actual length found alongside a plain-language description of what was expected
 
 ---
 
-[⬅️ Back to main README](../../README.md#predicatesintrospection--structural--reflective-checks)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)

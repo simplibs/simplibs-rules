@@ -50,7 +50,7 @@ failure card keeps the full list.
 * [`IsSubsetOf`](#issubsetof)
 * [`IsSupersetOf`](#issupersetof)
 
-[⬅️ Back to main README](../../README.md#predicatescollections--containers-mappings--iterables)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)
 
 ---
 
@@ -302,4 +302,4 @@ elements from `reference` are missing, again in deterministic sorted order.
 
 ---
 
-[⬅️ Back to main README](../../README.md#predicatescollections--containers-mappings--iterables)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)

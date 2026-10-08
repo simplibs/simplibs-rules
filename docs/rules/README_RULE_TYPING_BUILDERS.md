@@ -61,7 +61,7 @@ members, which is why they are left alone.
 * [`build_callable_rule`](#build_callable_rule)
 * [`build_annotated_rule`](#build_annotated_rule)
 
-[⬅️ Back to main README](../../README.md#typing--annotation-driven-validation)
+[⬅️ Back to main README](../../README.md#predicatestyping--annotation-driven-evaluation)
 
 ---
 
@@ -473,4 +473,4 @@ multiple, independent consumers to share the same annotation.
 
 ---
 
-[⬅️ Back to main README](../../README.md#typing--annotation-driven-validation)
+[⬅️ Back to main README](../../README.md#predicatestyping--annotation-driven-evaluation)

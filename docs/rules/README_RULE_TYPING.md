@@ -95,7 +95,7 @@ Expected:  value satisfying at least one of: list[int], set[int], str
 * [`is_supported_annotation`](#is_supported_annotation)
 * [`get_supported_origins`](#get_supported_origins)
 
-[⬅️ Back to main README](../../README.md#typing--annotation-driven-validation)
+[⬅️ Back to main README](../../README.md#predicatestyping--annotation-driven-evaluation)
 
 ---
 
@@ -348,4 +348,4 @@ descriptive information about this package's own supported surface.
 
 ---
 
-[⬅️ Back to main README](../../README.md#typing--annotation-driven-validation)
+[⬅️ Back to main README](../../README.md#predicatestyping--annotation-driven-evaluation)

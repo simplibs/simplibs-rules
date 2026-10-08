@@ -59,7 +59,7 @@ card is unchanged.
 * [`IsFinite`](#isfinite)
 * [`IsOdd`](#isodd)
 
-[⬅️ Back to main README](../../README.md#predicatesnumeric--numeric-type-identity)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)
 
 ---
 
@@ -455,4 +455,4 @@ On failure, the diagnostic distinguishes non-integer types from even integers.
 
 ---
 
-[⬅️ Back to main README](../../README.md#predicatesnumeric--numeric-type-identity)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)

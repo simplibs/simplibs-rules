@@ -47,7 +47,7 @@ sentence of each failure card is unchanged.
 * [`LessOrEqual`](#lessorequal)
 * [`InRange`](#inrange)
 
-[⬅️ Back to main README](../../README.md#predicatescomparisons--ordering--equality)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)
 
 ---
 
@@ -261,4 +261,4 @@ types" vs. "out of range" distinction the other comparison rules in this package
 
 ---
 
-[⬅️ Back to main README](../../README.md#predicatescomparisons--ordering--equality)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)

@@ -42,7 +42,7 @@ layer compose into larger texts (`int | None`, `not empty`). `NotEmpty` reads
 * [`IsEmpty`](#isempty)
 * [`NotEmpty`](#notempty)
 
-[⬅️ Back to main README](../../README.md#predicatescheckers--basic-state--identity)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)
 
 ---
 
@@ -189,4 +189,4 @@ from "has a length, but it's zero."
 
 ---
 
-[⬅️ Back to main README](../../README.md#predicatescheckers--basic-state--identity)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)

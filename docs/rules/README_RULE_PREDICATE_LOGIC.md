@@ -53,7 +53,7 @@ unreadable.
 * [`NotIn`](#notin)
 * [`UserRule`](#userrule)
 
-[⬅️ Back to main README](../../README.md#predicateslogic--identity-membership--custom-predicates)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)
 
 ---
 
@@ -245,4 +245,4 @@ broken."
 
 ---
 
-[⬅️ Back to main README](../../README.md#predicateslogic--identity-membership--custom-predicates)
+[⬅️ Back to main README](../../README.md#predicates--atomic-predicates)
