@@ -37,6 +37,16 @@ collapse possible: without it, each of those ~15 distinct origins would need its
 dispatch branch, even though the actual validation logic ("right container + rule per
 item") is identical for every one of them.
 
+## A note on descriptions
+
+The builders return the plain decomposed rule trees shown below; none of them
+produces any description text. `build_typing_rule` wraps the result of every builder
+except `build_any_of_rule` and `build_annotated_rule` in
+[`Described`](README_RULE_CONTAINERS.md#described), using the annotation's own spelling
+(`"list[int]"`). The examples below call the builders directly, so they show the tree
+*before* that wrapper. A Union and an Annotated already describe themselves from their
+members, which is why they are left alone.
+
 ---
 
 ## 🧭 Table of Contents
@@ -137,7 +147,7 @@ every item satisfy one shared item rule" fully describes the annotation — `lis
 
 **Example usage:**
 ```python
-build_typing_rule(list[int])
+build_elements_rule(list[int])
 # -> AllOf(IsInstance(list), ForEach(IsInstance(int)))
 
 build_typing_rule(list)
@@ -176,7 +186,7 @@ and one applied to every value.
 
 **Example usage:**
 ```python
-build_typing_rule(dict[str, int])
+build_key_value_rule(dict[str, int])
 # -> AllOf(
 #      IsInstance(dict),
 #      Compose(lambda m: m.keys(), ForEach(IsInstance(str))),
@@ -224,11 +234,11 @@ but need fundamentally different validation shapes — this function inspects
 
 **Example usage:**
 ```python
-build_typing_rule(tuple[int, ...])
+build_tuple_rule(tuple[int, ...])
 # -> routes to build_elements_rule(..., container_type=tuple)
 # -> AllOf(IsInstance(tuple), ForEach(IsInstance(int)))
 
-build_typing_rule(tuple[str, int, bool])
+build_tuple_rule(tuple[str, int, bool])
 # -> routes to the internal positional builder
 # -> AllOf(IsInstance(tuple), HasLength(length=3), <index-0 rule>, <index-1 rule>, <index-2 rule>)
 ```
@@ -254,8 +264,10 @@ case — equivalent to "any tuple of any length/contents," routed to
 (`_build_positional_rule`) builds `IsInstance(tuple)`, an exact `HasLength` arity
 check (so a wrong-length tuple fails with a clear diagnostic instead of an
 `IndexError`), and one independent, recursively-built rule per position — each
-checked via a small local closure comparing `value[index]` against that position's own
-rule.
+checked by `Compose(itemgetter(index), rule)`: the transformer extracts the item at that
+position, and the position's own rule validates it. On failure the card is that rule's own
+card for the item at the failing position (an earlier closure-based version could only be
+described as `"callable 'check'"`).
 
 [▲ Back to top](#-table-of-contents)
 
@@ -304,7 +316,7 @@ annotations, so no recursive `build_typing_rule` call is involved at all.
 
 **Example usage:**
 ```python
-build_typing_rule(Literal["draft", "published"])
+build_literal_rule(Literal["draft", "published"])
 # -> IsIn(("draft", "published"), strict=True)
 ```
 
@@ -335,13 +347,13 @@ optionally a subclass of `T`, not whether an *instance* matches some shape.
 
 **Example usage:**
 ```python
-build_typing_rule(type[MyBase])
+build_type_rule(type[MyBase])
 # -> AllOf(IsType(), IsSubclass(MyBase))
 
-build_typing_rule(type[MyBase | OtherBase])
+build_type_rule(type[MyBase | OtherBase])
 # -> AllOf(IsType(), AnyOf(IsSubclass(MyBase), IsSubclass(OtherBase)))
 
-build_typing_rule(type[Any])
+build_type_rule(type[Any])
 # -> IsType()   (Any base — unconstrained class object)
 ```
 
@@ -390,7 +402,7 @@ bare `Callable` — all three collapse to the exact same runtime check.
 
 **Example usage:**
 ```python
-build_typing_rule(Callable[[int, str], bool])
+build_callable_rule(Callable[[int, str], bool])
 # -> IsCallable()
 ```
 
@@ -427,7 +439,8 @@ build_typing_rule(Annotated[int, greater_than(0)])
 # -> AllOf(IsInstance(int), GreaterThan(0))
 
 build_typing_rule(Annotated[str, is_string & has_length(min_length=1)])
-# -> AllOf(IsInstance(str), AllOf(IsInstance(str), HasLength(min_length=1)))
+# -> AllOf(IsInstance(str), IsString(), HasLength(min_length=1))
+#    (the nested AllOf from `&` is flattened by AllOf's constructor)
 ```
 
 **Under the hood:**
@@ -440,10 +453,15 @@ def build_annotated_rule(annotation: Any) -> Rule:
         if isinstance(item, Rule):
             parts.append(item)
         elif callable(item):
-            parts.append(Compose(lambda value: value, item))
+            parts.append(UserRule(item))
 
     return AllOf(*parts) if len(parts) > 1 else parts[0]
 ```
+
+A plain callable is wrapped in `UserRule`, which gives it the missing `Rule` contract:
+it describes itself by the callable's name, builds a proper failure card, and treats an
+exception raised inside the callable as a validation failure. A callable that cannot be
+called with exactly one argument is rejected with `ParamError` when the rule is built.
 
 Every metadata item that is a `Rule` instance or a plain callable is folded into the
 composed result via `AllOf`; anything else (a plain string, a framework-specific

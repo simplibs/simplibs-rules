@@ -67,6 +67,14 @@ class CloseTo(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return f"close to {self.target!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -146,4 +154,12 @@ equal to a target float/int using Python's standard `math.isclose()`.
 * **Tolerance Failures:** Evaluated inputs that fail proximity checks
   format problem/fix strings as `ValueError` (`CLOSE_TO_ERROR`) with exact
   tolerance settings (`rel_tol`, `abs_tol`).
+
+---
+
+## 4. Description
+
+`describe()` returns "close to 3.14159" — the target only; the tolerances stay in the failure card. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

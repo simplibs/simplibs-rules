@@ -43,6 +43,14 @@ class AllUnique(Rule):
             return True
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return "all unique"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -121,4 +129,12 @@ duplicate elements.
 * **Duplicate Failures:** Evaluated iterables with duplicate items format
   problem/fix strings as `ValueError` (`ALL_UNIQUE_ERROR`), listing exact
   duplicate values.
+
+---
+
+## 3. Description
+
+`describe()` returns "all unique" — what the value must be. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

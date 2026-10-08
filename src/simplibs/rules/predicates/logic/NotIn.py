@@ -56,6 +56,24 @@ class NotIn(Rule):
             return True
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Absence from the (deterministically formatted) collection
+        return f"not one of {self._format_options()}"
+
+    def _format_options(self) -> str:
+
+        # 1. Format the collection representation deterministically
+        opts_repr = format_container(self.options)
+
+        # 2. Abbreviate long collections to their type and size
+        if len(opts_repr) > 60:
+            opts_repr = f"{type(self.options).__name__}(size={len(self.options)})"
+        return opts_repr
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -66,9 +84,7 @@ class NotIn(Rule):
     ) -> Exception:
 
         # 1. Format the collection representation deterministically
-        opts_repr = format_container(self.options)
-        if len(opts_repr) > 60:
-            opts_repr = f"{type(self.options).__name__}(size={len(self.options)})"
+        opts_repr = self._format_options()
 
         # 2. Prepare data
         try:
@@ -142,4 +158,12 @@ within a collection of forbidden options.
 * **Error Classification:** Uses `NOT_IN_ERROR` wrapping a `ValueError`.
 * **Fix Guidance:** Clear instruction to supply a value absent from the
   specified forbidden list.
+
+---
+
+## 3. Description
+
+`describe()` returns "not one of (...)". The collection text comes from
+`_format_options()`, which `build_exception` shares (deterministic ordering for
+sets, abbreviation to "type(size=N)" past 60 characters).
 """

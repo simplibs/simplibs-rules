@@ -10,8 +10,13 @@ class Rule(ABC):
 
     Every concrete rule inherits from this class and implements `is_valid` and `build_exception`.
     The class also provides a unified evaluation interface via `validate`, the magic `__call__` method,
-    and Python typing integration via `annotated`.
+    a short human-readable description via `describe`, and Python typing integration via `annotated`.
+
+    Every subclass must declare its own `__slots__` (an empty tuple if it adds no attributes),
+    otherwise its instances get a `__dict__` again.
     """
+
+    __slots__ = ()
 
     # ----------------------------------------------------------------------
     # 1) Abstract Interface (mandatory for subclasses)
@@ -87,6 +92,20 @@ class Rule(ABC):
             value_name=value_name,
             context=context,
         )
+
+    def describe(self) -> str:
+        """Return a short, human-readable description of what this rule requires.
+
+        Container rules (AllOf, AnyOf, ...) and the typing layer compose their
+        diagnostics from these texts, e.g. "int | None" instead of
+        "IsInstance, IsInstance".
+
+        The default is the class name; rules override it with something more
+        informative ("> 0", "string starting with 'x'").
+
+        Must return a non-empty str and never raise.
+        """
+        return type(self).__name__
 
     # ----------------------------------------------------------------------
     # 3) Typing Integration
@@ -199,7 +218,8 @@ _DESIGN_NOTES = """
 The `Rule` class serves as the fundamental pillar of the entire
 `simplibs-rules` library. It defines a standardized interface for
 evaluating conditions, assembling structured exceptions (`SimpleException`),
-and bridging validation rules with Python's typing system.
+describing what a rule requires, and bridging validation rules with
+Python's typing system.
 
 ---
 
@@ -207,8 +227,9 @@ and bridging validation rules with Python's typing system.
 
 ### Single Responsibility
 * **Evaluation Scope:** The `Rule` class is exclusively concerned with
-  whether a value satisfies the condition (`is_valid`) and how the exception
-  card looks on failure (`build_exception`).
+  whether a value satisfies the condition (`is_valid`), how the exception
+  card looks on failure (`build_exception`) and what the rule requires in
+  a few words (`describe`).
 * **`None` Value Handling:** The rule itself does not special-case `None`.
   If `None` needs to be treated as a valid value, compose it explicitly
   with `IsNone` (e.g. `rule | IsNone()`) rather than relying on a global
@@ -245,9 +266,69 @@ and bridging validation rules with Python's typing system.
 4. Value fails & `return_bool=False` -> raises exception from
 `build_exception(...)`.
 
+### `describe() -> str`
+* **Not abstract.** Returns a short text saying what the rule requires.
+* Default: the class name. Rules with parameters or structure override it.
+* Must return a non-empty `str` and never raise (see section 3).
+
 ---
 
-## 3. Typing System Integration (`annotated`)
+## 3. Description (`describe`)
+
+### Why a Method, Not Just the Class Name
+The class name carries no parameters and no structure: `AllOf(IsInteger(),
+GreaterThan(0))` and `AllOf(IsInstance(list), ForEach(IsInstance(int)))` both
+read "AllOf". A method lets every rule say what it requires, and lets
+containers compose the text from their children recursively
+("int & > 0", "int | None").
+
+### Why It Is Not Abstract
+A default (the class name) means a new or third-party rule works without
+writing anything extra, and the library could grow `describe()` rule by rule.
+A rule that does not override it is merely described less precisely.
+
+### Two Texts, On Purpose
+`build_exception` builds the full diagnostic card for **one** failing rule
+(`expected="instance of (int)"`). `describe()` is a short **fragment** meant
+to be composed into other texts (`int`). A phrase like "instance of (int)"
+cannot be joined into "int | str" without becoming unreadable, so the two
+stay separate.
+
+### Contract
+* Returns a non-empty `str`.
+* Never raises.
+* Depends only on the rule's own configuration (no hidden state).
+
+Consumers do not trust this blindly: the container helper `describe_rule`
+falls back to the class name when `describe()` raises or returns anything but
+a non-empty `str`, because a broken description must never replace the
+validation error it was meant to explain. `assert_rule_contract` verifies
+the contract for every rule under test.
+
+---
+
+## 4. `__slots__ = ()` on the Base Class
+
+Every rule declares `__slots__` for its own attributes. That only pays off if
+**every class in the hierarchy** declares it: a single class without
+`__slots__` (including `Rule` itself) gives all of its instances a
+`__dict__` again — more memory per instance (deeply nested typing trees
+create many) and any attribute can be assigned.
+
+* `Rule.__slots__ = ()` closes the base of the hierarchy (`abc.ABC` already
+  declares empty slots).
+* A subclass that forgets `__slots__` silently keeps its `__dict__`; nothing
+  fails, it just stops saving anything. `assert_rule_slots` (run by
+  `assert_rule_contract`) reports such a class together with the offending
+  classes of its MRO.
+* Attributes must be declared in `__slots__`. Assigning anything else outside
+  `__init__` (caches, lazily computed values) raises `AttributeError`.
+* Weak references to rules are not possible without `__weakref__` in
+  `__slots__`; the library does not use them.
+
+---
+
+## 5. Typing System Integration (`annotated`)
 
 Bridges runtime validation rules directly into Python's standard type
 annotation machinery via `typing.Annotated` (PEP 593) — see `annotated()`
@@ -255,7 +336,7 @@ docstring and `validated_type()` for the named-type equivalent.
 
 ---
 
-## 4. Operator-Based Composition (`|`, `&`, `~`)
+## 6. Operator-Based Composition (`|`, `&`, `~`)
 
 * **`rule1 | rule2`** (`__or__` / `__ror__`) -> `AnyOf(rule1, rule2)`.
 * **`rule1 & rule2`** (`__and__` / `__rand__`) -> `AllOf(rule1, rule2)`.
@@ -268,7 +349,7 @@ docstring and `validated_type()` for the named-type equivalent.
 
 ---
 
-## 5. The `__not_rule__` Hook — Opting Out of Rule-Side Composition
+## 7. The `__not_rule__` Hook — Opting Out of Rule-Side Composition
 
 `__not_rule__` is a bare class-level marker — its *presence*, not its
 value, is what matters. `Rule.__and__`/`__or__`/`__rand__`/`__ror__` check
@@ -285,7 +366,7 @@ one — should carry the same `__not_rule__` marker.
 
 ---
 
-## 6. Typing the `__not_rule__` Split — `_NotARule` Protocol, Not an Import
+## 8. Typing the `__not_rule__` Split — `_NotARule` Protocol, Not an Import
 
 `Rule.py`'s overloads need to tell a type checker "when `other` carries
 `__not_rule__`, don't assume this returns `Rule`" — but `Rule` lives in
@@ -313,10 +394,13 @@ that false precision.
 
 ---
 
-## 7. Ecosystem Integration
+## 9. Ecosystem Integration
 
 * **`simplibs-exception`:** `build_exception` utilizes `value_name` as `label`,
 `context`, and `value` to format readable diagnostic cards.
 * **`IsTyping`:** Automatically extracts `Rule` instances attached
 via `.annotated()` to decompose typing constructs into composed validation trees.
+* **Containers and typing layer:** compose their diagnostics from
+`describe()` (through `describe_rule`), so every rule's text ends up in
+messages such as "value satisfying at least one of: list[int], set[int], str".
 """

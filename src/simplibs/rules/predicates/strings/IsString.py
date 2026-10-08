@@ -25,6 +25,14 @@ class IsString(Rule):
         return isinstance(value, str)
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed noun phrase
+        return "str"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -101,4 +109,12 @@ The `IsString` rule validates that an input value is an instance of `str`.
   by other primitive-type rules (`is_integer`, `is_number`). Other rule
   constructors import these for fast internal parameter checks without
   instantiating a new `IsString()` each time.
+
+---
+
+## 4. Description
+
+`describe()` returns "str" — the type name. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

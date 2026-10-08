@@ -40,7 +40,8 @@ cooperating layers:
 1. **`build_typing_rule`** — the single recursive entry point. Given any annotation, it
    decides which of five paths applies (`Any`, a direct `Rule` instance, a plain class,
    a `NewType`, or a generic with an origin) and either returns a rule directly or
-   hands off to layer 2.
+   hands off to layer 2 — then attaches the annotation's own spelling to the result
+   (see [Descriptions](#descriptions)).
 2. **`ORIGIN_TABLE` + the builders** (`rules/typing/_builders/` — see its own
    documentation) — a dispatch table mapping each distinct `get_origin()` result to
    the one *process* (ELEMENTS, KEY_VALUE, ANY_OF, LITERAL, TYPE, CALLABLE, ANNOTATED,
@@ -56,6 +57,33 @@ cooperating layers:
 small structural building block the decomposition needs internally, the latter are
 read-only utilities for asking *what* this mechanism supports, without needing to
 actually validate a value.
+
+## Descriptions
+
+A decomposed annotation no longer looks like the annotation: `list[int]` becomes
+`AllOf(IsInstance(list), ForEach(IsInstance(int)))`, which the containers alone would
+describe as `"list & each int"`. A Union of such members would then read
+`"list & each int | set & each int | str"` instead of `"list[int] | set[int] | str"`.
+
+`build_typing_rule` is the only place that knows the annotation, so it is the one place
+that fixes this: every generic it builds is wrapped in
+[`Described`](README_RULE_CONTAINERS.md#described) with the text from the internal
+`format_annotation` helper (`"list[int]"`, `"dict[str, int]"`, `"Literal['a', 'b']"`,
+`"Callable[[int], str]"`, ...). Two cases are deliberately **not** wrapped, because their
+rules already compose a correct text from their children:
+
+* **`Union` / `X | Y`** → an `AnyOf` of the members: `"list[int] | set[int] | str"`.
+* **`Annotated[X, ...]`** → an `AllOf` of the parts: `"int & > 0"`.
+
+Plain classes, bare generics (`list`) and `Rule` instances used directly need nothing
+extra — each describes itself. The wrapper changes only the text: `is_valid` and
+`build_exception` are delegated unchanged, so the failure card still names the exact
+failing sub-rule. The visible result is a readable failure instead of
+`"AllOf, AllOf, IsInstance"`:
+
+```text
+Expected:  value satisfying at least one of: list[int], set[int], str
+```
 
 ---
 
@@ -77,7 +105,7 @@ The recursive dispatcher every annotation — top-level or nested — passes thr
 exactly once per recursion level. Not a `Rule` itself; a plain function returning one.
 `IsTyping.__init__` calls it exactly once; every builder in `_builders/` that needs to
 handle a nested annotation slot calls it again from inside its own function body. See
-[`rules/typing/_builders`](../_builders/README.md) for the full builder-by-builder
+[README_RULE_TYPING_BUILDERS](README_RULE_TYPING_BUILDERS.md) for the full builder-by-builder
 reference this dispatches into.
 
 **Parameters:**
@@ -89,6 +117,9 @@ reference this dispatches into.
 
 **Returns:**
 * `Rule`: A single, fully composed `Rule` instance equivalent to the given annotation.
+  Generic constructs are wrapped in `Described`, so the rule describes itself with the
+  annotation's own spelling (`"list[int]"`). `Union` and `Annotated` are not wrapped —
+  they compose their own description.
 
 **Raises:**
 * `ParamError`: If the annotation (or any nested fragment of it, at any recursion
@@ -97,7 +128,7 @@ reference this dispatches into.
 **Example usage:**
 ```python
 build_typing_rule(int)                         # -> IsInstance(int)
-build_typing_rule(list[int])                   # -> AllOf(IsInstance(list), ForEach(IsInstance(int)))
+build_typing_rule(list[int])                   # -> Described(AllOf(IsInstance(list), ForEach(IsInstance(int))), "list[int]")
 build_typing_rule(is_integer & greater_than(0)) # -> the Rule instance itself, unchanged
 ```
 
@@ -125,7 +156,15 @@ def build_typing_rule(annotation: Any) -> Rule:
     if builder is None:
         raise_unsupported_annotation_error(annotation)
 
-    return builder(annotation)
+    rule = builder(annotation)
+
+    # 4. Union / Annotated already compose their own description
+    if origin in (Union, types.UnionType, Annotated):
+        return rule
+
+    # 5. Everything else is decomposed into a structure that no longer
+    #    reads like the annotation — attach the annotation's own spelling
+    return Described(rule, format_annotation(annotation))
 ```
 
 **A note on why the order of checks matters.** Each branch above must run before the
@@ -172,9 +211,16 @@ def __init__(self, annotation: Any) -> None:
 def is_valid(self, value: Any) -> bool:
     return self.rule.is_valid(value)
 
+def describe(self) -> str:
+    return self.rule.describe()
+
 def build_exception(self, value, value_name=None, context=None):
     return self.rule.build_exception(value, value_name=value_name, context=context)
 ```
+
+`describe()` returns the composed rule's own description, which already carries the
+annotation's spelling (`"list[int]"`, `"int | None"`) — see
+[Descriptions](#descriptions).
 
 Because decomposition happens once at construction — not on every `is_valid()` call —
 reusing the same `IsTyping` instance across many validations (in a loop, or as a
@@ -211,6 +257,9 @@ build_typing_rule(list[Any])      # -> AllOf(IsInstance(list), ForEach(IsAny()))
 ```python
 def is_valid(self, value: Any) -> bool:
     return True
+
+def describe(self) -> str:
+    return "Any"
 ```
 
 `is_valid` unconditionally returns `True` rather than performing a technically-always-

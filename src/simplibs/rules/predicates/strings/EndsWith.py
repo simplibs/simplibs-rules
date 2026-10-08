@@ -45,6 +45,14 @@ class EndsWith(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameter
+        return f"string ending with {self.suffix!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -111,4 +119,12 @@ suffix using Python's native `str.endswith()` method.
   `TypeError`.
 * **Value Failures:** Strings missing the target suffix format problem/fix
   strings as `ValueError` (`ENDS_WITH_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "string ending with '.py'" — the same phrase the failure card uses as `expected`. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

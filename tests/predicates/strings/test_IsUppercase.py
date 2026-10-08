@@ -17,9 +17,16 @@ def test_is_uppercase_contract(subtests):
         rule=rule,
         valid_values=["HELLO", "HELLO123", "A-B-C!"],
         invalid_values=["", "123", "Hello", "hello", "HELLO World", 123, None, True],
+        expected_description="uppercase string",
         deep_check=True,
         verbose=False,
     )
+
+
+def test_is_uppercase_describe():
+    """Verify the description returned by IsUppercase."""
+    rule = IsUppercase()
+    assert rule.describe() == "uppercase string"
 
 
 def test_is_uppercase_exception_type_error(subtests):

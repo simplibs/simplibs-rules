@@ -30,6 +30,14 @@ class IsContainer(Rule):
         return isinstance(value, (list, tuple, set, frozenset, dict)) or isinstance(value, Container)
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return "container"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -96,4 +104,12 @@ any custom type implementing the `Container` protocol).
 * **Error Classification:** Uses `IS_CONTAINER_ERROR` wrapping a
   `TypeError`, since failing this rule always reflects a fundamental type
   mismatch rather than a value-range problem.
+
+---
+
+## 4. Description
+
+`describe()` returns "container" — the noun phrase for what the value must be. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

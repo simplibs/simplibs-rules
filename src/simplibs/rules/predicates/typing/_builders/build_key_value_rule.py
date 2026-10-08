@@ -1,5 +1,4 @@
 from typing import Any, get_args, get_origin
-
 # Outers
 from ....base_class import Rule
 from ....containers import AllOf, Compose, ForEach

@@ -33,6 +33,14 @@ class IsUppercase(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed noun phrase
+        return "uppercase string"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -93,4 +101,12 @@ rationale this rule follows.
 * **Dual Diagnostic Path:** `TypeError` when the value isn't a string at
   all; `ValueError` (`IS_UPPERCASE_ERROR`) when it is a string but has a
   lowercase character or no cased characters at all.
+
+---
+
+## 3. Description
+
+`describe()` returns "uppercase string" — what the string must be. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

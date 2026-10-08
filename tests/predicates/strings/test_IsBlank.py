@@ -17,6 +17,8 @@ def test_is_blank_contract(subtests):
         rule=rule,
         valid_values=["", " ", "   ", "\t", "\n", " \t\n "],
         invalid_values=["hello", " a ", "123", 123, None, True, []],
+        expected_description="blank string",
+        rule_factory=IsBlank,
         deep_check=True,
         verbose=False,
     )
@@ -60,3 +62,8 @@ def test_is_blank_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_blank_describe():
+    """Verify the description phrase."""
+    assert IsBlank().describe() == "blank string"

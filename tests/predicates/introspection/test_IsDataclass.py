@@ -29,6 +29,8 @@ def test_is_dataclass_contract(subtests):
         rule=rule,
         valid_values=[instance, SampleDataclass],
         invalid_values=[RegularClass(), RegularClass, "text", 123, None, [1, 2]],
+        expected_description="dataclass",
+        rule_factory=IsDataclass,
         deep_check=True,
         verbose=False,
     )
@@ -52,3 +54,8 @@ def test_is_dataclass_exception(subtests):
         exception=TypeError,
         verbose=False,
     )
+
+
+def test_is_dataclass_describe():
+    """Verify the description phrase."""
+    assert IsDataclass().describe() == "dataclass"

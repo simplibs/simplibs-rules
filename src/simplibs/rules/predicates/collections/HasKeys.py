@@ -45,6 +45,14 @@ class HasKeys(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return f"mapping with keys {self.keys!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -112,4 +120,12 @@ specified keys.
   format problem/fix strings as `TypeError`.
 * **Missing Keys Diagnostic:** Dynamically computes and presents missing
   keys in both `problem` and `how_to_fix` as `KeyError` (`HAS_KEYS_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "mapping with keys ('id', 'name')" — the same phrase the failure card uses as `expected`. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

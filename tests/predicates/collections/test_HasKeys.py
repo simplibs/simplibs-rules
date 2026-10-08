@@ -31,6 +31,7 @@ def test_has_keys_contract(subtests):
             123,
             None,
         ],
+        expected_description="mapping with keys ('id', 'name')",
         rule_factory=HasKeys,
         invalid_init_params=[
             ((), {}),  # No arguments raises ParamError
@@ -97,3 +98,8 @@ def test_has_keys_single_and_multiple_arguments():
     rule_mixed = HasKeys("id", 42, (1, 2))
     assert rule_mixed.is_valid({"id": "ok", 42: "number", (1, 2): "tuple"}) is True
     assert rule_mixed.is_valid({"id": "ok", 42: "number"}) is False
+
+
+def test_has_keys_describe():
+    """Verify the description phrase."""
+    assert HasKeys("id", "name").describe() == "mapping with keys ('id', 'name')"

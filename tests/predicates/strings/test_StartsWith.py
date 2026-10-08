@@ -18,14 +18,22 @@ def test_starts_with_contract(subtests):
         valid_values=["https://example.com", "https://localhost", "https://"],
         invalid_values=["http://example.com", "ftp://example.com", "example.com", "", 123, None, True],
         invalid_init_params=[
-            ((123,), {}),       # Non-string prefix -> ParamError
-            ((None,), {}),      # None prefix -> ParamError
-            ((True,), {}),      # Boolean prefix -> ParamError
-            (([],), {}),        # List prefix -> ParamError
+            ((123,), {}),
+            ((None,), {}),
+            ((True,), {}),
+            (([],), {}),
         ],
+        rule_factory=StartsWith,
+        expected_description="string starting with 'https://'",
         deep_check=True,
         verbose=False,
     )
+
+
+def test_starts_with_describe():
+    """Verify the description returned by StartsWith."""
+    rule = StartsWith("prefix_")
+    assert rule.describe() == "string starting with 'prefix_'"
 
 
 def test_starts_with_exception_type_error(subtests):

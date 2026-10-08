@@ -25,6 +25,14 @@ class IsFloat(Rule):
         return isinstance(value, float)
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "float"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -72,4 +80,12 @@ instance.
 
 * **Error Classification:** Uses `IS_FLOAT_ERROR` wrapping a `TypeError`.
 * **Fix Guidance:** Advises providing a float value.
+
+---
+
+## 3. Description
+
+`describe()` returns "float" — the type name. A short fragment that containers and
+the typing layer compose into larger texts ("not float", "float | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

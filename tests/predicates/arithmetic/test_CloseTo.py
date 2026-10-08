@@ -4,20 +4,11 @@ import math
 from typing import Any
 import pytest
 
-# Test tools and Kwargs wrapper
 from simplibs.exception.testing import assert_exception_function, Kwargs
 from simplibs.rules.testing import assert_rule_contract
-
-# Exceptions
 from simplibs.exception import ValidationError
-
-# Rules
 from simplibs.rules.predicates.arithmetic import CloseTo
 
-
-# ==============================================================================
-# 1. CONTRACT TEST (Master Contract)
-# ==============================================================================
 
 def test_close_to_contract(subtests):
     """Verify the complete contract of CloseTo rule using master orchestrator."""
@@ -28,6 +19,7 @@ def test_close_to_contract(subtests):
         rule=rule,
         valid_values=[10.0, 10.5, 9.5, 10],
         invalid_values=[12.0, 8.0, "10.0", None, True],
+        expected_description="close to 10.0",
         rule_factory=CloseTo,
         invalid_init_params=[
             (("invalid_target",), {}),             # Non-numeric target raises ParamError
@@ -40,13 +32,9 @@ def test_close_to_contract(subtests):
     )
 
 
-# ==============================================================================
-# 2. DETAILED DIAGNOSTIC CARD TEST
-# ==============================================================================
-
 def test_close_to_value_out_of_tolerance_exception(subtests):
     """Verify diagnosis upon failure due to exceeding tolerated difference (ValueError)."""
-    rule = CloseTo(100.0, rel_tol=0.01)  # Accepts approximately 99.0 to 101.0
+    rule = CloseTo(100.0, rel_tol=0.01)
 
     assert_exception_function(
         subtests,
@@ -104,10 +92,6 @@ def test_close_to_type_error_exception(subtests):
     )
 
 
-# ==============================================================================
-# 3. SPECIFIC EDGE CASES & FUNCTIONALITY
-# ==============================================================================
-
 def test_close_to_math_pi_example():
     """Verify functionality with known constants like math.pi."""
     rule = CloseTo(math.pi, rel_tol=1e-3)
@@ -124,3 +108,9 @@ def test_close_to_absolute_tolerance_only():
     assert rule.is_valid(0.005) is True
     assert rule.is_valid(-0.008) is True
     assert rule.is_valid(0.02) is False
+
+
+def test_close_to_describe():
+    """Verify the description phrase built from target parameter."""
+    assert CloseTo(10.0).describe() == "close to 10.0"
+    assert CloseTo(3.14).describe() == "close to 3.14"

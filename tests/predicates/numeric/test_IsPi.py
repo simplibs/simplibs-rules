@@ -26,6 +26,8 @@ def test_is_pi_contract(subtests):
             (("2",), {}),      # String in init -> ParamError
             ((True,), {}),     # Boolean in init -> ParamError
         ],
+        expected_description="pi to 2 decimals",
+        rule_factory=IsPi,
         deep_check=True,
         verbose=False,
     )
@@ -69,3 +71,9 @@ def test_is_pi_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_pi_describe():
+    """Verify the description phrase with parameters."""
+    assert IsPi(decimal_places=3).describe() == "pi to 3 decimals"
+    assert IsPi(decimal_places=5).describe() == "pi to 5 decimals"

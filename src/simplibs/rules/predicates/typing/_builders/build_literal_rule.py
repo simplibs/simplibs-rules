@@ -1,5 +1,4 @@
 from typing import Any, get_args
-
 # Outers
 from ....base_class import Rule
 from ....predicates.logic import IsIn

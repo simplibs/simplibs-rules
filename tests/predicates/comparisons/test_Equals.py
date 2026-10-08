@@ -18,6 +18,8 @@ def test_equals_contract(subtests):
         rule=rule,
         valid_values=["active"],
         invalid_values=["inactive", "ACTIVE", 123, None, False, ["active"]],
+        expected_description="equal to 'active'",
+        rule_factory=Equals,
         deep_check=True,
         verbose=False,
     )
@@ -40,3 +42,8 @@ def test_equals_exception(subtests):
         how_to_fix="Provide a value equal to 'active'.",
         exception=ValueError,
     )
+
+
+def test_equals_describe():
+    """Verify the description phrase."""
+    assert Equals("active").describe() == "equal to 'active'"

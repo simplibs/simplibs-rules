@@ -30,6 +30,17 @@ actually wanted.
 subclass `int`/`float`, so a plain `isinstance(value, Decimal)` is already exact and
 unambiguous.
 
+## A note on descriptions
+
+Every rule here overrides [`Rule.describe()`](README_RULE_CLASS.md#describe) with a short
+fragment that containers and the typing layer compose into larger texts: the type rules
+use the type's own name (`bool`, `int`, `float`, `Decimal`), the umbrella rules a plain
+phrase (`number`, `primitive number`, `finite number`), and the value rules the value
+itself (`zero`, `NaN`, `infinity`, `even int`, `odd int`, `pi to 5 decimals`).
+`IsPrimitiveNumber` deliberately reads `primitive number` rather than `int | float`, so
+its text never needs parentheses inside an `&`. The `expected` sentence of each failure
+card is unchanged.
+
 ---
 
 ## 🧭 Table of Contents
@@ -70,6 +81,8 @@ def is_valid(self, value: Any) -> bool:
     return isinstance(value, bool)
 ```
 
+**Description:** `"bool"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -94,6 +107,8 @@ def is_valid(self, value: Any) -> bool:
         and not isinstance(value, bool)
     )
 ```
+
+**Description:** `"int"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -120,6 +135,8 @@ def is_valid(self, value: Any) -> bool:
 > 💡 `IsFloat` alone accepts `float('nan')` and `float('inf')`, since both are,
 > structurally, floats — see `IsNan`/`IsInfinity` below if you need to exclude them.
 
+**Description:** `"float"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -141,6 +158,8 @@ validate(value, IsDecimal())
 def is_valid(self, value: Any) -> bool:
     return isinstance(value, Decimal)
 ```
+
+**Description:** `"Decimal"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -167,6 +186,8 @@ def is_valid(self, value: Any) -> bool:
         and not isinstance(value, bool)
     )
 ```
+
+**Description:** `"number"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -196,6 +217,8 @@ def is_valid(self, value: Any) -> bool:
     )
 ```
 
+**Description:** `"primitive number"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -222,6 +245,8 @@ def is_valid(self, value: Any) -> bool:
         and value == 0
     )
 ```
+
+**Description:** `"zero"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -253,6 +278,8 @@ def is_valid(self, value: Any) -> bool:
 On failure, the diagnostic distinguishes "this isn't a float at all" from "this is a
 float, but a regular (non-NaN) one."
 
+**Description:** `"NaN"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -281,6 +308,8 @@ def is_valid(self, value: Any) -> bool:
 
 On failure, the diagnostic distinguishes "this isn't a float at all" from "this is a
 finite float."
+
+**Description:** `"infinity"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -323,6 +352,8 @@ per accepted type. On failure, the diagnostic distinguishes "this isn't a number
 all" from "this is a number, but rounds to something other than π at this precision" —
 the latter states both the actual rounded value and the expected one.
 
+**Description:** `"pi to 5 decimals"` — only the precision is shown; the rounded value stays in the failure card.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -351,6 +382,8 @@ def is_valid(self, value: Any) -> bool:
 ```
 
 On failure, the diagnostic distinguishes non-integer types from odd integers.
+
+**Description:** `"even int"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -383,6 +416,8 @@ def is_valid(self, value: Any) -> bool:
 
 On failure, the diagnostic distinguishes non-numeric types from non-finite values (`NaN` or `+/-inf`).
 
+**Description:** `"finite number"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -413,6 +448,8 @@ def is_valid(self, value: Any) -> bool:
 ```
 
 On failure, the diagnostic distinguishes non-integer types from even integers.
+
+**Description:** `"odd int"`.
 
 [▲ Back to top](#-table-of-contents)
 

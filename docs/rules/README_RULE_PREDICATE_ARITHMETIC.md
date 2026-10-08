@@ -14,6 +14,13 @@ class CloseTo(Rule):
     ...
 ```
 
+## A note on descriptions
+
+Every rule here overrides [`Rule.describe()`](README_RULE_CLASS.md#describe) with a short
+fragment that containers and the typing layer compose into larger texts. `CloseTo`
+shows only its target (the tolerances stay in the failure card); `DivisibleBy` and
+`HasRemainder` use the phrase their failure card reports as `expected`.
+
 ---
 
 ## 🧭 Table of Contents
@@ -58,6 +65,8 @@ On failure, the reported diagnostic distinguishes "this isn't a primitive number
 all" from "this is a number, but outside tolerance" — the latter names both the
 relative tolerance and, if set above `0.0`, the absolute tolerance too.
 
+**Description:** `"close to 3.14159"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -89,6 +98,8 @@ def is_valid(self, value: Any) -> bool:
 On failure, the reported diagnostic distinguishes "this isn't an integer at all" from
 "this is an integer, but not a multiple of `divisor`" — the latter suggests a concrete
 example multiple as part of the fix.
+
+**Description:** `"multiple of 3"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -126,6 +137,8 @@ def is_valid(self, value: Any) -> bool:
 On failure, the reported diagnostic shows the value's *actual* remainder alongside the
 expected one (`"has remainder 2 when divided by 3, but expected 1"`), and suggests a
 concrete example value that would satisfy the rule.
+
+**Description:** `"remainder 1 when divided by 3"`.
 
 [▲ Back to top](#-table-of-contents)
 

@@ -29,7 +29,7 @@ def assert_rule_validate(
 
     def check_valid(value: Any) -> None:
         assert rule.validate(value) is True
-        assert rule.validate(value, return_value=True) == val
+        assert rule.validate(value, return_value=True) == value
 
     def check_return_bool_false(value: Any) -> None:
         assert rule.validate(value, return_bool=True) is False

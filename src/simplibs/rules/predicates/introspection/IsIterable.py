@@ -31,6 +31,14 @@ class IsIterable(Rule):
             return False
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed noun phrase
+        return "iterable"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -87,4 +95,12 @@ using Python's native `iter()` protocol.
 * **Error Classification:** Uses `IS_ITERABLE_ERROR` wrapping a
   `TypeError`.
 * **Fix Guidance:** Lists specific common Python iterable types.
+
+---
+
+## 3. Description
+
+`describe()` returns "iterable" — a short fragment that containers and the typing
+layer compose into larger texts ("not iterable", "iterable | ..."). The longer
+sentence form stays in `expected` of the failure card.
 """

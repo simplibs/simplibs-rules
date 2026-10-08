@@ -58,6 +58,14 @@ class IsPi(Rule):
             return False
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Precision is the only parameter worth showing
+        return f"pi to {self.decimal_places} decimals"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -135,4 +143,12 @@ user-specified precision (`decimal_places`).
   for numeric mismatch.
 * **Fix Guidance:** Displays rounded target expectation and actual
   rounded value for transparent debugging.
+
+---
+
+## 3. Description
+
+`describe()` returns "pi to 5 decimals". The precomputed rounded value stays
+in `expected` of the failure card ("3.14159 (math.pi to 5 decimals)"), where
+the actual number is useful; in a composed text the precision is enough.
 """

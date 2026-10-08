@@ -23,6 +23,8 @@ def test_not_in_contract(subtests):
         rule=rule,
         valid_values=["active", "pending", 123, None],
         invalid_values=["banned", "suspended"],
+        expected_description="not one of ['banned', 'suspended']",
+        rule_factory=NotIn,
         invalid_init_params=[
             ((123,), {}),       # Scalar is not a container -> ParamError
             (("string",), {}),  # String is not an allowed container -> ParamError
@@ -104,3 +106,9 @@ def test_not_in_exception_unhashable_value(subtests):
         how_to_fix="Provide a hashable value or a compatible container.",
         exception=TypeError,
     )
+
+
+def test_not_in_describe():
+    """Verify the description phrase for excluded collections."""
+    assert NotIn(["a", "b"]).describe() == "not one of ['a', 'b']"
+    assert NotIn(list(range(100))).describe() == "not one of list(size=100)"

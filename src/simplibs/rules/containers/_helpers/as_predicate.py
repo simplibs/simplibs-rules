@@ -18,7 +18,7 @@ def as_predicate(
     if callable(rule):
         return rule
 
-    # 3. Pojistka pro případ nevalidního vstupu (neměl by nastat)
+    # 3. Safeguard for invalid input (should never happen)
     raise_invalid_predicate(rule)
 
 

@@ -33,6 +33,14 @@ class IsNan(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "NaN"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -95,4 +103,12 @@ Not-a-Number (`float('nan')`).
   `TypeError`.
 * **Value Failures:** Regular float inputs format problem/fix strings as
   `ValueError` (`IS_NAN_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "NaN" — the conventional spelling. A short fragment that containers and
+the typing layer compose into larger texts ("not NaN", "NaN | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

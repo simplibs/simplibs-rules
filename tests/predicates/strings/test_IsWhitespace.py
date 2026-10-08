@@ -17,9 +17,16 @@ def test_is_whitespace_contract(subtests):
         rule=rule,
         valid_values=[" ", "   ", "\t", "\n", "\r\n", " \t\n "],
         invalid_values=["", "  a  ", "hello", "123", 123, None, True, []],
+        expected_description="whitespace string",
         deep_check=True,
         verbose=False,
     )
+
+
+def test_is_whitespace_describe():
+    """Verify the description returned by IsWhitespace."""
+    rule = IsWhitespace()
+    assert rule.describe() == "whitespace string"
 
 
 def test_is_whitespace_exception_type_error(subtests):

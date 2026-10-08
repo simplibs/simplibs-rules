@@ -17,9 +17,16 @@ def test_is_titlecase_contract(subtests):
         rule=rule,
         valid_values=["Hello World", "Python", "A Book Title 123"],
         invalid_values=["", "123", "hello world", "HELLO WORLD", "Hello world", 123, None, True],
+        expected_description="title-cased string",
         deep_check=True,
         verbose=False,
     )
+
+
+def test_is_titlecase_describe():
+    """Verify the description returned by IsTitlecase."""
+    rule = IsTitlecase()
+    assert rule.describe() == "title-cased string"
 
 
 def test_is_titlecase_exception_type_error(subtests):

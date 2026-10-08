@@ -17,6 +17,8 @@ def test_is_printable_contract(subtests):
         rule=rule,
         valid_values=["hello world", "abc 123 !@#", "Příliš žluťoučký kůň", ""],
         invalid_values=["hello\x00world", "line1\x01line2", 123, None, True, []],
+        expected_description="printable string",
+        rule_factory=IsPrintable,
         deep_check=True,
         verbose=False,
     )
@@ -68,3 +70,8 @@ def test_is_printable_helper(subtests):
         assert is_printable("Clean text") is True
         assert is_printable("Text\x00WithNull") is False
         assert is_printable(123) is False
+
+
+def test_is_printable_describe():
+    """Verify the description phrase."""
+    assert IsPrintable().describe() == "printable string"

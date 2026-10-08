@@ -13,7 +13,7 @@ def test_get_supported_origins_returns_frozenset() -> None:
     assert isinstance(origins, frozenset)
     assert len(origins) > 0
 
-    # Smoke check klíčových typů
+    # Smoke check of key origins
     assert list in origins
     assert dict in origins
     assert typing.Union in origins

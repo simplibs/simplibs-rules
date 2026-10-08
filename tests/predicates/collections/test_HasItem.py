@@ -34,6 +34,7 @@ def test_has_item_contract(subtests):
             123,
             None,
         ],
+        expected_description="container with item 'admin'",
         rule_factory=HasItem,
         deep_check=True,
         verbose=False,
@@ -114,3 +115,8 @@ def test_has_item_custom_container_protocol():
 
     rule_missing = HasItem("other")
     assert rule_missing.is_valid(CustomContainer()) is False
+
+
+def test_has_item_describe():
+    """Verify the description phrase."""
+    assert HasItem("admin").describe() == "container with item 'admin'"

@@ -21,9 +21,16 @@ def test_is_string_contract(subtests):
         rule=rule,
         valid_values=["", "hello", "123", "   "],
         invalid_values=[123, 10.5, True, None, [], {}],
+        expected_description="str",
         deep_check=True,
         verbose=False,
     )
+
+
+def test_is_string_describe():
+    """Verify the description returned by IsString."""
+    rule = IsString()
+    assert rule.describe() == "str"
 
 
 def test_is_string_exception(subtests):

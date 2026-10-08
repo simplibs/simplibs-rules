@@ -32,6 +32,14 @@ class IsEmpty(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "empty"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -98,4 +106,12 @@ The `IsEmpty` rule validates that a given collection or container supports
 * **Non-Empty Failures:** Evaluated containers that contain elements format
   problem/fix strings as `ValueError` (`IS_EMPTY_ERROR`), showing the
   actual length versus the expected zero length.
+
+---
+
+## 3. Description
+
+`describe()` returns "empty" — what the value must be. A short fragment that containers and
+the typing layer compose into larger texts ("not empty", "empty | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

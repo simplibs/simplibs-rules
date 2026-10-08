@@ -13,7 +13,7 @@ def test_build_literal_rule_values() -> None:
     assert isinstance(rule, IsIn)
     assert rule.strict is True
 
-    # Ověření přes veřejné chování (povoleno / zamítnuto)
+    # Verification through public behavior (allowed / rejected)
     assert rule.is_valid("read") is True
     assert rule.is_valid("write") is True
     assert rule.is_valid(1) is True
@@ -26,4 +26,4 @@ def test_build_literal_rule_strict_type_checking() -> None:
 
     assert isinstance(rule, IsIn)
     assert rule.is_valid(1) is True
-    assert rule.is_valid(True) is False  # V Pythonu 1 == True, ale strict=True to musí zamítnout!
+    assert rule.is_valid(True) is False  # In Python 1 == True, but strict=True must reject it!

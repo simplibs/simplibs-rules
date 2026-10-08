@@ -21,6 +21,8 @@ def test_is_primitive_number_contract(subtests):
         rule=rule,
         valid_values=[0, 10, -5, 0.0, 10.5, -1.23],
         invalid_values=[Decimal("10.5"), complex(1, 2), True, "10", None, []],
+        expected_description="primitive number",
+        rule_factory=IsPrimitiveNumber,
         deep_check=True,
         verbose=False,
     )
@@ -51,3 +53,8 @@ def test_is_primitive_number_helper():
     assert is_primitive_number(5) is True
     assert is_primitive_number(5.5) is True
     assert is_primitive_number(Decimal("5")) is False
+
+
+def test_is_primitive_number_describe():
+    """Verify the description phrase."""
+    assert IsPrimitiveNumber().describe() == "primitive number"

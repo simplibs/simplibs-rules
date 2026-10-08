@@ -17,6 +17,8 @@ def test_is_ascii_contract(subtests):
         rule=rule,
         valid_values=["", "hello", "123", "a-b_c!", "line\nbreak"],
         invalid_values=["příliš", "česky", "€", "©", 123, None, True],
+        expected_description="ASCII string",
+        rule_factory=IsAscii,
         deep_check=True,
         verbose=False,
     )
@@ -60,3 +62,8 @@ def test_is_ascii_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_ascii_describe():
+    """Verify the description phrase."""
+    assert IsAscii().describe() == "ASCII string"

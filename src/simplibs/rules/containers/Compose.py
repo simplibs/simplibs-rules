@@ -14,7 +14,7 @@ class Compose(Rule):
         rule(transformer(value))
 
     Example:
-        validate(value, Compose(str.strip, HasLength(min_=1)))
+        validate(value, Compose(str.strip, HasLength(min_length=1)))
     """
 
     __slots__ = ("transformer", "validator")
@@ -50,6 +50,14 @@ class Compose(Rule):
 
         # 2. Evaluate the rule on the transformed value
         return as_predicate(self.validator)(transformed)
+
+    # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Prefix form needs no parentheses around the validator
+        return f"after {describe_rule(self.transformer)}: {describe_rule(self.validator)}"
 
     # ----------------------------------------------------------------------
     # Exception definition
@@ -143,4 +151,21 @@ predicate.
   Transformation failures raise a `TypeError` wrapper containing the
   original exception class name and message directly in the `problem`
   field.
+
+---
+
+## 3. Description
+
+* **Prefix Form:**
+  `describe()` returns "after <transformer>: <validator>"
+  ("after strip: length at least 1"). The transformer is named through
+  `describe_rule` (`__name__` of a function or class, "<lambda>" for a lambda).
+* **Why a Prefix, Not an Infix Form:**
+  A prefix form needs no parentheses around its validator, so `Compose` does
+  not have to import `AllOf` / `AnyOf` to decide on them — which would be a
+  circular import, because both of them import `Compose`.
+* **Who Adds The Parentheses:**
+  The containers that embed a `Compose` (`AllOf`, `AnyOf`, `Not`, `ForEach`)
+  wrap *it* in parentheses ("(after strip: x) & y"), since the prefix would
+  otherwise read as covering everything to its right.
 """

@@ -1,11 +1,20 @@
-from typing import Any, get_origin
+import types
+from typing import Annotated, Any, Union, get_origin
 # Outers
 from ...base_class import Rule
+from ...containers import Described
 from ...predicates.introspection import IsInstance
 # Inners
+from ._helpers import format_annotation
 from .IsAny import _IS_ANY
 from ._builders import ORIGIN_TABLE
 from ._validations import raise_unsupported_annotation_error
+
+
+# Origins whose composed rule already describes itself correctly: a Union is an
+# AnyOf of its members, an Annotated is an AllOf of its parts — both compose
+# their text from their children, so wrapping them would only hide that.
+_SELF_DESCRIBING_ORIGINS = (Union, types.UnionType, Annotated)
 
 
 def build_typing_rule(annotation: Any) -> Rule:
@@ -21,7 +30,9 @@ def build_typing_rule(annotation: Any) -> Rule:
             list/set/dict/tuple/Iterable/Sequence/Mapping/... generic).
 
     Returns:
-        A single Rule instance equivalent to the given annotation.
+        A single Rule instance equivalent to the given annotation. Generic
+        constructs are wrapped in `Described`, so the rule describes itself
+        with the annotation's own spelling (e.g. "list[int]").
 
     Raises:
         ParamError: If the annotation (or any nested fragment of it) is
@@ -61,7 +72,15 @@ def build_typing_rule(annotation: Any) -> Rule:
         raise_unsupported_annotation_error(annotation)
 
     # 6. Delegate rule construction to specialized builder
-    return builder(annotation)
+    rule = builder(annotation)
+
+    # 7. Union / Annotated already compose their own description
+    if origin in _SELF_DESCRIBING_ORIGINS:
+        return rule
+
+    # 8. Every other construct is decomposed into a structure that no longer
+    #    reads like the annotation — attach the annotation's own spelling
+    return Described(rule, format_annotation(annotation))
 
 
 _DESIGN_NOTES = """
@@ -87,6 +106,8 @@ The dispatch order follows a minimal, strict logic path:
 3. **Table Lookup (`ORIGIN_TABLE`)** — Every structured origin (including
    `tuple` and `Annotated` in Python 3.11+) maps directly to its
    specialized builder function.
+4. **Description** — Every table-built rule except Union / Annotated is
+   wrapped in `Described` with the annotation's own spelling (see section 5).
 
 ---
 
@@ -128,4 +149,27 @@ Complex constructs such as heterogeneous vs. homogeneous `tuple` shapes or
 branching. Their respective builder functions (`build_tuple_rule` and
 `build_annotated_rule`) encapsulate their own internal inspection logic
 when invoked via `ORIGIN_TABLE`.
+
+---
+
+## 5. Why the Description Is Attached Here, Not in Every Builder
+
+`list[int]` decomposes into `AllOf(IsInstance(list), ForEach(IsInstance(int)))`.
+Composed by the containers alone, that tree would describe itself as
+"list & each int" — and a Union of several such members would read
+"list & each int | set & each int | str" instead of
+"list[int] | set[int] | str". The annotation is only known here, so this is
+the one place that wraps the builder's result in `Described(rule, text)`
+with the text from `format_annotation`.
+
+* **Union / Annotated Are Skipped:**
+  `AnyOf` and `AllOf` already compose a correct text from their children
+  (each child is itself described), and adding a fixed text on top would
+  not improve it.
+* **Bare Generics Need Nothing Extra:**
+  `list` has no origin and becomes a plain `IsInstance(list)`, which
+  describes itself as "list".
+* **Behavior Is Unchanged:**
+  `Described` delegates `is_valid` and `build_exception`. Only code that
+  inspects the *type* of the returned rule sees a difference.
 """

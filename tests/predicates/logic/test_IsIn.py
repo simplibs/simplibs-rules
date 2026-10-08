@@ -19,6 +19,8 @@ def test_is_in_contract(subtests):
         rule=rule,
         valid_values=[1, 2, "admin", None],
         invalid_values=[3, "user", [1]],  # [1] triggers unhashable fallback/invalid test
+        expected_description="one of [1, 2, 'admin', None]",
+        rule_factory=IsIn,
         invalid_init_params=[
             ((123,), {}),       # Scalar is not a container -> ParamError
             (("string",), {}),  # String is not an allowed container -> ParamError
@@ -115,3 +117,9 @@ def test_is_in_large_container_truncation(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_in_describe():
+    """Verify the description phrase for collection memberships."""
+    assert IsIn(["a", "b"]).describe() == "one of ['a', 'b']"
+    assert IsIn(list(range(100))).describe() == "one of list(size=100)"

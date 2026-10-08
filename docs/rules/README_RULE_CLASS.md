@@ -3,16 +3,19 @@
 `Rule` is the single foundation every validation rule in `simplibs-rules` is built
 on — from the simplest type check (`IsString`) to the most elaborate composed
 constraint (`AllOf(IsInteger(), GreaterThan(0))`). It does not implement any concrete
-check itself; instead it provides four things every rule needs:
+check itself; instead it provides five things every rule needs:
 
 1. A minimal, mandatory contract every concrete rule must fulfill
 (`is_valid`, `build_exception`).
-2. A unified evaluation interface built on top of that contract — `validate()`, the
+2. A short, human-readable description of what the rule requires (`describe()`),
+with a sensible default so no rule has to write one. Containers and the typing layer
+compose their diagnostics from it.
+3. A unified evaluation interface built on top of that contract — `validate()`, the
 callable shorthand (`rule(value)`), and the various return modes.
-3. Operator-based composition (`|`, `&`, `~`) that lets any two rules (or a rule and a
+4. Operator-based composition (`|`, `&`, `~`) that lets any two rules (or a rule and a
 plain callable) combine into a new rule, without either side needing to know
 anything about the other.
-4. A bridge into Python's own typing system (`annotated()`), letting a rule attach
+5. A bridge into Python's own typing system (`annotated()`), letting a rule attach
 itself directly to a type hint that both static type checkers and this library's
 own runtime tooling (`IsTyping`, `validate_call`, `validate_dataclass`) understand.
 
@@ -22,6 +25,7 @@ from typing import Annotated, Any, Callable, overload
 from ._NotARule import _NotARule
 
 class Rule(ABC):
+    __slots__ = ()
     ...
 ```
 
@@ -32,9 +36,14 @@ declared with `@abstractmethod` and carry no implementation of their own. This i
 deliberate: `Rule` only defines *what every rule must be able to answer* (does this
 value pass? what does failure look like?), never *how* — that answer is always
 specific to the concrete rule (`IsInteger`, `HasLength`, `Regex`, ...). Every piece of
-shared machinery this class *does* provide (`validate`, `__call__`, the operators,
-`annotated`) is built purely on top of those two abstract methods, so any concrete
-rule that implements them correctly gets the entire rest of this interface for free.
+shared machinery this class *does* provide (`validate`, `__call__`, `describe`, the
+operators, `annotated`) is built purely on top of those two abstract methods, so any
+concrete rule that implements them correctly gets the entire rest of this interface
+for free.
+
+`describe()` is deliberately **not** abstract: its default (the class name) means a
+rule works without writing one, and a rule that does not override it is merely
+described less precisely.
 
 ---
 
@@ -44,11 +53,15 @@ rule that implements them correctly gets the entire rest of this interface for f
 * [`build_exception`](#build_exception)
 * [`__call__`](#__call__)
 * [`validate`](#validate)
+* [`describe`](#describe)
 * [`annotated`](#annotated)
-* [`__or__` / `__ror__`](#__or__--__ror__)`
-* [`__and__` / `__rand__`](#__and__--__rand__)`
+* [`__or__` / `__ror__`](#__or__--__ror__)
+* [`__and__` / `__rand__`](#__and__--__rand__)
 * [`__invert__`](#__invert__)
-* [The `__not_rule__` Hook & `_NotARule`](#the-__not_rule__-hook--_notarule)`
+* [The `__not_rule__` Hook & `_NotARule`](#the-__not_rule__-hook--_notarule)
+* [A note on `__slots__`](#a-note-on-__slots__)
+* [A note on lazy container imports](#a-note-on-lazy-container-imports)
+* [A note on operator chaining and flattening](#a-note-on-operator-chaining-and-flattening)
 
 [⬅️ Back to main README](../../README.md#-the-rule-class)
 
@@ -234,6 +247,71 @@ def validate(self, value, *, value_name=None, context=None,
 
 ---
 
+### `describe`
+
+**Not abstract.** Returns a short, human-readable text saying what the rule requires.
+Containers (`AllOf`, `AnyOf`, `Not`, ...) and the typing layer compose their
+diagnostics from the `describe()` of the rules they hold, so a failure reads
+"value satisfying at least one of: list[int], set[int], str" instead of
+"AllOf, AllOf, IsInstance".
+
+The default returns the class name. Rules with parameters or structure override it to
+say something more informative (`"> 0"`, `"string starting with 'x'"`).
+
+**Parameters:**
+
+* *(none — takes only `self`)*
+
+**Returns:**
+
+* `str`: A short, non-empty description. It is a *fragment* meant to be composed into
+other texts (`int`, `> 0`), not a full sentence like the `expected` field of a
+diagnostic card. **Must never raise.**
+
+**Example usage:**
+
+```python
+class IsEvenLength(Rule):
+    __slots__ = ()
+    ...
+
+IsEvenLength().describe()                 # -> "IsEvenLength"  (default: the class name)
+
+(IsInstance(int) | IsNone()).describe()   # -> "int | None"    (containers compose their children)
+(~IsNone()).describe()                    # -> "not None"
+```
+
+**Overriding it in your own rule:**
+
+```python
+class IsMultipleOfTen(Rule):
+    __slots__ = ()
+
+    def is_valid(self, value: Any) -> bool:
+        return isinstance(value, int) and value % 10 == 0
+
+    def build_exception(self, value, value_name=None, context=None): ...
+
+    def describe(self) -> str:
+        return "multiple of 10"
+```
+
+> 💡 Containers do not trust `describe()` blindly: if a (user-written) override raises
+> or returns anything but a non-empty `str`, the class name is used instead, so a faulty
+> description can never replace the validation error it was meant to explain.
+> `assert_rule_contract` checks the contract for every rule under test.
+
+**Under the hood:**
+
+```python
+def describe(self) -> str:
+    return type(self).__name__
+```
+
+[▲ Back to top](#-table-of-contents)
+
+---
+
 ### `annotated`
 
 Wraps this rule as `typing.Annotated[type_, self]` — the bridge that lets a `Rule`
@@ -343,7 +421,7 @@ def __ror__(self, other: "Rule | Callable[[Any], bool]") -> "Rule":
 
 ### `__and__` / `__rand__`
 
-Combines this rule with another rule or plain callable via logical AND — `rule1 & rule2` 
+Combines this rule with another rule or plain callable via logical AND — `rule1 & rule2`
 passes only if **both** sides do. Equivalent to `AllOf(rule1, rule2)`.
 
 **Parameters:**
@@ -432,18 +510,47 @@ def __invert__(self) -> "Rule":
 
 ### The `__not_rule__` Hook & `_NotARule`
 
-Callable objects carrying the `__not_rule__` attribute marker are explicitly excluded 
+Callable objects carrying the `__not_rule__` attribute marker are explicitly excluded
 from being wrapped as plain predicate functions in `AllOf` or `AnyOf`.
 
-Instead, binary operators check `callable(other) and not hasattr(other, "__not_rule__")`. 
-If the marker is present, `Rule.__and__` and `Rule.__or__` return `NotImplemented`, 
+Instead, binary operators check `callable(other) and not hasattr(other, "__not_rule__")`.
+If the marker is present, `Rule.__and__` and `Rule.__or__` return `NotImplemented`,
 ceding control to Python's reflected operator protocol (`other.__rand__` / `other.__ror__`).
 
 To ensure static type checkers resolve signatures accurately:
 
 1. `_NotARule` is defined as a structural `Protocol` matching any callable with `__not_rule__`.
-2. The `@overload` for `_NotARule` is placed **first** to prevent type checkers from matching 
-3. non-rule callables (such as `Action`) as standard `Callable[[Any], bool]` functions.
+2. The `@overload` for `_NotARule` is placed **first** to prevent type checkers from matching
+non-rule callables (such as `Action`) as standard `Callable[[Any], bool]` functions.
+
+[▲ Back to top](#-table-of-contents)
+
+---
+
+## A note on `__slots__`
+
+`Rule` declares `__slots__ = ()`, and every rule in the library declares `__slots__` for
+its own attributes. That only works if **every class in the hierarchy** does so: a single
+class without `__slots__` gives all of its instances a `__dict__` again, so the slots
+declared elsewhere stop saving memory and stop blocking stray attributes.
+
+What this means for your own rules:
+
+* Declare `__slots__` in every `Rule` subclass — an empty tuple if it adds no attributes.
+* Every attribute assigned in `__init__` must be listed in `__slots__`. Assigning an
+undeclared attribute raises `AttributeError`.
+* A subclass that forgets `__slots__` does not fail by itself; it just keeps its `__dict__`.
+`assert_rule_contract` catches this and names the offending classes (see
+[README_TESTING_ASSERTS_RULE_CONTRACT](../testing/README_TESTING_ASSERTS_RULE_CONTRACT.md)).
+* Weak references to rules are not supported unless a class adds `__weakref__` to its slots.
+
+```python
+class GreaterThan(Rule):
+    __slots__ = ("threshold",)
+
+    def __init__(self, threshold: float) -> None:
+        self.threshold = threshold
+```
 
 [▲ Back to top](#-table-of-contents)
 

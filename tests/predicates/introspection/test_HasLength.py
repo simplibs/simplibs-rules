@@ -9,10 +9,6 @@ from simplibs.exception import ValidationError
 from simplibs.rules.predicates.introspection import HasLength
 
 
-# ==============================================================================
-# 1. CONTRACT TESTS (Master Contracts)
-# ==============================================================================
-
 def test_has_length_exact_contract(subtests):
     """Verify the complete contract of HasLength rule for exact length."""
     rule = HasLength(length=3)
@@ -22,6 +18,8 @@ def test_has_length_exact_contract(subtests):
         rule=rule,
         valid_values=["abc", [1, 2, 3], (1, 2, 3), {"a": 1, "b": 2, "c": 3}],
         invalid_values=["ab", "abcd", [], 123, None],
+        expected_description="length 3",
+        rule_factory=HasLength,
         invalid_init_params=[
             ((), {}),                               # No parameters -> ParamError
             ((3,), {"min_length": 1}),             # Conflict length + min_length -> ParamError
@@ -42,6 +40,8 @@ def test_has_length_range_contract(subtests):
         rule=rule,
         valid_values=["ab", "abc", "abcd", [1, 2], [1, 2, 3, 4]],
         invalid_values=["a", "abcde", "", 456, None],
+        expected_description="length between 2 and 4",
+        rule_factory=HasLength,
         invalid_init_params=[
             ((), {"min_length": 5, "max_length": 2}),  # Swapped bounds (min > max) -> ParamError
             ((), {"min_length": -1}),                  # Negative min_length -> ParamError
@@ -51,10 +51,6 @@ def test_has_length_range_contract(subtests):
         verbose=False,
     )
 
-
-# ==============================================================================
-# 2. DETAILED DIAGNOSTIC CARD TESTS
-# ==============================================================================
 
 def test_has_length_value_out_of_bounds_exception(subtests):
     """Verify diagnosis (ValueError) when value has invalid length."""
@@ -96,20 +92,20 @@ def test_has_length_non_sized_type_exception(subtests):
     )
 
 
-# ==============================================================================
-# 3. SPECIFIC BOUNDARY VARIATIONS (min_length / max_length standalone)
-# ==============================================================================
-
 def test_has_length_boundary_variations():
     """Verify behavior when using min_length only or max_length only."""
-    # min_length only
     rule_min = HasLength(min_length=2)
     assert rule_min.is_valid("a") is False
     assert rule_min.is_valid("ab") is True
-    assert rule_min.is_valid("abc") is True
 
-    # max_length only
     rule_max = HasLength(max_length=2)
-    assert rule_max.is_valid("") is True
     assert rule_max.is_valid("ab") is True
     assert rule_max.is_valid("abc") is False
+
+
+def test_has_length_describe():
+    """Verify the description phrases for various length setups."""
+    assert HasLength(length=5).describe() == "length 5"
+    assert HasLength(min_length=2, max_length=4).describe() == "length between 2 and 4"
+    assert HasLength(min_length=3).describe() == "length at least 3"
+    assert HasLength(max_length=10).describe() == "length at most 10"

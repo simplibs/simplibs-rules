@@ -18,6 +18,8 @@ def test_greater_than_contract(subtests):
         rule=rule,
         valid_values=[11, 15, 10.1, 100],
         invalid_values=[10, 5, 0, -5, "15", None, [10]],
+        expected_description="> 10",
+        rule_factory=GreaterThan,
         deep_check=True,
         verbose=False,
     )
@@ -60,3 +62,8 @@ def test_greater_than_incomparable_type_exception(subtests):
         how_to_fix="Provide a value of a type comparable with 'int'.",
         exception=TypeError,
     )
+
+
+def test_greater_than_describe():
+    """Verify the description phrase."""
+    assert GreaterThan(10).describe() == "> 10"

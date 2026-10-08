@@ -26,6 +26,8 @@ def test_is_finite_contract(subtests):
             None,
             [],
         ],
+        expected_description="finite number",
+        rule_factory=IsFinite,
         deep_check=True,
         verbose=False,
     )
@@ -69,3 +71,8 @@ def test_is_finite_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_finite_describe():
+    """Verify the description phrase."""
+    assert IsFinite().describe() == "finite number"

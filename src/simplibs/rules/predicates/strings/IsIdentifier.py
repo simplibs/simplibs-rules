@@ -32,6 +32,14 @@ class IsIdentifier(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed noun phrase
+        return "Python identifier"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -97,4 +105,12 @@ via Python's native `str.isidentifier()`.
 
 * **Dual Diagnostic Path:** `TypeError` when the value isn't a string at all;
   `ValueError` (`IS_IDENTIFIER_ERROR`) when it is a string but fails the identifier check.
+
+---
+
+## 3. Description
+
+`describe()` returns "Python identifier" — what the string must be. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

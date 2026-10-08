@@ -21,6 +21,8 @@ def test_is_integer_contract(subtests):
         rule=rule,
         valid_values=[0, 10, -5],
         invalid_values=[10.5, "10", True, False, None, []],
+        expected_description="int",
+        rule_factory=IsInteger,
         deep_check=True,
         verbose=False,
     )
@@ -55,3 +57,8 @@ def test_is_integer_helpers():
     assert is_non_negative_integer(5) is True
     assert is_non_negative_integer(-1) is False
     assert is_non_negative_integer(True) is False
+
+
+def test_is_integer_describe():
+    """Verify the description phrase."""
+    assert IsInteger().describe() == "int"

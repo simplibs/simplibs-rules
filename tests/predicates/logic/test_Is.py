@@ -21,6 +21,8 @@ def test_is_contract(subtests):
         rule=rule,
         valid_values=[SENTINEL],
         invalid_values=[object(), "SENTINEL", 123, None, []],
+        expected_description=f"identical to {SENTINEL!r}",
+        rule_factory=Is,
         deep_check=True,
         verbose=False,
     )
@@ -44,3 +46,9 @@ def test_is_exception(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_describe():
+    """Verify the description phrase."""
+    assert Is(None).describe() == "identical to None"
+    assert Is(SENTINEL).describe() == f"identical to {SENTINEL!r}"

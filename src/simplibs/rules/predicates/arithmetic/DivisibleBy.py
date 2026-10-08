@@ -53,6 +53,14 @@ class DivisibleBy(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return f"multiple of {self.divisor}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -117,4 +125,12 @@ divisible (`value % divisor == 0`) by a target divisor.
 * **Divisibility Failures:** Evaluated inputs that fail divisibility format
   problem/fix strings as `ValueError` (`DIVISIBLE_BY_ERROR`) with concrete
   examples of multiples.
+
+---
+
+## 3. Description
+
+`describe()` returns "multiple of 3" — the same phrase the failure card uses as `expected`. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

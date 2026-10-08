@@ -26,6 +26,14 @@ class IsDataclass(Rule):
         return dataclasses.is_dataclass(value)
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed noun phrase
+        return "dataclass"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -81,4 +89,12 @@ of a dataclass or a class decorated with `@dataclass`.
   `TypeError`.
 * **Fix Guidance:** Explicit advice to provide a `@dataclass`-decorated
   class or instance.
+
+---
+
+## 3. Description
+
+`describe()` returns "dataclass" — a short fragment that containers and the typing
+layer compose into larger texts ("not dataclass", "dataclass | ..."). The longer
+sentence form stays in `expected` of the failure card.
 """

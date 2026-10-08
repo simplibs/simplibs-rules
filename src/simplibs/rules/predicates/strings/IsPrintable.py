@@ -32,6 +32,14 @@ class IsPrintable(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed noun phrase
+        return "printable string"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -96,4 +104,12 @@ characters via Python's native `str.isprintable()`.
 
 * **Dual Diagnostic Path:** `TypeError` when the value isn't a string at all;
   `ValueError` (`IS_PRINTABLE_ERROR`) when it is a string but contains unprintable characters.
+
+---
+
+## 3. Description
+
+`describe()` returns "printable string" — what the string must be. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

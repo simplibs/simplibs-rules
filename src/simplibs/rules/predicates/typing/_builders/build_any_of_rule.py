@@ -65,9 +65,16 @@ extra is needed here to handle that case correctly.
 
 `get_args()` returns union members in the order they were written in the
 annotation, and `AnyOf(*members)` preserves that order. This matters for
-diagnostics: `AnyOf.build_exception` (mirroring `AllOf`) reports against
-the first-checked failing member, so `int | str` and `str | int` may
-report a different "expected" member first on failure, even though both
-accept the same values. This is a cosmetic diagnostic ordering
+diagnostics: `AnyOf.describe()` and `AnyOf.build_exception` list the
+members in that order, so `int | str` and `str | int` read differently
+even though both accept the same values. This is a cosmetic ordering
 difference, not a correctness issue.
+
+---
+
+## 4. Description Is Composed, Not Attached
+
+`build_typing_rule` does not wrap a Union in `Described`: `AnyOf` already
+describes itself from its members ("int | None"), and every member that is a
+generic is itself described by its own annotation ("list[int] | set[int] | str").
 """

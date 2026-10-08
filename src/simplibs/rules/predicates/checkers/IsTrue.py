@@ -25,6 +25,14 @@ class IsTrue(Rule):
         return value is True
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "True"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -77,4 +85,12 @@ boolean object `True`.
 * **Error Classification:** Uses `IS_TRUE_ERROR` wrapping a `ValueError`.
 * **Fix Guidance:** Clear instruction specifying the boolean literal
   `True`.
+
+---
+
+## 3. Description
+
+`describe()` returns "True" — the literal the rule requires. A short fragment that containers and
+the typing layer compose into larger texts ("not True", "True | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

@@ -18,6 +18,8 @@ def test_not_equals_contract(subtests):
         rule=rule,
         valid_values=[1, -1, "0", None, [0]],
         invalid_values=[0, 0.0, False],
+        expected_description="not equal to 0",
+        rule_factory=NotEquals,
         deep_check=True,
         verbose=False,
     )
@@ -40,3 +42,8 @@ def test_not_equals_exception(subtests):
         how_to_fix="Provide a value other than 0.",
         exception=ValueError,
     )
+
+
+def test_not_equals_describe():
+    """Verify the description phrase."""
+    assert NotEquals(0).describe() == "not equal to 0"

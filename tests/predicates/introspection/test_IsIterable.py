@@ -18,6 +18,8 @@ def test_is_iterable_contract(subtests):
         rule=rule,
         valid_values=["text", [1, 2], (1, 2), {"a": 1}, {1, 2}, (x for x in range(3))],
         invalid_values=[123, 3.14, True, None],
+        expected_description="iterable",
+        rule_factory=IsIterable,
         deep_check=True,
         verbose=False,
     )
@@ -41,3 +43,8 @@ def test_is_iterable_exception(subtests):
         exception=TypeError,
         verbose=False,
     )
+
+
+def test_is_iterable_describe():
+    """Verify the description phrase."""
+    assert IsIterable().describe() == "iterable"

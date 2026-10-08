@@ -106,27 +106,42 @@ typing_rule.is_valid({"apples": 5, "oranges": 10})   # -> True
 typing_rule.is_valid({"apples": "5"})                # -> False
 ```
 
+### Level 4: Readable descriptions
+
+Every rule can say what it requires in a few words, and containers and annotations
+compose those texts — so a failure names what was expected instead of class names:
+
+```python
+rule = IsTyping(list[int] | set[int] | str)
+
+rule.describe()                              # -> "list[int] | set[int] | str"
+(is_integer & greater_than(0)).describe()    # -> "int & > 0"
+
+rule.validate(["a"], value_name="payload")
+# Expected: value satisfying at least one of: list[int], set[int], str
+```
+
 ---
 
 ## 🛠️ Architecture & Package Structure
 
 ```
 src/simplibs/rules/
-├── base_class/             ◄── Abstract base class Rule & internal helpers (_NotARule)
+├── base_class/           ◄── Abstract base class Rule & internal helpers (_NotARule)
 │   ├── Rule.py
 │   └── _NotARule.py
-├── containers/             ◄── Rule combinators (AllOf, AnyOf, Not, NoneOf, ForEach, Compose)
-├── predicates/              ◄── Single-purpose predicate rules
-│   ├── arithmetic/         ◄── CloseTo, DivisibleBy, HasRemainder
-│   ├── checkers/            ◄── IsEmpty, NotEmpty, IsNone, IsTrue, IsFalse
-│   ├── collections/         ◄── IsContainer, HasItem, HasKey, HasKeys, AllUnique, IsSubsetOf, IsSupersetOf
-│   ├── comparisons/         ◄── Equals, NotEquals, GreaterThan, GreaterOrEqual, LessThan, LessOrEqual, InRange
-│   ├── introspection/       ◄── IsInstance, IsType, IsSubclass, IsDataclass, IsCallable, IsHashable, IsIterable, HasAttribute, HasLength
-│   ├── logic/                ◄── Is, IsNot, IsIn, NotIn, UserRule
-│   ├── numeric/              ◄── IsBool, IsInteger, IsFloat, IsDecimal, IsNumber, IsPrimitiveNumber, IsZero, IsNan, IsInfinity, IsPi
-│   ├── strings/              ◄── IsString, Contains, IsSubstringOf, StartsWith, EndsWith, Regex, IsBlank, NotBlank
-│   └── typing/                ◄── Annotation-driven evaluation (IsAny, IsTyping, build_typing_rule)
-└── testing/                  ◄── Testing contracts for Rule implementations
+├── containers/           ◄── Rule combinators (AllOf, AnyOf, Not, NoneOf, ForEach, Compose, Described)
+├── predicates/           ◄── Single-purpose predicate rules
+│   ├── arithmetic/       ◄── CloseTo, DivisibleBy, HasRemainder
+│   ├── checkers/         ◄── IsEmpty, NotEmpty, IsNone, IsTrue, IsFalse
+│   ├── collections/      ◄── IsContainer, HasItem, HasKey, HasKeys, AllUnique, IsSubsetOf, IsSupersetOf
+│   ├── comparisons/      ◄── Equals, NotEquals, GreaterThan, GreaterOrEqual, LessThan, LessOrEqual, InRange
+│   ├── introspection/    ◄── IsInstance, IsType, IsSubclass, IsDataclass, IsCallable, IsHashable, IsIterable, HasAttribute, HasLength
+│   ├── logic/            ◄── Is, IsNot, IsIn, NotIn, UserRule
+│   ├── numeric/          ◄── IsBool, IsInteger, IsFloat, IsDecimal, IsNumber, IsPrimitiveNumber, IsZero, IsNan, IsInfinity, IsPi, IsEven, IsOdd, IsFinite
+│   ├── strings/          ◄── IsString, Contains, IsSubstringOf, StartsWith, EndsWith, Regex, IsBlank, NotBlank, IsAlnum, IsAlpha, IsAscii, IsDigitString, IsLowercase, IsTitlecase, IsUppercase, IsIdentifier, IsPrintable, IsWhitespace
+│   └── typing/           ◄── Annotation-driven evaluation (IsAny, IsTyping, build_typing_rule)
+└── testing/              ◄── Testing contracts for Rule implementations
     └── assert_rule_contract.py
 ```
 
@@ -140,6 +155,7 @@ capabilities out of the box.
 
 ```python
 class Rule(ABC):
+    __slots__ = ()
 
     @abstractmethod
     def is_valid(self, value: Any) -> bool:
@@ -178,6 +194,10 @@ class Rule(ABC):
 
         raise self.build_exception(value, value_name=value_name, context=context)
 
+    def describe(self) -> str:
+        """Return a short, human-readable description of what this rule requires."""
+        return type(self).__name__
+
     def annotated(self, type_: type) -> Any:
         """Wrap this rule as `typing.Annotated[type_, self]` for type hints."""
         return Annotated[type_, self]
@@ -209,27 +229,49 @@ Both are fully interchangeable.
 
 ### `containers/` — Composing other rules
 
-| Class     | Shortcut   | Description / Parameters                                     |
-|-----------|------------|----------------------------------------------------------------|
-| `AllOf`   | `all_of`   | Logical AND across multiple rules (`*rules`). Behind `&`.    |
-| `AnyOf`   | `any_of`   | Logical OR across multiple rules (`*rules`). Behind `\|`.     |
-| `Compose` | `compose`  | Transforms value before checking (`transformer, validator`). |
-| `ForEach` | `for_each` | Validates every item in an iterable (`rule`).                |
-| `NoneOf`  | `none_of`  | Value must satisfy none of the given rules (`*rules`).       |
-| `Not`     | `negate`   | Logical NOT for a single rule (`rule`). Behind `~`.           |
+| Class       | Shortcut    | Description / Parameters                                                              |
+|-------------|-------------|---------------------------------------------------------------------------------------|
+| `AllOf`     | `all_of`    | Logical AND across multiple rules (`*rules`). Behind `&`.                             |
+| `AnyOf`     | `any_of`    | Logical OR across multiple rules (`*rules`). Behind `\|`.                             |
+| `Compose`   | `compose`   | Transforms value before checking (`transformer, validator`).                          |
+| `ForEach`   | `for_each`  | Validates every item in an iterable (`rule`).                                         |
+| `NoneOf`    | `none_of`   | Value must satisfy none of the given rules (`*rules`).                                |
+| `Not`       | `negate`    | Logical NOT for a single rule (`rule`). Behind `~`.                                   |
+| `Described` | -           | Behaves like the wrapped rule, but describes itself with a fixed text (`rule, text`). |
 
 ➡️ [README_RULE_CONTAINERS](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_CONTAINERS.md)
 
 ### `predicates/` — Atomic predicates
 
-* **`arithmetic/`**: `CloseTo`, `DivisibleBy`, `HasRemainder` — [README](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_ARITHMETIC.md)
-* **`checkers/`**: `IsEmpty`, `NotEmpty`, `IsNone`, `IsTrue`, `IsFalse` — [README](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_CHECKERS.md)
-* **`collections/`**: `IsContainer`, `HasItem`, `HasKey`, `HasKeys`, `AllUnique`, `IsSubsetOf`, `IsSupersetOf` — [README](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_COLLECTIONS.md)
-* **`comparisons/`**: `Equals`, `NotEquals`, `GreaterThan`, `GreaterOrEqual`, `LessThan`, `LessOrEqual`, `InRange` — [README](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_COMPARISONS.md)
-* **`introspection/`**: `IsInstance`, `IsType`, `IsSubclass`, `IsDataclass`, `IsCallable`, `IsHashable`, `IsIterable`, `HasAttribute`, `HasLength` — [README](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_INTROSPECTION.md)
-* **`logic/`**: `Is`, `IsNot`, `IsIn`, `NotIn`, `UserRule` — [README](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_LOGIC.md)
-* **`numeric/`**: `IsBool`, `IsInteger`, `IsFloat`, `IsDecimal`, `IsNumber`, `IsPrimitiveNumber`, `IsZero`, `IsNan`, `IsInfinity`, `IsPi` — [README](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_NUMERIC.md)
-* **`strings/`**: `IsString`, `Contains`, `IsSubstringOf`, `StartsWith`, `EndsWith`, `Regex`, `IsBlank`, `NotBlank` — [README](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_STRINGS.md)
+* **`arithmetic/`**: `CloseTo`, `DivisibleBy`, `HasRemainder`  
+[README_RULE_PREDICATE_ARITHMETIC](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_ARITHMETIC.md)
+
+* **`checkers/`**: `IsEmpty`, `NotEmpty`, `IsNone`, `IsTrue`, `IsFalse`  
+[README_RULE_PREDICATE_CHECKERS](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_CHECKERS.md)
+
+* **`collections/`**: `IsContainer`, `HasItem`, `HasKey`, `HasKeys`, `AllUnique`, 
+`IsSubsetOf`, `IsSupersetOf`  
+[README_RULE_PREDICATE_COLLECTIONS](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_COLLECTIONS.md)
+
+* **`comparisons/`**: `Equals`, `NotEquals`, `GreaterThan`, `GreaterOrEqual`, 
+`LessThan`, `LessOrEqual`, `InRange`  
+[README_RULE_PREDICATE_COMPARISONS](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_COMPARISONS.md)
+
+* **`introspection/`**: `IsInstance`, `IsType`, `IsSubclass`, `IsDataclass`, 
+`IsCallable`, `IsHashable`, `IsIterable`, `HasAttribute`, `HasLength`  
+[README_RULE_PREDICATE_INTROSPECTION](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_INTROSPECTION.md)
+
+* **`logic/`**: `Is`, `IsNot`, `IsIn`, `NotIn`, `UserRule`  
+[README_RULE_PREDICATE_LOGIC](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_LOGIC.md)
+
+* **`numeric/`**: `IsBool`, `IsInteger`, `IsFloat`, `IsDecimal`, `IsNumber`, 
+`IsPrimitiveNumber`, `IsZero`, `IsNan`, `IsInfinity`, `IsPi`, `IsEven`, `IsOdd`, `IsFinite`  
+[README_RULE_PREDICATE_NUMERIC](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_NUMERIC.md) 
+
+* **`strings/`**: `IsString`, `Contains`, `IsSubstringOf`, `StartsWith`, `EndsWith`, 
+`Regex`, `IsBlank`, `NotBlank`, `IsAlnum`, `IsAlpha`, `IsAscii`, `IsDigitString`, 
+`IsLowercase`, `IsTitlecase`, `IsUppercase`, `IsIdentifier`, `IsPrintable`, `IsWhitespace`  
+[README_RULE_PREDICATE_STRINGS](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_STRINGS.md)
 
 ### `predicates/typing/` — Annotation-driven evaluation
 
@@ -243,7 +285,7 @@ Both are fully interchangeable.
 int] | None`, `Literal[...]`, `Callable[...]`, ...) into a composed `Rule` tree — the
 mechanism that also powers `simplibs-validate`'s `validate_call`/`validate_dataclass`.
 
-➡️ [README_RULE_TYPING](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_TYPING.md) — the public `IsTyping`/`build_typing_rule` entry points
+➡️ [README_RULE_TYPING](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_TYPING.md) — the public `IsTyping`/`build_typing_rule` entry points  
 ➡️ [README_RULE_TYPING_BUILDERS](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_TYPING_BUILDERS.md) — the internal per-construct decomposition engine
 
 ---
@@ -253,8 +295,9 @@ mechanism that also powers `simplibs-validate`'s `validate_call`/`validate_datac
 `simplibs-rules` includes its own contract testing tools to ensure custom or existing `Rule`
 implementations strictly follow all rules and return modes:
 
-assert_rule_contract: Verifies is_valid, direct calling, validate() matrix, return modes, 
-and exception generation consistency for any Rule instance.
+assert_rule_contract: Verifies is_valid, direct calling, the validate() matrix and return
+modes, exception generation consistency, the describe() text contract and `__slots__`
+integrity — plus, optionally, the constructor's `ParamError` guard — for any Rule instance.
 
 ➡️ [README_TESTING_ASSERTS_RULE_CONTRACT](https://github.com/simplibs/simplibs-rules/blob/main/docs/testing/README_TESTING_ASSERTS_RULE_CONTRACT.md)
 
@@ -275,7 +318,7 @@ on top of the same mechanism for the higher-level entry points (`validate()`,
 * **[`simplibs-validate`](https://pypi.org/project/simplibs-validate/)** — the `validate()`
   entry point, ready-made validate_* wrappers, operational tools (raise_invalid, validated_type), 
   and self-validating decorators (validate_call, validate_dataclass) built on top of Rule.
-* **`simplibs-types`** *(in progress)* — reusable, named validated types (`Annotated[type,
+* **`simplibs-types`** — reusable, named validated types (`Annotated[type,
   Rule]` combinations) built on `Rule`, for sharing a single constraint definition across
   many annotations.
 

@@ -33,6 +33,7 @@ def test_is_superset_of_contract(subtests):
             123,
             None,
         ],
+        expected_description="superset of {'read', 'write'}",
         rule_factory=IsSupersetOf,
         invalid_init_params=[
             ((123,), {}),       # Non-container reference parameter raises ParamError
@@ -105,3 +106,8 @@ def test_is_superset_of_unhashable_elements_exception(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_superset_of_describe():
+    """Verify the description phrase."""
+    assert IsSupersetOf({"a", "b"}).describe() == "superset of {'a', 'b'}"

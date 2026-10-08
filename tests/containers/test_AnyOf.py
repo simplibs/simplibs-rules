@@ -11,7 +11,7 @@ from simplibs.rules.testing import assert_rule_contract
 from simplibs.exception import ValidationError
 
 # Rules
-from simplibs.rules.containers import AnyOf
+from simplibs.rules.containers import AllOf, AnyOf, Compose
 from simplibs.rules.predicates.numeric import IsInteger, IsFloat
 from simplibs.rules.predicates.strings import IsString
 
@@ -104,3 +104,53 @@ def test_any_of_short_circuit_eval():
 
     assert rule.is_valid(10) is True
     assert call_log == ["rule_1"]
+
+
+# ==============================================================================
+# 5. DESCRIPTION TEST
+# ==============================================================================
+
+def is_a(value: Any) -> bool:
+    return False
+
+
+def is_b(value: Any) -> bool:
+    return False
+
+
+def is_c(value: Any) -> bool:
+    return False
+
+
+def test_any_of_describe(subtests):
+    """Verify that AnyOf composes its description from its operands, with parentheses where needed."""
+
+    with subtests.test("joins operands with |"):
+        assert AnyOf(is_a, is_b, is_c).describe() == "is_a | is_b | is_c"
+
+    with subtests.test("flattened nesting reads flat"):
+        assert AnyOf(AnyOf(is_a, is_b), is_c).describe() == "is_a | is_b | is_c"
+
+    with subtests.test("AllOf operand needs no parentheses"):
+        assert AnyOf(AllOf(is_a, is_b), is_c).describe() == "is_a & is_b | is_c"
+
+    with subtests.test("Compose operand is parenthesized"):
+        assert AnyOf(Compose(str.strip, is_a), is_b).describe() == "(after strip: is_a) | is_b"
+
+
+def test_any_of_exception_describes_composed_operands(subtests):
+    """Verify that the failure card names composed operands by what they require, not by class name."""
+    rule = AnyOf(AllOf(is_a, is_b), is_c)
+
+    assert_exception_function(
+        subtests,
+        func=rule.validate,
+        invalid_params=(5, Kwargs(value_name="payload")),
+        exception_type=ValidationError,
+        error_name="ANY_OF_ERROR",
+        label="payload",
+        expected="value satisfying at least one of: is_a & is_b, is_c",
+        problem="Value did not satisfy any of: is_a & is_b, is_c.",
+        exception=ValueError,
+        verbose=False,
+    )

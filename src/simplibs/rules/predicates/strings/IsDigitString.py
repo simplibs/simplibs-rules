@@ -32,6 +32,14 @@ class IsDigitString(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed noun phrase
+        return "digit string"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -112,4 +120,12 @@ rationale for keeping these as independent, one-rule-per-file classes.
 * **Dual Diagnostic Path:** `TypeError` when the value isn't a string at
   all; `ValueError` (`IS_DIGIT_STRING_ERROR`) when it is a string but
   fails the character-class check (including the empty-string case).
+
+---
+
+## 4. Description
+
+`describe()` returns "digit string" — a string of digit characters, not a number. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

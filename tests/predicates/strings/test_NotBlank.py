@@ -17,9 +17,16 @@ def test_not_blank_contract(subtests):
         rule=rule,
         valid_values=["hello", " a ", "123", "text\nwith\nlines"],
         invalid_values=["", " ", "   ", "\t", "\n", 123, None, True, []],
+        expected_description="non-blank string",
         deep_check=True,
         verbose=False,
     )
+
+
+def test_not_blank_describe():
+    """Verify the description returned by NotBlank."""
+    rule = NotBlank()
+    assert rule.describe() == "non-blank string"
 
 
 def test_not_blank_exception_type_error(subtests):

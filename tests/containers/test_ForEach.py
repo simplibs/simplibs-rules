@@ -11,7 +11,7 @@ from simplibs.rules.testing import assert_rule_contract
 from simplibs.exception import ValidationError
 
 # Rules
-from simplibs.rules.containers import ForEach
+from simplibs.rules.containers import AllOf, AnyOf, Compose, ForEach
 from simplibs.rules.predicates.numeric import IsInteger
 from simplibs.rules.predicates.comparisons import GreaterThan
 
@@ -113,3 +113,35 @@ def test_for_each_unreachable_fallback():
     assert isinstance(exc, ValidationError)
     assert exc.error_name == "FOR_EACH_UNREACHABLE_ERROR"
     assert exc.exception is RuntimeError
+
+
+# ==============================================================================
+# 4. DESCRIPTION TEST
+# ==============================================================================
+
+def is_a(value: Any) -> bool:
+    return True
+
+
+def is_b(value: Any) -> bool:
+    return True
+
+
+def is_c(value: Any) -> bool:
+    return True
+
+
+def test_for_each_describe(subtests):
+    """Verify that ForEach describes itself as 'each <rule>', parenthesizing compound operands."""
+
+    with subtests.test("simple operand"):
+        assert ForEach(is_a).describe() == "each is_a"
+
+    with subtests.test("AnyOf operand is parenthesized"):
+        assert ForEach(AnyOf(is_a, is_b)).describe() == "each (is_a | is_b)"
+
+    with subtests.test("AllOf operand is parenthesized"):
+        assert ForEach(AllOf(is_a, is_b)).describe() == "each (is_a & is_b)"
+
+    with subtests.test("Compose operand is parenthesized"):
+        assert ForEach(Compose(str.strip, is_a)).describe() == "each (after strip: is_a)"

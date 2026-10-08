@@ -26,6 +26,14 @@ class IsDecimal(Rule):
         return isinstance(value, Decimal)
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "Decimal"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -80,4 +88,12 @@ of Python's standard `decimal.Decimal`.
   `TypeError`.
 * **Fix Guidance:** Recommends constructing a `Decimal` instance (e.g.
   using string representations like `Decimal('10.5')`).
+
+---
+
+## 3. Description
+
+`describe()` returns "Decimal" — the type name. A short fragment that containers and
+the typing layer compose into larger texts ("not Decimal", "Decimal | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

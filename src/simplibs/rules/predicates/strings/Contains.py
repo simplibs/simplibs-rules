@@ -45,6 +45,14 @@ class Contains(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameter
+        return f"string containing {self.substring!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -111,4 +119,12 @@ substring using Python's native `in` operator.
   `TypeError`.
 * **Value Failures:** Strings missing the target substring format
   problem/fix strings as `ValueError` (`CONTAINS_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "string containing '@'" — the same phrase the failure card uses as `expected`. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

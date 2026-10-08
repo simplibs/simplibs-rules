@@ -21,6 +21,8 @@ def test_user_rule_contract(subtests):
         rule=rule,
         valid_values=[1, 10, 100],
         invalid_values=[0, -5, "not_an_int"],  # String triggers exception inside lambda, treated as False
+        expected_description="positive_pred",
+        rule_factory=UserRule,
         invalid_init_params=[
             (("not_callable",), {}),  # String is not callable -> ParamError
             ((lambda: True,), {}),     # Zero-arg function wrong arity -> ParamError
@@ -61,3 +63,11 @@ def test_user_rule_exception(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_user_rule_describe():
+    """Verify the description phrase returns function name or repr."""
+    assert UserRule(positive_pred).describe() == "positive_pred"
+
+    anonymous_rule = UserRule(lambda v: v > 0)
+    assert anonymous_rule.describe().startswith("<lambda")

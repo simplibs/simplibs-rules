@@ -36,6 +36,14 @@ class IsZero(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "zero"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -98,6 +106,14 @@ The `IsZero` rule validates that a numeric value is equal to zero
   `TypeError`.
 * **Value Failures:** Non-zero numbers format problem/fix strings as
   `ValueError` (`IS_ZERO_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "zero" — the same word the failure card uses as `expected` for a number. A short fragment that containers and
+the typing layer compose into larger texts ("not zero", "zero | ..."); the
+longer sentence form stays in `expected` of the failure card.
 
 ## Notes
 * `build_exception` previously called an undefined `_is_number(value)`

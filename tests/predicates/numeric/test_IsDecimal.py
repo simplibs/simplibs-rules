@@ -18,6 +18,8 @@ def test_is_decimal_contract(subtests):
         rule=rule,
         valid_values=[Decimal("0"), Decimal("10.5"), Decimal("-1.23")],
         invalid_values=[10, 10.5, "10.5", True, None, []],
+        expected_description="Decimal",
+        rule_factory=IsDecimal,
         deep_check=True,
         verbose=False,
     )
@@ -41,3 +43,8 @@ def test_is_decimal_exception(subtests):
         exception=TypeError,
         verbose=False,
     )
+
+
+def test_is_decimal_describe():
+    """Verify the description phrase."""
+    assert IsDecimal().describe() == "Decimal"

@@ -49,6 +49,19 @@ class IsSupersetOf(Rule):
             return False
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Deterministic reference text
+        reference = format_container(self.reference)
+
+        # 2. Abbreviate long references so a composed description stays readable
+        if len(reference) > 60:
+            reference = f"set(size={len(self.reference)})"
+        return f"superset of {reference}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -135,4 +148,14 @@ reference).
 * **Superset Failures:** Evaluated iterables missing required items format
   problem/fix strings as `ValueError` (`IS_SUPERSET_OF_ERROR`), showing
   exact missing elements in deterministic sorted order.
+
+---
+
+## 3. Description
+
+`describe()` returns "superset of {'a', 'b'}", with the reference rendered by
+`format_container` (deterministic ordering). References longer than 60
+characters are abbreviated to "set(size=N)" in the description only, so a
+large reference never makes a composed text unreadable; the failure card keeps
+the full list in `expected`, where it is the useful detail.
 """

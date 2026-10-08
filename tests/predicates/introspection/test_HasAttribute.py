@@ -23,10 +23,6 @@ class DummyObject:
         raise AttributeError("Property is dynamically unavailable")
 
 
-# ==============================================================================
-# 1. CONTRACT TEST (Master Contract)
-# ==============================================================================
-
 def test_has_attribute_contract(subtests):
     """Verify the complete contract of the HasAttribute rule."""
     rule = HasAttribute("existing_attr")
@@ -37,6 +33,8 @@ def test_has_attribute_contract(subtests):
         rule=rule,
         valid_values=[dummy],
         invalid_values=["string_object", 123, None, [1, 2, 3]],
+        expected_description="object with attribute 'existing_attr'",
+        rule_factory=HasAttribute,
         invalid_init_params=[
             ((123,), {}),     # attr_name parameter must be str -> ParamError
             ((None,), {}),    # attr_name parameter must not be None -> ParamError
@@ -46,10 +44,6 @@ def test_has_attribute_contract(subtests):
         verbose=False,
     )
 
-
-# ==============================================================================
-# 2. DETAILED DIAGNOSTIC CARD TEST
-# ==============================================================================
 
 def test_has_attribute_exception(subtests):
     """Verify diagnosis (AttributeError) when object lacks the required attribute."""
@@ -71,21 +65,17 @@ def test_has_attribute_exception(subtests):
     )
 
 
-# ==============================================================================
-# 3. SPECIFIC EDGE CASES
-# ==============================================================================
-
 def test_has_attribute_edge_cases():
     """Verify behavior on methods, built-in types, and dynamic attributes."""
     dummy = DummyObject()
 
-    # Method and built-in attributes
     assert HasAttribute("method").is_valid(dummy) is True
     assert HasAttribute("append").is_valid([]) is True
     assert HasAttribute("lower").is_valid("hello") is True
-
-    # Non-existent attribute on object
     assert HasAttribute("missing_attr").is_valid(dummy) is False
-
-    # Property raising AttributeError (hasattr catches it and returns False)
     assert HasAttribute("dynamic_missing_property").is_valid(dummy) is False
+
+
+def test_has_attribute_describe():
+    """Verify the description phrase."""
+    assert HasAttribute("existing_attr").describe() == "object with attribute 'existing_attr'"

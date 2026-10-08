@@ -37,6 +37,7 @@ def test_is_container_contract(subtests):
             True,
             None,
         ],
+        expected_description="container",
         rule_factory=IsContainer,
         deep_check=True,
         verbose=False,
@@ -87,3 +88,8 @@ def test_is_container_custom_protocol():
             return True
 
     assert is_container(CustomContainer()) is True
+
+
+def test_is_container_describe():
+    """Verify the description phrase."""
+    assert IsContainer().describe() == "container"

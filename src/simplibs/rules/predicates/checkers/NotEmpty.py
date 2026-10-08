@@ -32,6 +32,14 @@ class NotEmpty(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "non-empty"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -97,4 +105,12 @@ and contains at least one item (`len(value) > 0`).
   problem/fix strings as `TypeError`.
 * **Empty Failures:** Evaluated containers that are empty format
   problem/fix strings as `ValueError` (`NOT_EMPTY_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "non-empty" — deliberately not "not empty", so `Not(NotEmpty())` never reads "not not empty". A short fragment that containers and
+the typing layer compose into larger texts ("not non-empty", "non-empty | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

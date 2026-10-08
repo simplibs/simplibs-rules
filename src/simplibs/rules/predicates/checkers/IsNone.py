@@ -25,6 +25,14 @@ class IsNone(Rule):
         return value is None
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "None"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -78,4 +86,12 @@ singleton object.
 
 * **Error Classification:** Uses `IS_NONE_ERROR` wrapping a `ValueError`.
 * **Fix Guidance:** Clear instruction requiring `None`.
+
+---
+
+## 3. Description
+
+`describe()` returns "None" — the spelling of the value itself, and of `NoneType` in an annotation. A short fragment that containers and
+the typing layer compose into larger texts ("not None", "None | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

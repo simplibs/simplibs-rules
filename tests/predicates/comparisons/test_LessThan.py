@@ -18,6 +18,8 @@ def test_less_than_contract(subtests):
         rule=rule,
         valid_values=[99, 0, -10, 99.9],
         invalid_values=[100, 101, 150, "50", None, [50]],
+        expected_description="< 100",
+        rule_factory=LessThan,
         deep_check=True,
         verbose=False,
     )
@@ -60,3 +62,8 @@ def test_less_than_incomparable_type_exception(subtests):
         how_to_fix="Provide a value of a type comparable with 'int'.",
         exception=TypeError,
     )
+
+
+def test_less_than_describe():
+    """Verify the description phrase."""
+    assert LessThan(100).describe() == "< 100"

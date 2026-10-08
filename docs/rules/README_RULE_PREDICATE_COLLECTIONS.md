@@ -29,6 +29,15 @@ shortcut — the same pattern used throughout this library for parameterless rul
 `IsSubsetOf` and `IsSupersetOf` both reuse this shortcut internally to validate their
 own `reference` constructor argument, rather than duplicating the container-type check.
 
+## A note on descriptions
+
+Every rule here overrides [`Rule.describe()`](README_RULE_CLASS.md#describe) with a short
+fragment that containers and the typing layer compose into larger texts — mostly the
+same phrase the failure card reports as `expected` (`mapping with key 'id'`). The
+reference of `IsSubsetOf` / `IsSupersetOf` is rendered deterministically and
+abbreviated to `set(size=N)` in the description once it exceeds 60 characters; the
+failure card keeps the full list.
+
 ---
 
 ## 🧭 Table of Contents
@@ -83,6 +92,8 @@ hashable; unhashable items (lists, dicts, ...) fall back to a manual `O(n²)` co
 rather than raising. On failure, the reported diagnostic explicitly lists every
 duplicate value found, not just that duplicates exist.
 
+**Description:** `"all unique"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -109,6 +120,8 @@ def is_valid(self, value: Any) -> bool:
         and self.item in value
     )
 ```
+
+**Description:** `"container with item 'admin'"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -139,6 +152,8 @@ On failure, a value that doesn't support membership at all is reported as a `Typ
 ("does not support key lookup"), while a mapping missing the key specifically is
 reported as a `KeyError` naming that key — the same distinction Python's own `dict`
 lookup semantics would draw.
+
+**Description:** `"mapping with key 'id'"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -171,6 +186,8 @@ On failure, the reported diagnostic lists exactly which keys are missing, not ju
 some are — computed by re-checking each key against the value when the exception is
 built.
 
+**Description:** `"mapping with keys ('id', 'name')"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -199,6 +216,8 @@ def is_valid(self, value: Any) -> bool:
         return False
     return isinstance(value, (list, tuple, set, frozenset, dict)) or isinstance(value, Container)
 ```
+
+**Description:** `"container"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -240,6 +259,8 @@ deterministic sorted order (via a shared `format_container` helper), avoiding
 Python's own non-deterministic `set` repr ordering in error messages and test
 assertions.
 
+**Description:** `"subset of {'admin', 'editor', 'viewer'}"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -274,6 +295,8 @@ def is_valid(self, value: Any) -> bool:
 Diagnostics mirror `IsSubsetOf`'s: unhashable elements are reported as their own
 distinct failure, and an incomplete value's diagnostic lists exactly which required
 elements from `reference` are missing, again in deterministic sorted order.
+
+**Description:** `"superset of {'read'}"`.
 
 [▲ Back to top](#-table-of-contents)
 

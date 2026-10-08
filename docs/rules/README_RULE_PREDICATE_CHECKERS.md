@@ -24,6 +24,14 @@ meant to strictly mean "the literal boolean `False`, nothing else." Using `is` m
 these three rules exact identity checks, immune to that kind of accidental type
 coercion.
 
+## A note on descriptions
+
+Every rule here overrides [`Rule.describe()`](README_RULE_CLASS.md#describe) with a short
+fragment — `None`, `True`, `False`, `empty`, `non-empty` — that containers and the typing
+layer compose into larger texts (`int | None`, `not empty`). `NotEmpty` reads
+`non-empty` rather than `not empty`, so negating it never produces "not not empty". The
+`expected` sentence of each failure card is unchanged.
+
 ---
 
 ## 🧭 Table of Contents
@@ -57,6 +65,8 @@ def is_valid(self, value: Any) -> bool:
     return value is None
 ```
 
+**Description:** `"None"` — also how `IsInstance(NoneType)` reads inside `int | None`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -81,6 +91,8 @@ def is_valid(self, value: Any) -> bool:
     return value is True
 ```
 
+**Description:** `"True"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -104,6 +116,8 @@ validate(value, is_false)     # equivalent, via the pre-instantiated shortcut
 def is_valid(self, value: Any) -> bool:
     return value is False
 ```
+
+**Description:** `"False"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -136,6 +150,8 @@ On failure, the reported diagnostic distinguishes "this value doesn't support `l
 at all" from "this value has a length, but it isn't zero" — the latter names the
 actual length found.
 
+**Description:** `"empty"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -166,6 +182,8 @@ def is_valid(self, value: Any) -> bool:
 
 On failure, the reported diagnostic again distinguishes "no `len()` support at all"
 from "has a length, but it's zero."
+
+**Description:** `"non-empty"`.
 
 [▲ Back to top](#-table-of-contents)
 

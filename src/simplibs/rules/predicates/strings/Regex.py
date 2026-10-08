@@ -55,6 +55,14 @@ class Regex(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameter
+        return f"string matching /{self.pattern}/"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -123,4 +131,12 @@ given regular expression pattern.
 * **Value Failures:** Non-matching strings format problem/fix strings as
   `ValueError` (`REGEX_ERROR`), enclosing pattern in forward slashes e.g.
   `/pattern/`.
+
+---
+
+## 3. Description
+
+`describe()` returns "string matching /^[a-z]+$/" — the same phrase the failure card uses as `expected`. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

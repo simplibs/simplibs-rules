@@ -41,6 +41,14 @@ class IsTyping(Rule):
         return self.rule.is_valid(value)
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Delegate — the composed rule already carries the annotation's spelling
+        return self.rule.describe()
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -97,4 +105,13 @@ already the exact composed tree describing the annotation, its own
 `build_exception` already produces the most specific diagnostic
 available — re-deriving one here would either duplicate that logic or
 produce a strictly worse, less specific message.
+
+---
+
+## 4. `describe` Delegates To The Composed Rule
+
+`build_typing_rule` already attaches the annotation's own spelling to the tree
+it builds (via `Described`, or through `AnyOf` / `AllOf` for Union and
+Annotated), so `IsTyping.describe()` returns it unchanged: "list[int]",
+"int | None". Nothing is computed here, and `annotation` is not re-formatted.
 """

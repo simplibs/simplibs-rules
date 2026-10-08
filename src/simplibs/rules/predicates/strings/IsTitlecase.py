@@ -33,6 +33,14 @@ class IsTitlecase(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed noun phrase
+        return "title-cased string"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -127,4 +135,12 @@ the discoverability benefit, and a factory becomes the better trade.
 * **Dual Diagnostic Path:** `TypeError` when the value isn't a string at
   all; `ValueError` (`IS_TITLECASE_ERROR`) when it is a string but isn't
   title-cased.
+
+---
+
+## 4. Description
+
+`describe()` returns "title-cased string" — what the string must be. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

@@ -19,9 +19,9 @@ def test_build_key_value_rule_subscripted() -> None:
 
     assert rule.is_valid({"a": 1, "b": 2}) is True
     assert rule.is_valid({}) is True
-    assert rule.is_valid({1: 1}) is False  # špatný klíč
-    assert rule.is_valid({"a": "1"}) is False  # špatná hodnota
-    assert rule.is_valid([("a", 1)]) is False  # není dict
+    assert rule.is_valid({1: 1}) is False  # wrong key
+    assert rule.is_valid({"a": "1"}) is False  # wrong value
+    assert rule.is_valid([("a", 1)]) is False  # not a dict
 
 
 def test_build_key_value_rule_unsubscripted() -> None:

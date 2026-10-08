@@ -31,6 +31,14 @@ class IsNot(Rule):
         return value is not self.forbidden
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Negated identity with the forbidden object
+        return f"not identical to {self.forbidden!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -86,4 +94,11 @@ syntactic sugar over `Not(Is(...))` and delivers tailored diagnostic cards.
 * **Error Classification:** Uses `IS_NOT_ERROR` wrapping a `ValueError`.
 * **Fix Guidance:** Explicitly directs the caller to supply any object
   reference other than `forbidden`.
+
+---
+
+## 3. Description
+
+`describe()` returns "not identical to None" — the phrase from `expected`
+without the leading "value".
 """

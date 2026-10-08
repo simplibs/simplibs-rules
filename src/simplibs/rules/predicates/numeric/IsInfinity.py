@@ -33,6 +33,14 @@ class IsInfinity(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "infinity"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -94,4 +102,12 @@ representing positive or negative infinity.
   `TypeError`.
 * **Value Failures:** Finite float inputs format problem/fix strings as
   `ValueError` (`IS_INFINITY_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "infinity" — covers both +inf and -inf. A short fragment that containers and
+the typing layer compose into larger texts ("not infinity", "infinity | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

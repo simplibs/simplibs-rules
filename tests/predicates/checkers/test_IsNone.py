@@ -18,6 +18,7 @@ def test_is_none_contract(subtests):
         rule=rule,
         valid_values=[None],
         invalid_values=[False, 0, "", [], True],
+        expected_description="None",
         rule_factory=IsNone,
         deep_check=True,
         verbose=False,
@@ -42,3 +43,8 @@ def test_is_none_exception_details(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_none_describe():
+    """Verify the description phrase."""
+    assert IsNone().describe() == "None"

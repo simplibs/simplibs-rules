@@ -22,6 +22,15 @@ return a boolean (`hash()` and `iter()` both raise `TypeError` on unsupported in
 `is_valid` catches that and reports `False` instead of letting it propagate — the same
 "never raise from `is_valid`" contract every rule in this library upholds.
 
+## A note on descriptions
+
+Every rule here overrides [`Rule.describe()`](README_RULE_CLASS.md#describe) with a short
+fragment — a noun phrase such as `int`, `class` or `length at least 1` — that containers
+and the typing layer compose into larger texts (`int | None`, `not hashable`). It is
+deliberately shorter than the `expected` sentence of the failure card (`instance of
+(int)`), which stays unchanged: one is built to be *joined*, the other to be *read on
+its own*.
+
 ---
 
 ## 🧭 Table of Contents
@@ -62,6 +71,8 @@ def is_valid(self, value: Any) -> bool:
     return isinstance(value, self.types)
 ```
 
+**Description:** the type names joined with `|` — `"int"`, `"int | str"`; `NoneType` reads `"None"` (`"int | None"`).
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -84,6 +95,8 @@ validate(value, IsType())
 def is_valid(self, value: Any) -> bool:
     return isinstance(value, type)
 ```
+
+**Description:** `"class"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -117,6 +130,8 @@ On failure, the reported diagnostic distinguishes two different mistakes: passin
 *instance* where a class was expected ("is an instance of 'X', not a class object"),
 versus passing a genuine class that simply doesn't inherit from the required base(s).
 
+**Description:** `"subclass of Base"`, or `"subclass of A | B"` for several bases.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -140,6 +155,8 @@ def is_valid(self, value: Any) -> bool:
     return dataclasses.is_dataclass(value)
 ```
 
+**Description:** `"dataclass"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -162,6 +179,8 @@ validate(value, IsCallable())
 def is_valid(self, value: Any) -> bool:
     return callable(value)
 ```
+
+**Description:** `"callable"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -191,6 +210,8 @@ def is_valid(self, value: Any) -> bool:
         return False
 ```
 
+**Description:** `"hashable"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -218,6 +239,8 @@ def is_valid(self, value: Any) -> bool:
         return False
 ```
 
+**Description:** `"iterable"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -240,6 +263,8 @@ validate(value, HasAttribute("append"))
 def is_valid(self, value: Any) -> bool:
     return hasattr(value, self.attr_name)
 ```
+
+**Description:** `"object with attribute 'append'"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -292,6 +317,8 @@ value has a length, but not the expected one" — and in the latter case, states
 actual length found alongside a plain-language description of what was expected
 (`"length 10"`, `"length between 1 and 10"`, `"length at least 1"`, `"length at most
 10"`), built from whichever of the three constructor arguments was actually given.
+
+**Description:** the same phrase the failure card reports as `expected` — `"length 10"`, `"length between 1 and 10"`, `"length at least 1"`, `"length at most 10"`.
 
 [▲ Back to top](#-table-of-contents)
 

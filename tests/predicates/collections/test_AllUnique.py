@@ -34,6 +34,7 @@ def test_all_unique_contract(subtests):
             123,
             None,
         ],
+        expected_description="all unique",
         rule_factory=AllUnique,
         deep_check=True,
         verbose=False,
@@ -97,3 +98,8 @@ def test_all_unique_unhashable_items():
 
     # Duplicate unhashable lists
     assert rule.is_valid([[1, 2], [1, 2]]) is False
+
+
+def test_all_unique_describe():
+    """Verify the description phrase."""
+    assert AllUnique().describe() == "all unique"

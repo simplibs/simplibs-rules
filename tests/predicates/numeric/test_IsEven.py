@@ -17,6 +17,8 @@ def test_is_even_contract(subtests):
         rule=rule,
         valid_values=[0, 2, -4, 100, -100],
         invalid_values=[1, -3, 99, 2.0, -4.0, True, False, "2", None, []],
+        expected_description="even int",
+        rule_factory=IsEven,
         deep_check=True,
         verbose=False,
     )
@@ -60,3 +62,8 @@ def test_is_even_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_even_describe():
+    """Verify the description phrase."""
+    assert IsEven().describe() == "even int"

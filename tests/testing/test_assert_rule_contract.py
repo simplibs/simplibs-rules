@@ -9,10 +9,27 @@ from simplibs.rules.base_class import Rule
 from simplibs.rules.testing.assert_rule_contract import assert_rule_contract
 
 
+# --- Shared helper ---
+
+def _build_card(value: Any, value_name: str, context: str) -> ValidationError:
+    """Build a complete, well-formed diagnostic card for the 'value == 5' dummies."""
+    return ValidationError(
+        problem="Value is invalid.",
+        expected="The integer 5.",
+        how_to_fix="Provide 5.",
+        label=value_name,
+        value=value,
+        context=context,
+    )
+
+
 # --- Mock Rules for Testing ---
 
 class DummyValidRule(Rule):
     """Fully valid rule meeting the complete contract."""
+
+    __slots__ = ("limit",)
+
     def __init__(self, limit: int = 10):
         if limit <= 0:
             raise ParamError("limit must be positive")
@@ -34,9 +51,15 @@ class DummyValidRule(Rule):
             error_name="DUMMY_LIMIT_ERROR",
         )
 
+    def describe(self) -> str:
+        return f"integer <= {self.limit}"
+
 
 class DummyCompoundRule(Rule):
     """Rule returning different error names based on input value."""
+
+    __slots__ = ()
+
     def is_valid(self, value: Any) -> bool:
         return False
 
@@ -57,6 +80,9 @@ class DummyCompoundRule(Rule):
 
 class DummyTransformingRule(Rule):
     """Rule that transforms input string into int in exception (e.g. Compose)."""
+
+    __slots__ = ()
+
     def is_valid(self, value: Any) -> bool:
         return False
 
@@ -76,6 +102,9 @@ class DummyTransformingRule(Rule):
 
 class DummyBrokenIsValidRule(Rule):
     """Rule with faulty is_valid implementation (returns non-bool)."""
+
+    __slots__ = ()
+
     def is_valid(self, value: Any) -> bool:
         return 1 if value == 5 else 0  # type: ignore # Returns int instead of bool
 
@@ -85,6 +114,9 @@ class DummyBrokenIsValidRule(Rule):
 
 class DummyBrokenValidateRule(Rule):
     """Rule with faulty validate method (does not return value when return_value=True)."""
+
+    __slots__ = ()
+
     def validate(self, value: Any, return_value: bool = False, return_bool: bool = False) -> Any:
         if return_value:
             return "BROKEN"
@@ -99,6 +131,9 @@ class DummyBrokenValidateRule(Rule):
 
 class DummyBrokenBuildExceptionRule(Rule):
     """Rule returning a different error_name than expected_error_name."""
+
+    __slots__ = ()
+
     def is_valid(self, value: Any) -> bool:
         return value == 5
 
@@ -114,8 +149,36 @@ class DummyBrokenBuildExceptionRule(Rule):
         )
 
 
+class DummyBrokenDescribeRule(Rule):
+    """Rule that is valid in every respect except that describe() returns an empty string."""
+
+    __slots__ = ()
+
+    def is_valid(self, value: Any) -> bool:
+        return value == 5
+
+    def build_exception(self, value: Any, value_name: str = "value", context: str = ""):
+        return _build_card(value, value_name, context)
+
+    def describe(self) -> str:
+        return ""
+
+
+class DummyNoSlotsRule(Rule):
+    """Rule that is valid in every respect except that it forgot to declare __slots__."""
+
+    def is_valid(self, value: Any) -> bool:
+        return value == 5
+
+    def build_exception(self, value: Any, value_name: str = "value", context: str = ""):
+        return _build_card(value, value_name, context)
+
+
 class DummyBrokenConstructorRule(Rule):
     """Rule whose constructor fails to raise ParamError for invalid arguments."""
+
+    __slots__ = ()
+
     def __init__(self, limit: int = 10):
         pass  # Ignores negative limit and does not raise ParamError
 
@@ -141,7 +204,7 @@ def test_assert_rule_contract_fails_on_non_rule_instance(subtests):
 
 
 def test_assert_rule_contract_full_success(subtests):
-    """Verify complete successful run through all 4 orchestrator stages."""
+    """Verify complete successful run through all 6 orchestrator stages."""
     rule = DummyValidRule(limit=10)
     assert_rule_contract(
         subtests,
@@ -149,6 +212,7 @@ def test_assert_rule_contract_full_success(subtests):
         valid_values=[1, 5, 10],
         invalid_values=[11, "invalid", None],
         expected_error_name="DUMMY_LIMIT_ERROR",
+        expected_description="integer <= 10",
         rule_factory=DummyValidRule,
         invalid_init_params=[
             ((-5,), {}),  # limit <= 0 -> ParamError
@@ -239,8 +303,61 @@ def test_assert_rule_contract_fails_on_build_exception_stage(subtests):
         )
 
 
+def test_assert_rule_contract_fails_on_describe_stage(subtests):
+    """Verify error catching in Stage 4 (describe returning an empty string)."""
+    rule = DummyBrokenDescribeRule()
+    with pytest.raises((AssertionError, Failed), match="describe"):
+        assert_rule_contract(
+            subtests,
+            rule=rule,
+            valid_values=[5],
+            invalid_values=[10],
+            verbose=False,
+        )
+
+
+def test_assert_rule_contract_fails_on_expected_description_mismatch(subtests):
+    """Verify Stage 4 also fails when describe() differs from expected_description."""
+    rule = DummyValidRule(limit=10)
+    with pytest.raises((AssertionError, Failed), match="describe"):
+        assert_rule_contract(
+            subtests,
+            rule=rule,
+            valid_values=[1],
+            invalid_values=[11],
+            expected_description="integer <= 99",  # Rule says "integer <= 10"
+            verbose=False,
+        )
+
+
+def test_assert_rule_contract_fails_on_slots_stage(subtests):
+    """Verify error catching in Stage 5 (rule instance carries a __dict__)."""
+    rule = DummyNoSlotsRule()
+    with pytest.raises((AssertionError, Failed), match="__dict__"):
+        assert_rule_contract(
+            subtests,
+            rule=rule,
+            valid_values=[5],
+            invalid_values=[10],
+            verbose=False,
+        )
+
+
+def test_assert_rule_contract_slots_check_can_be_disabled(subtests):
+    """Verify that check_slots=False lets a rule with a __dict__ pass the contract."""
+    rule = DummyNoSlotsRule()
+    assert_rule_contract(
+        subtests,
+        rule=rule,
+        valid_values=[5],
+        invalid_values=[10],
+        check_slots=False,
+        verbose=False,
+    )
+
+
 def test_assert_rule_contract_fails_on_param_error_stage(subtests):
-    """Verify error catching in Stage 4 (constructor requiring ParamError)."""
+    """Verify error catching in Stage 6 (constructor requiring ParamError)."""
     rule = DummyBrokenConstructorRule()
     with pytest.raises((AssertionError, Failed)):
         assert_rule_contract(
@@ -250,5 +367,18 @@ def test_assert_rule_contract_fails_on_param_error_stage(subtests):
             invalid_values=[10],
             rule_factory=DummyBrokenConstructorRule,
             invalid_init_params=[((-5,), {})],  # Ignored -> failure
+            verbose=False,
+        )
+
+
+def test_assert_rule_contract_fails_on_init_params_without_factory(subtests):
+    """Verify the ParamError check is never silently skipped for a missing rule_factory."""
+    with pytest.raises(AssertionError, match="rule_factory"):
+        assert_rule_contract(
+            subtests,
+            rule=DummyValidRule(limit=10),
+            valid_values=[1],
+            invalid_values=[11],
+            invalid_init_params=[((-5,), {})],  # No rule_factory -> would never run
             verbose=False,
         )

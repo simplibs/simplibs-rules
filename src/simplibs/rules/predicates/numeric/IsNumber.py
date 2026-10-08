@@ -29,6 +29,14 @@ class IsNumber(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "number"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -93,4 +101,12 @@ numeric types (excluding booleans).
   same pattern as `is_integer` and `is_primitive_number`. `IsZero`
   imports this to distinguish non-numeric input (`TypeError`) from a
   numeric-but-nonzero value (`ValueError`) in `build_exception`.
+
+---
+
+## 4. Description
+
+`describe()` returns "number" — the umbrella over int, float, Decimal and complex. A short fragment that containers and
+the typing layer compose into larger texts ("not number", "number | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

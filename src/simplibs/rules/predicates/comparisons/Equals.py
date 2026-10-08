@@ -31,6 +31,14 @@ class Equals(Rule):
         return value == self.expected_value
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return f"equal to {self.expected_value!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -84,4 +92,12 @@ expected target value.
 * **Error Classification:** Uses `EQUALS_ERROR` wrapping a `ValueError`.
 * **Diagnostic Detail:** Clearly presents both the actual evaluated value
   and expected target.
+
+---
+
+## 3. Description
+
+`describe()` returns "equal to 'active'" — the relation and the target value. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

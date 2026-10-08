@@ -36,7 +36,7 @@ def test_build_elements_rule_with_container_override() -> None:
     rule = build_elements_rule(Iterable[str], container_type=list)
 
     assert isinstance(rule, AllOf)
-    # První pravidlo musí být IsInstance(list), nikoli IsInstance(Iterable)
+    # The first rule must be IsInstance(list), not IsInstance(Iterable)
     assert isinstance(rule.rules[0], IsInstance)
     assert rule.is_valid(["a", "b"]) is True
-    assert rule.is_valid(("a", "b")) is False  # tuple selže na IsInstance(list)
+    assert rule.is_valid(("a", "b")) is False  # a tuple fails on IsInstance(list)

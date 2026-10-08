@@ -45,6 +45,14 @@ class IsSubstringOf(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameter
+        return f"substring of {self.target_string!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -111,4 +119,12 @@ given target master string using Python's native `in` operator (`value in target
   `TypeError`.
 * **Value Failures:** Strings that are not substrings format problem/fix
   strings as `ValueError` (`IS_SUBSTRING_OF_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "substring of 'ADMIN_ROLE'" — the same phrase the failure card uses as `expected`. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

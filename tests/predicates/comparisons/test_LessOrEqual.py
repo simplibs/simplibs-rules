@@ -18,6 +18,8 @@ def test_less_or_equal_contract(subtests):
         rule=rule,
         valid_values=[100, 99, 0, -10, 100.0],
         invalid_values=[100.1, 101, 150, "50", None, [50]],
+        expected_description="<= 100",
+        rule_factory=LessOrEqual,
         deep_check=True,
         verbose=False,
     )
@@ -59,3 +61,8 @@ def test_less_or_equal_incomparable_type_exception(subtests):
         how_to_fix="Provide a value of a type comparable with 'int'.",
         exception=TypeError,
     )
+
+
+def test_less_or_equal_describe():
+    """Verify the description phrase."""
+    assert LessOrEqual(100).describe() == "<= 100"

@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.3.0] - 2026-10-08
+
+### 📋 Improved
+
+#### Rule Descriptions
+
+* **Added `Rule.describe()` as a standard description contract**:
+  * Every rule can now provide a concise human-readable description of what it validates.
+  * Built-in predicates and container rules now expose consistent descriptions used both by diagnostics and by composed rules.
+  * **Added `Described`**, a transparent rule wrapper that preserves the wrapped rule's validation and exception behavior while replacing its description with fixed custom text. This allows decomposed rule trees to retain a meaningful representation of the original expression, such as `list[int]`.
+  * Added `describe_rule()` helper with safe fallback handling and optional parenthesization for composed expressions.
+
+#### Typing-Based Rules (`simplibs.rules.predicates.typing`)
+
+* **Improved descriptions of composed typing rules**:
+  * Typing annotations are now preserved as readable descriptions when decomposed into individual validation rules.
+  * Generic annotations such as `list[int]`, `dict[str, int]`, `tuple[...]`, `Literal[...]`, and `Callable[...]` retain their original annotation-oriented description while being validated through their composed rule tree.
+  * `Union` and `Annotated` descriptions are composed from their child rules rather than being wrapped with a redundant outer description.
+  * Added annotation formatting support for nested generics, unions, `Literal`, `Callable`, `Annotated`, `NewType`, and other supported annotation forms.
+  * Tuple-element validation now preserves the rule and value corresponding to the failing position in the resulting diagnostic.
+
+#### Predicate Rules
+
+* Added consistent `describe()` implementations across built-in checker, numeric, comparison, collection, introspection, and logic predicates.
+* Description formatting is now shared with exception diagnostics where appropriate, keeping rule descriptions and error messages consistent.
+
+#### Testing Utilities (`simplibs.rules.testing`)
+
+* **Extended `assert_rule_contract`** with description and `__slots__` validation.
+* Added `assert_rule_describe` and `assert_rule_slots` helpers.
+* Added validation of `expected_description` and protection against silently skipped constructor validation when `invalid_init_params` is supplied without a `rule_factory`.
+* Expanded contract tests to cover description failures, invalid descriptions, slot requirements, and optional slot checking.
+
+### 🔄 Changed
+
+* `Annotated` callable validation now uses `UserRule`, providing consistent callable validation and failure handling.
+* Tuple typing builders now use composed rules for positional validation, producing diagnostics for the individual tuple element rather than the complete tuple.
+* `build_typing_rule()` may now return a `Described` wrapper for supported structured annotations instead of the underlying container rule directly.
+
+### 📚 Documentation
+
+* Updated rule, container, predicate, typing, and testing documentation to describe the new `describe()` contract and resulting diagnostic behavior.
+* Added description references and examples throughout the relevant README files.
+* Corrected several existing documentation inconsistencies and outdated examples.
+
+---
+
 ## [0.2.2] - 2026-09-24
 
 ### 📋 Improved

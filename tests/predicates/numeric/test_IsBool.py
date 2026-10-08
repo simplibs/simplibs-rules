@@ -32,6 +32,7 @@ def test_is_bool_contract(subtests):
             None,
             {},
         ],  # Ints (even though bool inherits from int in Python), floats, strs, etc. must fail
+        expected_description="bool",
         rule_factory=IsBool,
         deep_check=True,
         verbose=False,
@@ -74,3 +75,8 @@ def test_is_bool_exception_details(subtests):
         how_to_fix="Provide a boolean value (True or False).",
         exception=TypeError,
     )
+
+
+def test_is_bool_describe():
+    """Verify the description phrase."""
+    assert IsBool().describe() == "bool"

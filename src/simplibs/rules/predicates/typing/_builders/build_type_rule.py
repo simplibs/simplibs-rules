@@ -24,10 +24,10 @@ def build_type_rule(annotation: Any) -> Rule:
         IsSubclass checks for a Union base).
     """
 
-    # 1. Definice základního pravidla
+    # 1. Base rule definition
     parts: list[Rule] = [IsType()]
 
-    # 2. Zpracování argumentů
+    # 2. Argument processing
     args = get_args(annotation)
     if args:
         base = args[0]

@@ -21,6 +21,8 @@ def test_is_not_contract(subtests):
         rule=rule,
         valid_values=[object(), "FORBIDDEN", 123, None, []],
         invalid_values=[FORBIDDEN],
+        expected_description=f"not identical to {FORBIDDEN!r}",
+        rule_factory=IsNot,
         deep_check=True,
         verbose=False,
     )
@@ -44,3 +46,9 @@ def test_is_not_exception(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_not_describe():
+    """Verify the description phrase."""
+    assert IsNot(None).describe() == "not identical to None"
+    assert IsNot(FORBIDDEN).describe() == f"not identical to {FORBIDDEN!r}"

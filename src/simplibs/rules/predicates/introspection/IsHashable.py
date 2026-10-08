@@ -31,6 +31,14 @@ class IsHashable(Rule):
             return False
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed noun phrase
+        return "hashable"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -88,4 +96,12 @@ be used as a dictionary key or set member in Python.
   `TypeError`.
 * **Fix Guidance:** Advises using immutable datatypes (e.g. `tuple` instead
   of `list`).
+
+---
+
+## 3. Description
+
+`describe()` returns "hashable" — a short fragment that containers and the typing
+layer compose into larger texts ("not hashable", "hashable | ..."). The longer
+sentence form stays in `expected` of the failure card.
 """

@@ -24,7 +24,8 @@ def test_is_any_contract(subtests):
         subtests,
         rule=rule,
         valid_values=[1, "string", [1, 2], {"a": 1}, None, True, object()],
-        invalid_values=[],  # IsAny acceptuje absolutně cokoliv
+        invalid_values=[],  # IsAny accepts absolutely anything
+        expected_description="Any",
         rule_factory=IsAny,
         deep_check=True,
         verbose=False,
@@ -39,7 +40,7 @@ def test_is_any_build_exception_fallback():
     """Verify build_exception directly for coverage even though is_valid never fails."""
     rule = IsAny()
 
-    # Zavoláme metodu přímo a ověříme zkonstruovaný objekt výjimky
+    # Call the method directly and verify the constructed exception object
     exc = rule.build_exception("test_val", value_name="sample")
 
     assert isinstance(exc, ValidationError)

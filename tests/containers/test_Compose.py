@@ -11,7 +11,7 @@ from simplibs.rules.testing import assert_rule_contract
 from simplibs.exception import ValidationError
 
 # Rules
-from simplibs.rules.containers import Compose
+from simplibs.rules.containers import AnyOf, Compose
 from simplibs.rules.predicates.comparisons import GreaterThan
 
 
@@ -91,3 +91,35 @@ def test_compose_custom_lambda_transformer():
     assert rule.is_valid("hello") is True   # len = 5 > 2
     assert rule.is_valid("hi") is False      # len = 2, not > 2
     assert rule.is_valid(12345) is False     # len(12345) raises TypeError -> returns False
+
+
+# ==============================================================================
+# 4. DESCRIPTION TEST
+# ==============================================================================
+
+def is_a(value: Any) -> bool:
+    return True
+
+
+def is_b(value: Any) -> bool:
+    return True
+
+
+def is_c(value: Any) -> bool:
+    return True
+
+
+def test_compose_describe(subtests):
+    """Verify that Compose describes itself as 'after <transformer>: <validator>'."""
+
+    with subtests.test("named function transformer"):
+        assert Compose(str.strip, is_a).describe() == "after strip: is_a"
+
+    with subtests.test("class transformer"):
+        assert Compose(int, is_a).describe() == "after int: is_a"
+
+    with subtests.test("lambda transformer"):
+        assert Compose(lambda v: v, is_a).describe() == "after <lambda>: is_a"
+
+    with subtests.test("compound validator needs no parentheses"):
+        assert Compose(len, AnyOf(is_a, is_b)).describe() == "after len: is_a | is_b"

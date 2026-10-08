@@ -25,6 +25,14 @@ class IsCallable(Rule):
         return callable(value)
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed noun phrase
+        return "callable"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -78,4 +86,12 @@ function using Python's native `callable()` check.
   `TypeError`.
 * **Fix Guidance:** Lists explicit valid callable forms (functions,
   methods, objects with `__call__`).
+
+---
+
+## 3. Description
+
+`describe()` returns "callable" — a short fragment that containers and the typing
+layer compose into larger texts ("not callable", "callable | ..."). The longer
+sentence form stays in `expected` of the failure card.
 """

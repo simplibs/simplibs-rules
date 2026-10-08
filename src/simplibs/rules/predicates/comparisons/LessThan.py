@@ -36,6 +36,14 @@ class LessThan(Rule):
             return False
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return f"< {self.threshold!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -103,4 +111,12 @@ The `LessThan` rule validates that an input value is strictly less than
   strings as `TypeError`.
 * **Value Failures:** Out-of-bounds inputs format problem/fix strings as
   `ValueError` (`LESS_THAN_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "< 100" — the operator itself, the shortest faithful spelling. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

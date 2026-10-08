@@ -4,6 +4,7 @@ from simplibs.exception import ValidationError
 from ..base_class import Rule
 # Inners
 from ._helpers import as_predicate, describe_rule
+from .Compose import Compose
 from ._init_validators import (
     raise_requires_at_least_one_rule_error,
     raise_rule_param_not_callable
@@ -54,6 +55,17 @@ class AnyOf(Rule):
         # 1. Evaluate whether the value satisfies at least one rule
         return any(
             as_predicate(rule)(value)
+            for rule in self.rules
+        )
+
+    # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Join operands with "|" — "|" binds loosest, only Compose needs parentheses
+        return " | ".join(
+            describe_rule(rule, parenthesize=(Compose,))
             for rule in self.rules
         )
 
@@ -118,12 +130,11 @@ disjunction / OR). It is also the rule constructed under the hood by
   which — without flattening — would construct a nested
   `AnyOf(AnyOf(a, b), c)` rather than a flat `AnyOf(a, b, c)`.
 * **Why Nesting Would Be a Problem:**
-  `build_exception` calls `describe_rule(rule)` for every sub-rule to list
-  candidate requirements. `describe_rule` on a nested `AnyOf` instance
-  returns only `"AnyOf"` (its class name), producing an unreadable
-  diagnostic like *"expected one of: AnyOf, IsFloat"* instead of
-  *"expected one of: IsInteger, IsFloat, IsFloat"* — a real regression in
-  diagnostic quality, not just cosmetic nesting.
+  `build_exception` lists every sub-rule through `describe_rule`. A nested
+  `AnyOf` would be listed as one entry ("a | b, c") instead of as the flat
+  alternatives ("a, b, c"), and every evaluation would pass through an
+  unnecessary extra object and call frame. Flattening keeps the diagnostic
+  to one alternative per entry.
 * **How It Works:**
   During `__init__`, every positional `rule` argument is inspected with
   `type(rule) is AnyOf` (exact type match, not `isinstance`, so a
@@ -143,4 +154,20 @@ disjunction / OR). It is also the rule constructed under the hood by
 * **Error Classification:** Uses `ANY_OF_ERROR` wrapping a `ValueError`.
 * **Summary Listing:** Concatenates rule descriptions to form a transparent
   overview of candidate requirements.
+
+---
+
+## 4. Description
+
+* **Operator Form:**
+  `describe()` joins the operands with `" | "` ("int | None"), matching the
+  `|` operator this rule is built by.
+* **Precedence:**
+  `|` binds loosest, so an `AllOf` operand needs no parentheses
+  ("a & b | c"). Only a `Compose` operand is wrapped, because its prefix form
+  ("after f: v") would otherwise read as covering everything to its right.
+* **Same Text In The Failure Card:**
+  `build_exception` lists the operands through `describe_rule` as well, so a
+  failure reads "value satisfying at least one of: list[int], set[int], str"
+  instead of "AllOf, AllOf, IsInstance".
 """

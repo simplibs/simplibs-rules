@@ -22,6 +22,8 @@ def test_is_hashable_contract(subtests):
         rule=rule,
         valid_values=[123, "text", (1, 2), True, None, float],
         invalid_values=[[1, 2], {"a": 1}, {1, 2}, UnhashableClass()],
+        expected_description="hashable",
+        rule_factory=IsHashable,
         deep_check=True,
         verbose=False,
     )
@@ -45,3 +47,8 @@ def test_is_hashable_exception(subtests):
         exception=TypeError,
         verbose=False,
     )
+
+
+def test_is_hashable_describe():
+    """Verify the description phrase."""
+    assert IsHashable().describe() == "hashable"

@@ -18,6 +18,8 @@ def test_is_infinity_contract(subtests):
         valid_values=[float("inf"), float("-inf")],
         # float("nan") excluded because NaN == NaN evaluates to False in Python
         invalid_values=[0.0, 10.5, 100, "inf", True, None],
+        expected_description="infinity",
+        rule_factory=IsInfinity,
         deep_check=True,
         verbose=False,
     )
@@ -61,3 +63,8 @@ def test_is_infinity_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_infinity_describe():
+    """Verify the description phrase."""
+    assert IsInfinity().describe() == "infinity"

@@ -33,6 +33,16 @@ different types. This mirrors the same `bool`/`int` equality overlap this librar
 already documents elsewhere (e.g. the `Literal` builder in `rules/typing/`) — `strict`
 exists specifically so a caller who needs to draw that distinction can.
 
+## A note on descriptions
+
+Every rule here overrides [`Rule.describe()`](README_RULE_CLASS.md#describe) with a short
+fragment that containers and the typing layer compose into larger texts. It is shorter
+than the `expected` sentence of the failure card, which stays unchanged. For `IsIn` and
+`NotIn` the collection is rendered by the same helper as the failure card —
+deterministically ordered for sets, and abbreviated to `type(size=N)` once its text
+exceeds 60 characters — so a long option list never makes a composed description
+unreadable.
+
 ---
 
 ## 🧭 Table of Contents
@@ -65,6 +75,8 @@ def is_valid(self, value: Any) -> bool:
     return value is self.expected
 ```
 
+**Description:** `"identical to None"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -86,6 +98,8 @@ validate(value, IsNot(None))
 def is_valid(self, value: Any) -> bool:
     return value is not self.forbidden
 ```
+
+**Description:** `"not identical to None"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -130,6 +144,8 @@ respectively. The collection itself is rendered deterministically, and abbreviat
 just its type and size once its full representation grows past 60 characters, to keep
 long option lists from producing unreadable error messages.
 
+**Description:** `"one of ('draft', 'published', 'archived')"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -170,6 +186,8 @@ can't possibly be *found* in the collection, so `NotIn` treats that as passing (
 rather than failing — the logical mirror of `IsIn` treating the same situation as
 failing. Diagnostics mirror `IsIn`'s formatting (deterministic, length-capped
 collection rendering) for the "value unexpectedly found" case.
+
+**Description:** `"not one of ('banned', 'forbidden')"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -220,6 +238,8 @@ mandatory positional argument are still rejected, but extra *optional* parameter
 `*args`, and uninspectable callables (some C-implemented builtins) are all accepted, on
 the principle that "can't tell" should never be treated the same as "definitely
 broken."
+
+**Description:** the wrapped callable's own name — `"positive_pred"`, `"<lambda>"` — or its `repr()` when it has none. The failure card names the callable the same way.
 
 [▲ Back to top](#-table-of-contents)
 

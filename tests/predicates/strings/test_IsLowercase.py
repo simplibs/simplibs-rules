@@ -17,6 +17,8 @@ def test_is_lowercase_contract(subtests):
         rule=rule,
         valid_values=["hello", "hello123", "a-b-c!"],
         invalid_values=["", "123", "Hello", "HELLO", "hello World", 123, None, True],
+        expected_description="lowercase string",
+        rule_factory=IsLowercase,
         deep_check=True,
         verbose=False,
     )
@@ -60,3 +62,8 @@ def test_is_lowercase_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_lowercase_describe():
+    """Verify the description phrase."""
+    assert IsLowercase().describe() == "lowercase string"

@@ -18,6 +18,7 @@ def test_is_empty_contract(subtests):
         rule=rule,
         valid_values=[[], {}, "", set(), tuple()],
         invalid_values=[[1], {"a": 1}, "text", {1}, (1,), 0, None, True],
+        expected_description="empty",
         rule_factory=IsEmpty,
         deep_check=True,
         verbose=False,
@@ -62,3 +63,8 @@ def test_is_empty_no_len_support_exception(subtests):
         exception=TypeError,
         verbose=False,
     )
+
+
+def test_is_empty_describe():
+    """Verify the description phrase."""
+    assert IsEmpty().describe() == "empty"

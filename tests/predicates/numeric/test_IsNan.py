@@ -69,3 +69,8 @@ def test_is_nan_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_nan_describe():
+    """Verify the description phrase."""
+    assert IsNan().describe() == "NaN"

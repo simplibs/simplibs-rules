@@ -1,7 +1,8 @@
 from typing import Any, get_args
 # Outers
 from ....base_class import Rule
-from ....containers import AllOf, Compose
+from ....containers import AllOf
+from ....predicates.logic import UserRule
 
 
 def build_annotated_rule(annotation: Any) -> Rule:
@@ -44,7 +45,7 @@ def build_annotated_rule(annotation: Any) -> Rule:
         if isinstance(item, Rule):
             parts.append(item)
         elif callable(item):
-            parts.append(Compose(lambda value: value, item))
+            parts.append(UserRule(item))
 
     # 5. Collapse to a single Rule
     return (
@@ -82,8 +83,17 @@ machinery exactly as intended.
 Consistent with `validate()`/`Rule.validate()` already accepting a plain
 callable (lambda, function) as a predicate alongside `Rule` instances.
 A metadata item that is callable but not a `Rule` is wrapped
-via `Compose(identity, predicate)` rather than requiring the user to
-formally subclass `Rule` just to attach `Annotated[int, lambda v: v > 0]`.
+in `UserRule` rather than requiring the user to formally subclass `Rule`
+just to attach `Annotated[int, lambda v: v > 0]`.
+
+`UserRule` is the right wrapper because it exists precisely to give an
+arbitrary callable the missing Rule contract: it describes itself by the
+callable's name, builds a proper failure card, and treats an exception
+raised inside the callable as a validation failure. An earlier revision used
+`Compose(lambda value: value, item)`, which repurposed Compose's
+transform-then-validate design for something it was not built for — and
+described itself as "after <lambda>: ..." in diagnostics. (This is the same
+correction `compile_parameter_rules` already made for `overrides`.)
 
 ---
 
@@ -103,4 +113,12 @@ untouched, exactly as PEP 593 intends.
 `Annotated[int, greater_than(0), divisible_by(2)]` combines both — no
 conflict handling needed, since combining independent predicates with
 AND is always well-defined.
+
+---
+
+## 5. Description Composes From the Parts
+
+The result is not wrapped in `Described`: `AllOf` already describes itself
+as "int & > 0" from its children, and a Union as the underlying type is
+parenthesized by `AllOf` ("(int | str) & > 0").
 """

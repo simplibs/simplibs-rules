@@ -1,7 +1,8 @@
+from operator import itemgetter
 from typing import Any, get_args
 # Outers
 from ....base_class import Rule
-from ....containers import AllOf
+from ....containers import AllOf, Compose
 from ....predicates.introspection import HasLength, IsInstance
 # Inners
 from .build_elements_rule import build_elements_rule
@@ -66,11 +67,9 @@ def _build_positional_rule(annotation: Any, args: tuple[Any, ...]) -> Rule:
     return AllOf(*parts)
 
 
-def _at_index(index: int, rule: Rule):
-    """Build a closure checking if `rule` holds at a specific tuple position."""
-    def check(value) -> bool:
-        return rule.is_valid(value[index])
-    return check
+def _at_index(index: int, rule: Rule) -> Rule:
+    """Build a rule checking that `rule` holds at a specific tuple position."""
+    return Compose(itemgetter(index), rule)
 
 
 _DESIGN_NOTES = """
@@ -95,11 +94,19 @@ are processed positionally.
 
 ---
 
-## 2. Per-Position Rules via Closure Predicates
+## 2. Per-Position Rules via Compose
 
-Each position check (`value[index]` satisfies `rule`) uses a lightweight local
-closure (`_at_index`). A dedicated `Rule` subclass is omitted to avoid unnecessary
-overhead since these checks exist solely within this builder's composed `AllOf`.
+Each position check ("the item at `index` satisfies `rule`") is
+`Compose(itemgetter(index), rule)`: the transformer extracts the item, the
+validator is the position's own rule. A dedicated `Rule` subclass is not
+needed, and the failure card is exactly what the position's rule would report
+for that item — with the item as the reported value. An earlier revision used
+a bare closure, which `build_child_exception` could only describe as
+"callable 'check'", hiding which position failed and why.
+
+`HasLength` runs before the position rules inside `AllOf`, so `itemgetter`
+never meets a tuple that is too short; if it ever did, `Compose` treats the
+`IndexError` as a failed transformation.
 
 ---
 

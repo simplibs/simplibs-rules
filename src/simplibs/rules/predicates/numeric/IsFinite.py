@@ -31,6 +31,14 @@ class IsFinite(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "finite number"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -101,4 +109,12 @@ The `IsFinite` rule validates that an input value is a primitive number
 * **Dual Diagnostic Path:** `TypeError` when the value isn't a primitive
   number at all (mirrors `IsPrimitiveNumber`'s own message); `ValueError`
   (`IS_FINITE_ERROR`) when it is one, just not finite.
+
+---
+
+## 3. Description
+
+`describe()` returns "finite number" — an int or float that is neither NaN nor infinite. A short fragment that containers and
+the typing layer compose into larger texts ("not finite number", "finite number | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

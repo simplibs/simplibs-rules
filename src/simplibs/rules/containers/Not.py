@@ -4,6 +4,9 @@ from simplibs.exception import ValidationError
 from ..base_class import Rule
 # Inners
 from ._helpers import as_predicate, describe_rule
+from .AllOf import AllOf
+from .AnyOf import AnyOf
+from .Compose import Compose
 from ._init_validators import raise_rule_param_not_callable
 
 
@@ -38,6 +41,14 @@ class Not(Rule):
 
         # 1. Evaluate whether the value fails the wrapped rule
         return not as_predicate(self.rule)(value)
+
+    # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Compound operands need parentheses: not (a | b)
+        return f"not {describe_rule(self.rule, parenthesize=(AllOf, AnyOf, Compose))}"
 
     # ----------------------------------------------------------------------
     # Exception definition
@@ -94,4 +105,18 @@ callable predicate function.
   function name of the forbidden condition directly into `problem` and
   `how_to_fix`.
 * **Error Classification:** Uses `NOT_RULE_ERROR` wrapping a `ValueError`.
+
+---
+
+## 3. Description
+
+* **Prefix Form:**
+  `describe()` returns "not <rule>" ("not None").
+* **Precedence:**
+  A compound operand (`AllOf`, `AnyOf`, `Compose`) is wrapped in parentheses
+  ("not (a | b)"), so the negation clearly applies to the whole of it.
+* **Failure Card:**
+  `build_exception` names the negated rule through `describe_rule` without
+  parentheses, since it embeds the text in a sentence ("value NOT satisfying
+  a | b").
 """

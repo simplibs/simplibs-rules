@@ -33,6 +33,7 @@ def test_has_key_contract(subtests):
             123,
             None,
         ],
+        expected_description="mapping with key 'id'",
         rule_factory=HasKey,
         deep_check=True,
         verbose=False,
@@ -95,3 +96,8 @@ def test_has_key_with_non_string_keys():
 
     rule_tuple = HasKey((1, 2))
     assert rule_tuple.is_valid({(1, 2): "coordinates"}) is True
+
+
+def test_has_key_describe():
+    """Verify the description phrase."""
+    assert HasKey("id").describe() == "mapping with key 'id'"

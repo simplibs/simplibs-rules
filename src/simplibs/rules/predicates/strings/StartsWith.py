@@ -45,6 +45,14 @@ class StartsWith(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameter
+        return f"string starting with {self.prefix!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -111,4 +119,12 @@ specified prefix using Python's native `str.startswith()` method.
   `TypeError`.
 * **Value Failures:** Strings missing the target prefix format problem/fix
   strings as `ValueError` (`STARTS_WITH_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "string starting with 'https://'" — the same phrase the failure card uses as `expected`. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

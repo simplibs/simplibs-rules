@@ -38,6 +38,14 @@ class HasItem(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return f"container with item {self.item!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -128,4 +136,12 @@ borrowing the heavier subset/superset machinery for a one-element case.
   format problem/fix strings as `TypeError`.
 * **Missing Item Failures:** Evaluated containers missing the expected
   item format problem/fix strings as `ValueError` (`HAS_ITEM_ERROR`).
+
+---
+
+## 5. Description
+
+`describe()` returns "container with item 'admin'" — the same phrase the failure card uses as `expected`. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

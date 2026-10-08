@@ -3,7 +3,9 @@ from simplibs.exception import ValidationError
 # Outers
 from ..base_class import Rule
 # Inners
-from ._helpers import as_predicate, build_child_exception
+from ._helpers import as_predicate, build_child_exception, describe_rule
+from .AnyOf import AnyOf
+from .Compose import Compose
 from ._init_validators import (
     raise_requires_at_least_one_rule_error,
     raise_rule_param_not_callable
@@ -37,7 +39,7 @@ class AllOf(Rule):
         flattened: list[Rule | Any] = []
         for rule in rules:
             if not callable(rule):
-                raise_rule_param_not_callable("AnyOf", rule)
+                raise_rule_param_not_callable("AllOf", rule)
             if type(rule) is AllOf:
                 flattened.extend(rule.rules)
             else:
@@ -54,6 +56,17 @@ class AllOf(Rule):
         # 1. Evaluate whether the value satisfies all rules
         return all(
             as_predicate(rule)(value)
+            for rule in self.rules
+        )
+
+    # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Join operands with "&" — an OR operand needs parentheses, "&" binds tighter
+        return " & ".join(
+            describe_rule(rule, parenthesize=(AnyOf, Compose))
             for rule in self.rules
         )
 
@@ -144,4 +157,23 @@ conjunction / AND). It is also the rule constructed under the hood by
 
 * **Transparent Delegation:** Vends the exact child exception card of the
   failing sub-rule.
+
+---
+
+## 4. Description
+
+* **Operator Form:**
+  `describe()` joins the operands with `" & "` ("int & > 0"), matching the
+  `&` operator this rule is built by.
+* **Precedence:**
+  `&` binds tighter than `|`, so an `AnyOf` operand is wrapped in
+  parentheses ("(a | b) & c"). A `Compose` operand is wrapped too: its
+  prefix form ("after f: v") would otherwise read as covering everything to
+  its right.
+* **Flat Text:**
+  Nested `AllOf` operands are already flattened by the constructor, so the
+  text is always flat ("a & b & c").
+* **Operands Describe Themselves:**
+  Each operand is rendered through `describe_rule`, which calls
+  `Rule.describe()` (or uses `__name__` for a plain callable).
 """

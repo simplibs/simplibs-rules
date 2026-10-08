@@ -38,6 +38,14 @@ class HasKey(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return f"mapping with key {self.key!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -101,4 +109,12 @@ specific key.
   format problem/fix strings as `TypeError`.
 * **Missing Key Failures:** Evaluated containers missing the expected key
   format problem/fix strings as `KeyError` (`HAS_KEY_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "mapping with key 'id'" — the same phrase the failure card uses as `expected`. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

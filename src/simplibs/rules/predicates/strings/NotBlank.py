@@ -32,6 +32,14 @@ class NotBlank(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed noun phrase
+        return "non-blank string"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -95,4 +103,12 @@ non-whitespace character.
   `TypeError`.
 * **Value Failures:** Empty or whitespace-only strings format problem/fix
   strings as `ValueError` (`NOT_BLANK_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns "non-blank string" — deliberately not "not blank", so negating it never reads "not not blank". A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

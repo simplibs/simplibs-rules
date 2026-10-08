@@ -36,6 +36,14 @@ class GreaterOrEqual(Rule):
             return False
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return f">= {self.threshold!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -103,4 +111,12 @@ order-wise greater than or equal to (`>=`) a given threshold.
   strings as `TypeError`.
 * **Value Failures:** Out-of-bounds inputs format problem/fix strings as
   `ValueError` (`GREATER_OR_EQUAL_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` returns ">= 0" — the operator itself, the shortest faithful spelling. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

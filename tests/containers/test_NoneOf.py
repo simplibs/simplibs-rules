@@ -11,7 +11,7 @@ from simplibs.rules.testing import assert_rule_contract
 from simplibs.exception import ValidationError
 
 # Rules
-from simplibs.rules.containers import NoneOf
+from simplibs.rules.containers import AllOf, AnyOf, NoneOf
 from simplibs.rules.predicates.numeric import IsInteger, IsZero
 from simplibs.rules.predicates.strings import IsString
 from simplibs.rules.predicates.checkers import IsNone
@@ -45,7 +45,10 @@ def test_none_of_contract(subtests):
 
 def test_none_of_single_matched_rule_exception(subtests):
     """Verify detailed exception structure when a value violates exactly one rule."""
-    rule = NoneOf(IsZero(), IsNone())
+    # Expected texts are built from describe(), so the test stays valid
+    # whenever a predicate changes its description.
+    zero, none = IsZero(), IsNone()
+    rule = NoneOf(zero, none)
 
     assert_exception_function(
         subtests,
@@ -55,9 +58,9 @@ def test_none_of_single_matched_rule_exception(subtests):
         label="status_code",
         value=0,
         error_name="NONE_OF_ERROR",
-        expected="value satisfying none of: IsZero, IsNone",
-        problem="Value unexpectedly satisfied forbidden rule(s): IsZero.",
-        how_to_fix="Modify the value so that it does not match any of: IsZero, IsNone.",
+        expected=f"value satisfying none of: {zero.describe()}, {none.describe()}",
+        problem=f"Value unexpectedly satisfied forbidden rule(s): {zero.describe()}.",
+        how_to_fix=f"Modify the value so that it does not match any of: {zero.describe()}, {none.describe()}.",
         exception=ValueError,
         verbose=False,
     )
@@ -66,7 +69,8 @@ def test_none_of_single_matched_rule_exception(subtests):
 def test_none_of_multiple_matched_rules_exception(subtests):
     """Verify detailed exception structure when a value violates multiple rules simultaneously."""
     # 0 is both IsZero and IsInteger
-    rule = NoneOf(IsZero(), IsInteger())
+    zero, integer = IsZero(), IsInteger()
+    rule = NoneOf(zero, integer)
 
     assert_exception_function(
         subtests,
@@ -76,9 +80,9 @@ def test_none_of_multiple_matched_rules_exception(subtests):
         label="count",
         value=0,
         error_name="NONE_OF_ERROR",
-        expected="value satisfying none of: IsZero, IsInteger",
-        problem="Value unexpectedly satisfied forbidden rule(s): IsZero, IsInteger.",
-        how_to_fix="Modify the value so that it does not match any of: IsZero, IsInteger.",
+        expected=f"value satisfying none of: {zero.describe()}, {integer.describe()}",
+        problem=f"Value unexpectedly satisfied forbidden rule(s): {zero.describe()}, {integer.describe()}.",
+        how_to_fix=f"Modify the value so that it does not match any of: {zero.describe()}, {integer.describe()}.",
         exception=ValueError,
         verbose=False,
     )
@@ -105,3 +109,32 @@ def test_none_of_with_custom_predicates():
     assert rule.is_valid(10) is True
     assert rule.is_valid(15) is False
     assert rule.is_valid(-2) is False
+
+
+# ==============================================================================
+# 4. DESCRIPTION TEST
+# ==============================================================================
+
+def is_a(value: Any) -> bool:
+    return True
+
+
+def is_b(value: Any) -> bool:
+    return True
+
+
+def is_c(value: Any) -> bool:
+    return True
+
+
+def test_none_of_describe(subtests):
+    """Verify that NoneOf lists its operands inside 'none of (...)'."""
+
+    with subtests.test("simple operands"):
+        assert NoneOf(is_a, is_b).describe() == "none of (is_a, is_b)"
+
+    with subtests.test("AnyOf operand needs no parentheses"):
+        assert NoneOf(AnyOf(is_a, is_b), is_c).describe() == "none of (is_a | is_b, is_c)"
+
+    with subtests.test("AllOf operand needs no parentheses"):
+        assert NoneOf(AllOf(is_a, is_b), is_c).describe() == "none of (is_a & is_b, is_c)"

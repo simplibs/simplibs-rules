@@ -43,3 +43,9 @@ def test_build_any_of_rule_with_optional() -> None:
     assert rule.is_valid(100) is True
     assert rule.is_valid(None) is True
     assert rule.is_valid("none") is False
+
+
+def test_build_any_of_rule_describe() -> None:
+    """Verify a Union describes itself by its members, in the written order."""
+    assert build_any_of_rule(Union[int, str]).describe() == "int | str"
+    assert build_any_of_rule(Optional[int]).describe() == "int | None"

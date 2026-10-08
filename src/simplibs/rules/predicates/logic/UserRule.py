@@ -51,6 +51,14 @@ class UserRule(Rule):
             return False
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. The wrapped callable's own name — repr() for unnamed callables
+        return getattr(self.rule, "__name__", repr(self.rule))
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -61,7 +69,7 @@ class UserRule(Rule):
     ) -> Exception:
 
         # 1. Prepare data
-        rule_name = getattr(self.rule, "__name__", repr(self.rule))
+        rule_name = self.describe()
 
         # 2. Build the exception
         return ValidationError(
@@ -115,4 +123,13 @@ callable, not only literal `lambda` expressions. `IsLambda` was also
 rejected — it reads as "is this value a lambda", the opposite of what
 this class actually checks (whether a value *satisfies* the given
 callable).
+
+---
+
+## 4. Description
+
+`describe()` returns the callable's `__name__` ("positive_pred", "<lambda>"),
+or its `repr()` when it has none. `build_exception` reuses it as the callable's
+name in the card, so the card and the text used by containers (and by
+`format_annotation` for `Annotated` metadata) always agree.
 """

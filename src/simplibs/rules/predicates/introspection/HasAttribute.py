@@ -37,6 +37,14 @@ class HasAttribute(Rule):
         return hasattr(value, self.attr_name)
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Same phrase the failure card uses as `expected`
+        return f"object with attribute {self.attr_name!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -92,4 +100,12 @@ whether a target object possesses a specific attribute or method.
 * **Problem Detail:** Mentions the exact runtime type
   (`type(value).__name__`) to quickly identify why the attribute was
   missing.
+
+---
+
+## 3. Description
+
+`describe()` returns "object with attribute 'append'" — the same phrase the
+failure card uses as `expected`, because it is already short and reads
+naturally after "not" and inside "a | b".
 """

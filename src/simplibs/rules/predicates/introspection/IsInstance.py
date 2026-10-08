@@ -46,6 +46,17 @@ class IsInstance(Rule):
         return isinstance(value, self.types)
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Type names joined with "|" — NoneType reads as None
+        return " | ".join(
+            "None" if type_ is type(None) else type_.__name__
+            for type_ in self.types
+        )
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -102,4 +113,19 @@ or more specified classes/types.
   `TypeError`.
 * **Diagnostic Detail:** Explicitly formats the runtime type
   (`type(value).__name__`) and allowed types.
+
+---
+
+## 3. Description
+
+`describe()` lists the type names joined with `" | "` ("int", "int | str") —
+the spelling of the matching annotation — and `NoneType` reads "None", so
+`IsInstance(int, NoneType)` is "int | None". It is a short fragment for
+composition (containers and the typing layer build "list[int] | None" from
+it), whereas `expected` in the failure card stays the longer sentence form
+("instance of (int)").
+
+Inside an `AllOf`, a multi-type `IsInstance` is not parenthesized
+("int | str & > 0"); the typing layer never produces one (every Union member
+is its own single-type rule), so this can only come from hand-built trees.
 """

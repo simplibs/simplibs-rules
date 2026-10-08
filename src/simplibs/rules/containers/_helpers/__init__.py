@@ -18,5 +18,5 @@ descriptions for diagnostic messages.
 | :----------------------- | :------- | :--------------------------------------------------------------------------------|
 | `as_predicate`            | Function | Normalizes a `Rule` instance or callable into a plain `Callable[[Any], bool]`.  |
 | `build_child_exception`   | Function | Delegates exception construction to a child `Rule` or a callable fallback.      |
-| `describe_rule`           | Function | Returns a readable name for a rule or callable, for use in error messages.      |
+| `describe_rule`           | Function | Returns a readable description of a rule (`Rule.describe()`) or callable, optionally parenthesized. |
 """

@@ -18,14 +18,22 @@ def test_is_substring_of_contract(subtests):
         valid_values=["ADMIN", "ROLE", "FULL_ACCESS", "ADMIN_ROLE_FULL_ACCESS", ""],
         invalid_values=["USER", "GUEST", "admin", 123, None, True, []],
         invalid_init_params=[
-            ((123,), {}),       # Non-string parameter -> ParamError
-            ((None,), {}),      # None parameter -> ParamError
-            ((True,), {}),      # Boolean parameter -> ParamError
-            (([],), {}),        # List parameter -> ParamError
+            ((123,), {}),
+            ((None,), {}),
+            ((True,), {}),
+            (([],), {}),
         ],
+        rule_factory=IsSubstringOf,
+        expected_description="substring of 'ADMIN_ROLE_FULL_ACCESS'",
         deep_check=True,
         verbose=False,
     )
+
+
+def test_is_substring_of_describe():
+    """Verify the description returned by IsSubstringOf."""
+    rule = IsSubstringOf("TEST_TARGET")
+    assert rule.describe() == "substring of 'TEST_TARGET'"
 
 
 def test_is_substring_of_exception_type_error(subtests):

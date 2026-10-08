@@ -84,6 +84,23 @@ class InRange(Rule):
             return False
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Interval in standard bracket notation
+        return f"in {self._format_range()}"
+
+    def _format_range(self) -> str:
+
+        # 1. Brackets follow the inclusivity of each boundary
+        left_bracket = "[" if self.include_min else "("
+        right_bracket = "]" if self.include_max else ")"
+
+        # 2. Interval notation: [1, 10], [0.0, 1.0)
+        return f"{left_bracket}{self.min_val!r}, {self.max_val!r}{right_bracket}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -99,9 +116,7 @@ class InRange(Rule):
             _ = self.min_val <= value <= self.max_val
 
             # 1.1 When the types are comparable, but the value lies outside the range
-            left_bracket = "[" if self.include_min else "("
-            right_bracket = "]" if self.include_max else ")"
-            expected_range = f"{left_bracket}{self.min_val!r}, {self.max_val!r}{right_bracket}"
+            expected_range = self._format_range()
 
             problem = f"Value {value!r} falls outside the expected range {expected_range}."
             how_to_fix = f"Provide a value within the range {expected_range}."
@@ -163,4 +178,13 @@ inclusivity via `include_min` and `include_max`.
 * **Value Failures:** Out-of-bounds inputs format problem/fix strings as
   `ValueError` (`IN_RANGE_ERROR`), clearly indicating boundary mathematical
   notation e.g., `[min, max]`.
+
+---
+
+## 3. Description
+
+`describe()` returns "in [1, 10]" (or "in [0.0, 1.0)"), using interval
+notation that honors `include_min` / `include_max`. `_format_range()` is
+shared with `build_exception`, so the bracketed range in the failure card and
+the summary used by containers can never drift apart.
 """

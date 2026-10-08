@@ -11,6 +11,8 @@ from simplibs.rules.containers.Not import Not
 class DummyPassRule(Rule):
     """Dummy rule that always passes."""
 
+    __slots__ = ()
+
     def is_valid(self, value: object) -> bool:
         return True
 
@@ -26,6 +28,8 @@ class DummyPassRule(Rule):
 class DummyFailRule(Rule):
     """Dummy rule that always fails."""
 
+    __slots__ = ()
+
     def is_valid(self, value: object) -> bool:
         return False
 
@@ -40,6 +44,61 @@ class DummyFailRule(Rule):
         return ValueError(f"Validation failed for {label}{ctx} with {value!r}")
 
 
+class DummyDescribedRule(Rule):
+    """Dummy rule that overrides describe() with its own text."""
+
+    __slots__ = ()
+
+    def is_valid(self, value: object) -> bool:
+        return True
+
+    def build_exception(
+        self,
+        value: object,
+        value_name: str | None = None,
+        context: str | None = None,
+    ) -> Exception:
+        return ValueError("Dummy described failure")
+
+    def describe(self) -> str:
+        return "dummy described"
+
+
+class DummyAttributeRule(Rule):
+    """Dummy rule with one declared slot attribute."""
+
+    __slots__ = ("limit",)
+
+    def __init__(self, limit: int = 10) -> None:
+        self.limit = limit
+
+    def is_valid(self, value: object) -> bool:
+        return True
+
+    def build_exception(
+        self,
+        value: object,
+        value_name: str | None = None,
+        context: str | None = None,
+    ) -> Exception:
+        return ValueError("Dummy attribute failure")
+
+
+class DummyNoSlotsRule(Rule):
+    """Dummy rule that forgot to declare __slots__."""
+
+    def is_valid(self, value: object) -> bool:
+        return True
+
+    def build_exception(
+        self,
+        value: object,
+        value_name: str | None = None,
+        context: str | None = None,
+    ) -> Exception:
+        return ValueError("Dummy no-slots failure")
+
+
 # ==============================================================================
 # 1. BASE RULE INTERFACE TESTS
 # ==============================================================================
@@ -48,6 +107,11 @@ def test_rule_abstract_instantiation() -> None:
     """Verify that Rule cannot be instantiated directly."""
     with pytest.raises(TypeError):
         Rule()  # type: ignore[abstract]
+
+
+def test_rule_abstract_methods_are_only_the_contract() -> None:
+    """Verify that only is_valid and build_exception are abstract (describe is not)."""
+    assert Rule.__abstractmethods__ == frozenset({"is_valid", "build_exception"})
 
 
 def test_rule_call_magic_method() -> None:
@@ -86,7 +150,81 @@ def test_rule_validate_failure_return_bool() -> None:
 
 
 # ==============================================================================
-# 2. TYPING INTEGRATION TESTS (.annotated())
+# 2. DESCRIPTION TESTS (.describe())
+# ==============================================================================
+
+def test_rule_describe_default_is_class_name(subtests) -> None:
+    """Verify that a rule that does not override describe() reports its class name."""
+    with subtests.test("pass rule"):
+        assert DummyPassRule().describe() == "DummyPassRule"
+
+    with subtests.test("fail rule"):
+        assert DummyFailRule().describe() == "DummyFailRule"
+
+
+def test_rule_describe_default_is_non_empty_string() -> None:
+    """Verify that the default description satisfies the describe() contract."""
+    text = DummyPassRule().describe()
+    assert isinstance(text, str)
+    assert text.strip() != ""
+
+
+def test_rule_describe_can_be_overridden() -> None:
+    """Verify that a subclass can replace the default description."""
+    assert DummyDescribedRule().describe() == "dummy described"
+
+
+def test_rule_describe_does_not_affect_evaluation(subtests) -> None:
+    """Verify that overriding describe() leaves evaluation untouched."""
+    rule = DummyDescribedRule()
+
+    with subtests.test("is_valid"):
+        assert rule.is_valid("x") is True
+
+    with subtests.test("validate"):
+        assert rule.validate("x") is True
+
+
+# ==============================================================================
+# 3. SLOTS TESTS
+# ==============================================================================
+
+def test_rule_declares_empty_slots() -> None:
+    """Verify that Rule itself declares an empty __slots__ (and so adds no __dict__)."""
+    assert "__slots__" in vars(Rule)
+    assert Rule.__slots__ == ()
+
+
+def test_rule_slotted_subclass_has_no_instance_dict() -> None:
+    """Verify that a subclass declaring __slots__ produces instances without __dict__."""
+    assert not hasattr(DummyPassRule(), "__dict__")
+    assert not hasattr(DummyAttributeRule(), "__dict__")
+
+
+def test_rule_slotted_subclass_rejects_undeclared_attribute() -> None:
+    """Verify that assigning an attribute missing from __slots__ raises AttributeError."""
+    rule = DummyPassRule()
+    with pytest.raises(AttributeError):
+        rule.extra = 1  # type: ignore[attr-defined]
+
+
+def test_rule_slotted_subclass_accepts_declared_attribute() -> None:
+    """Verify that an attribute declared in __slots__ can be set and read."""
+    rule = DummyAttributeRule(limit=5)
+    assert rule.limit == 5
+
+    rule.limit = 7
+    assert rule.limit == 7
+
+
+def test_rule_subclass_without_slots_gets_instance_dict() -> None:
+    """Document the pitfall: a subclass that forgets __slots__ silently regains __dict__."""
+    rule = DummyNoSlotsRule()
+    assert hasattr(rule, "__dict__")
+
+
+# ==============================================================================
+# 4. TYPING INTEGRATION TESTS (.annotated())
 # ==============================================================================
 
 def test_rule_annotated_method(subtests) -> None:
@@ -115,7 +253,7 @@ def test_rule_annotated_method(subtests) -> None:
 
 
 # ==============================================================================
-# 3. OPERATOR COMPOSITION TESTS (|, &, ~)
+# 5. OPERATOR COMPOSITION TESTS (|, &, ~)
 # ==============================================================================
 
 def test_rule_operator_or(subtests) -> None:

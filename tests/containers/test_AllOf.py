@@ -11,7 +11,7 @@ from simplibs.rules.testing import assert_rule_contract
 from simplibs.exception import ValidationError
 
 # Rules
-from simplibs.rules.containers import AllOf
+from simplibs.rules.containers import AllOf, AnyOf, Compose, Not
 from simplibs.rules.predicates.numeric import IsInteger
 from simplibs.rules.predicates.comparisons import GreaterThan, LessThan
 
@@ -111,3 +111,38 @@ def test_all_of_short_circuit_eval():
     rule = AllOf(rule_1, rule_2)
     assert rule.is_valid(10) is False
     assert call_log == ["rule_1"]
+
+
+# ==============================================================================
+# 5. DESCRIPTION TEST
+# ==============================================================================
+
+def is_a(value: Any) -> bool:
+    return True
+
+
+def is_b(value: Any) -> bool:
+    return True
+
+
+def is_c(value: Any) -> bool:
+    return True
+
+
+def test_all_of_describe(subtests):
+    """Verify that AllOf composes its description from its operands, with parentheses where needed."""
+
+    with subtests.test("joins operands with &"):
+        assert AllOf(is_a, is_b, is_c).describe() == "is_a & is_b & is_c"
+
+    with subtests.test("flattened nesting reads flat"):
+        assert AllOf(AllOf(is_a, is_b), is_c).describe() == "is_a & is_b & is_c"
+
+    with subtests.test("AnyOf operand is parenthesized"):
+        assert AllOf(AnyOf(is_a, is_b), is_c).describe() == "(is_a | is_b) & is_c"
+
+    with subtests.test("Compose operand is parenthesized"):
+        assert AllOf(Compose(str.strip, is_a), is_b).describe() == "(after strip: is_a) & is_b"
+
+    with subtests.test("Not operand needs no parentheses"):
+        assert AllOf(Not(is_a), is_b).describe() == "not is_a & is_b"

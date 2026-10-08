@@ -22,6 +22,8 @@ def test_in_range_contract(subtests):
         rule=rule,
         valid_values=[1, 5, 10, 1.0, 9.9],
         invalid_values=[0, 11, -5, "5", None, [1]],
+        expected_description="in [1, 10]",
+        rule_factory=InRange,
         invalid_init_params=[
             ((10, 1), {}),         # Swapped bounds (min > max) raise ParamError
             ((1, "10"), {}),       # Incomparable bound types raise ParamError
@@ -96,3 +98,9 @@ def test_in_range_inclusivity_variations():
     rule_max_only = InRange(5, 10, include_min=False, include_max=True)
     assert rule_max_only.is_valid(5) is False
     assert rule_max_only.is_valid(10) is True
+
+
+def test_in_range_describe():
+    """Verify the description phrase for different bracket configurations."""
+    assert InRange(1, 10).describe() == "in [1, 10]"
+    assert InRange(1, 10, include_min=False, include_max=False).describe() == "in (1, 10)"

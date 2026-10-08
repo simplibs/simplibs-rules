@@ -17,6 +17,8 @@ def test_is_odd_contract(subtests):
         rule=rule,
         valid_values=[1, -1, 3, -5, 99],
         invalid_values=[0, 2, -4, 1.0, -3.0, True, False, "1", None, []],
+        expected_description="odd int",
+        rule_factory=IsOdd,
         deep_check=True,
         verbose=False,
     )
@@ -60,3 +62,8 @@ def test_is_odd_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_odd_describe():
+    """Verify the description phrase."""
+    assert IsOdd().describe() == "odd int"

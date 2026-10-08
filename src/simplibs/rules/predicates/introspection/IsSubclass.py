@@ -50,6 +50,14 @@ class IsSubclass(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Base class names joined with "|"
+        return "subclass of " + " | ".join(type_.__name__ for type_ in self.types)
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -119,4 +127,12 @@ The `IsSubclass` rule verifies that a target value is a Python class
     class hierarchy.
 * **Error Classification:** Uses `IS_SUBCLASS_ERROR` wrapping a
   `TypeError`.
+
+---
+
+## 3. Description
+
+`describe()` returns "subclass of Base" (several bases: "subclass of A | B"),
+a short fragment for composition. The failure card keeps its own, longer
+`expected` ("subclass of (Base)" or "a class (subclass of (Base))").
 """

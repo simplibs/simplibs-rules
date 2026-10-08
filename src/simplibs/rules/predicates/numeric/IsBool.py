@@ -25,6 +25,14 @@ class IsBool(Rule):
         return isinstance(value, bool)
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "bool"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -93,4 +101,12 @@ instance — either `True` or `False`.
 * **Error Classification:** Uses `IS_BOOL_ERROR` wrapping a `TypeError`.
 * **Fix Guidance:** Advises providing the literal `True`/`False` boolean
   value.
+
+---
+
+## 4. Description
+
+`describe()` returns "bool" — the type name, like the other type rules of this package. A short fragment that containers and
+the typing layer compose into larger texts ("not bool", "bool | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

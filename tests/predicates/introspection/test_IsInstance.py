@@ -16,8 +16,10 @@ def test_is_instance_contract(subtests):
     assert_rule_contract(
         subtests,
         rule=rule,
-        valid_values=[123, "text", True],  # bool is a subclass of int in Python
+        valid_values=[123, "text", True],
         invalid_values=[3.14, [1, 2], None, {"a": 1}],
+        expected_description="int | str",
+        rule_factory=IsInstance,
         invalid_init_params=[
             ((), {}),             # No type in constructor -> ParamError
             ((123,), {}),         # Passed parameter is not a type -> ParamError
@@ -46,3 +48,9 @@ def test_is_instance_exception(subtests):
         exception=TypeError,
         verbose=False,
     )
+
+
+def test_is_instance_describe():
+    """Verify the description phrase including NoneType formatting."""
+    assert IsInstance(int, str).describe() == "int | str"
+    assert IsInstance(int, type(None)).describe() == "int | None"

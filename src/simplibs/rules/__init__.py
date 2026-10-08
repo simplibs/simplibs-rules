@@ -11,6 +11,7 @@ from .containers import (
     ForEach,
     NoneOf,
     Not,
+    Described
 )
 
 # Predicates — arithmetic
@@ -146,6 +147,7 @@ compose             = Compose           # transformer, validator
 for_each            = ForEach           # rule
 none_of             = NoneOf            # *rules
 negate              = Not               # rule
+described           = Described         # rule, text
 
 
 # ---- predicates/arithmetic -------------------------------------------------
@@ -269,6 +271,7 @@ rule_class = SimpleNamespace(
     ForEach=ForEach,
     NoneOf=NoneOf,
     Not=Not,
+    Described=Described,
 
     # arithmetic
     CloseTo=CloseTo,
@@ -373,6 +376,7 @@ rules = SimpleNamespace(
     for_each=for_each,
     none_of=none_of,
     negate=negate,
+    described=described,
 
     # arithmetic
     close_to=close_to,
@@ -491,6 +495,7 @@ __all__ = [
     "ForEach",
     "NoneOf",
     "Not",
+    "Described",
 
     # arithmetic
     "CloseTo",
@@ -589,6 +594,7 @@ __all__ = [
     "for_each",
     "none_of",
     "negate",
+    "described",
     "close_to",
     "divisible_by",
     "has_remainder",
@@ -807,14 +813,17 @@ are compound names rather than the keywords themselves.
 
 ### `containers/`
 
-| Shortcut   | Parameters               | Logic                              |
-|------------|--------------------------|------------------------------------|
-| `all_of`   | `*rules`                 | All rules must pass.               |
-| `any_of`   | `*rules`                 | At least one rule must pass.       |
-| `compose`  | `transformer, validator` | Validate the transformed value.    |
-| `for_each` | `rule`                   | The rule must pass for every item. |
-| `none_of`  | `*rules`                 | No rule may pass.                  |
-| `negate`   | `rule`                   | The rule must fail.                |
+### `containers/`
+
+| Shortcut    | Parameters                | Logic                                   |
+|-------------|---------------------------|-----------------------------------------|
+| `all_of`    | `*rules`                  | All rules must pass.                    |
+| `any_of`    | `*rules`                  | At least one rule must pass.            |
+| `compose`   | `transformer, validator`  | Validate the transformed value.         |
+| `for_each`  | `rule`                    | The rule must pass for every item.      |
+| `none_of`   | `*rules`                  | No rule may pass.                       |
+| `negate`    | `rule`                    | The rule must fail.                     |
+| `described` | `rule`, `text`            | Wrap the rule with a fixed description. |
 
 
 ### `predicates/arithmetic/`

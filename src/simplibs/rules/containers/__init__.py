@@ -1,6 +1,7 @@
 from .AllOf import AllOf
 from .AnyOf import AnyOf
 from .Compose import Compose
+from .Described import Described
 from .ForEach import ForEach
 from .NoneOf import NoneOf
 from .Not import Not
@@ -25,4 +26,5 @@ predicate rules.
 | `Not`      | Class | Inverts the result of a single wrapped rule or predicate.                       |
 | `ForEach`  | Class | Applies a rule to every item in an iterable value.                              |
 | `Compose`  | Class | Transforms the value, then validates the transformed result.                    |
+| `Described` | Class | Behaves like the wrapped rule, but describes itself with a fixed text.         |
 """

@@ -95,6 +95,26 @@ class HasLength(Rule):
         return True
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Exact length
+        if self.length is not None:
+            return f"length {self.length}"
+
+        # 2. Range with both boundaries
+        if self.min_length is not None and self.max_length is not None:
+            return f"length between {self.min_length} and {self.max_length}"
+
+        # 3. Only a lower boundary
+        if self.min_length is not None:
+            return f"length at least {self.min_length}"
+
+        # 4. Only an upper boundary
+        return f"length at most {self.max_length}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -104,7 +124,7 @@ class HasLength(Rule):
         context: str | None = None,
     ) -> Exception:
 
-        expected = self._describe_expected()
+        expected = self.describe()
 
         # 1. Prepare data
         # 1.1 When value has no defined length (is not Sized)
@@ -129,15 +149,6 @@ class HasLength(Rule):
             how_to_fix=how_to_fix,
             exception=exception_type,
         )
-
-    def _describe_expected(self) -> str:
-        if self.length is not None:
-            return f"length {self.length}"
-        if self.min_length is not None and self.max_length is not None:
-            return f"length between {self.min_length} and {self.max_length}"
-        if self.min_length is not None:
-            return f"length at least {self.min_length}"
-        return f"length at most {self.max_length}"
 
 
 _DESIGN_NOTES = """
@@ -174,4 +185,13 @@ meets target conditions: an exact target (`length`) or boundary conditions
   `TypeError`.
 * **Value Failures:** Invalid length collections format problem/fix
   strings as `ValueError` (`HAS_LENGTH_ERROR`).
+
+---
+
+## 3. Description
+
+`describe()` builds the phrase once ("length 10", "length between 1 and 10",
+"length at least 1", "length at most 10"), and `build_exception` reuses it as
+`expected`, so the summary used by containers and the failure card can never
+drift apart. It replaces the former private `_describe_expected()` helper.
 """

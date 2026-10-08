@@ -32,6 +32,14 @@ class IsAny(Rule):
         return True
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Mirrors typing.Any
+        return "Any"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -111,4 +119,13 @@ than needing a special "skip this slot" branch.
 The module instantiates a single `_IS_ANY` singleton. The leading underscore
 explicitly signals that it is private to internal typing helpers and should
 not be imported or re-exported as a public API object.
+
+---
+
+## 5. Description
+
+`describe()` returns `"Any"` — the spelling of the annotation this rule stands
+for. It appears when `Any` is a member of a larger description
+("dict[str, Any]" is produced by `format_annotation`, while a bare
+`IsAny` inside a hand-built rule tree reads "Any").
 """

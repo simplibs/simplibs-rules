@@ -23,6 +23,8 @@ def test_contains_contract(subtests):
             ((True,), {}),      # Boolean parameter -> ParamError
             (([],), {}),        # List parameter -> ParamError
         ],
+        expected_description="string containing '@'",
+        rule_factory=Contains,
         deep_check=True,
         verbose=False,
     )
@@ -66,3 +68,9 @@ def test_contains_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_contains_describe():
+    """Verify the description phrase."""
+    assert Contains("@").describe() == "string containing '@'"
+    assert Contains("abc").describe() == "string containing 'abc'"

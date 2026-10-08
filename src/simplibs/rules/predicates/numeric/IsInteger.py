@@ -28,6 +28,14 @@ class IsInteger(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "int"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -107,6 +115,14 @@ excluding `bool`.
   `is_container`). Other rule constructors (`HasLength`, `IsPi`,
   `DivisibleBy`, `HasRemainder`) import these for fast internal parameter
   checks without instantiating a new `IsInteger()` each time.
+
+---
+
+## 4. Description
+
+`describe()` returns "int" — the type name (booleans are excluded, as always). A short fragment that containers and
+the typing layer compose into larger texts ("not int", "int | ..."); the
+longer sentence form stays in `expected` of the failure card.
 
 ## Notes
 * A previous revision left a broken draft (`is_non_negative_integer =

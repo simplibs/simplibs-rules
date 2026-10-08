@@ -18,6 +18,8 @@ def test_is_float_contract(subtests):
         # float("nan") excluded because NaN == NaN returns False per IEEE 754
         valid_values=[0.0, 10.5, -1.23, float("inf")],
         invalid_values=[10, "10.5", True, None, []],
+        expected_description="float",
+        rule_factory=IsFloat,
         deep_check=True,
         verbose=False,
     )
@@ -41,3 +43,8 @@ def test_is_float_exception(subtests):
         exception=TypeError,
         verbose=False,
     )
+
+
+def test_is_float_describe():
+    """Verify the description phrase."""
+    assert IsFloat().describe() == "float"

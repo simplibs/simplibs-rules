@@ -29,6 +29,14 @@ class IsOdd(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "odd int"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -91,4 +99,12 @@ diagnostic ("is an even integer") beats a generic negated one.
 * **Dual Diagnostic Path:** `TypeError` when the value isn't an integer
   at all; `ValueError` (`IS_ODD_ERROR`) when it is an integer, just an
   even one.
+
+---
+
+## 3. Description
+
+`describe()` returns "odd int" — the type name plus the property. A short fragment that containers and
+the typing layer compose into larger texts ("not odd int", "odd int | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

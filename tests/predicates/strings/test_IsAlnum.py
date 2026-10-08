@@ -17,6 +17,8 @@ def test_is_alnum_contract(subtests):
         rule=rule,
         valid_values=["abc", "123", "a1b2c3", "Python3"],
         invalid_values=["", "hello world", "a-b", "test!", 123, None, True, []],
+        expected_description="alphanumeric string",
+        rule_factory=IsAlnum,
         deep_check=True,
         verbose=False,
     )
@@ -60,3 +62,8 @@ def test_is_alnum_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_alnum_describe():
+    """Verify the description phrase."""
+    assert IsAlnum().describe() == "alphanumeric string"

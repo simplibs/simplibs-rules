@@ -33,6 +33,7 @@ def test_is_subset_of_contract(subtests):
             123,
             None,
         ],
+        expected_description="subset of {'admin', 'editor', 'viewer'}",
         rule_factory=IsSubsetOf,
         invalid_init_params=[
             ((123,), {}),       # Non-container reference parameter raises ParamError
@@ -105,3 +106,8 @@ def test_is_subset_of_unhashable_elements_exception(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_subset_of_describe():
+    """Verify the description phrase."""
+    assert IsSubsetOf({"a", "b"}).describe() == "subset of {'a', 'b'}"

@@ -18,13 +18,21 @@ def test_regex_contract(subtests):
         valid_values=["hello", "abc", "z"],
         invalid_values=["Hello", "abc123", "", " ", 123, None, True],
         invalid_init_params=[
-            ((123,), {}),       # Non-string parameter -> ParamError (TypeError)
-            ((None,), {}),      # None parameter -> ParamError (TypeError)
-            (("[a-z",), {}),    # Invalid regex syntax -> ParamError (re.error)
+            ((123,), {}),
+            ((None,), {}),
+            (("[a-z",), {}),
         ],
+        rule_factory=Regex,
+        expected_description="string matching /^[a-z]+$/",
         deep_check=True,
         verbose=False,
     )
+
+
+def test_regex_describe():
+    """Verify the description returned by Regex."""
+    rule = Regex(r"^\d+$")
+    assert rule.describe() == "string matching /^\\d+$/"
 
 
 def test_regex_exception_type_error(subtests):

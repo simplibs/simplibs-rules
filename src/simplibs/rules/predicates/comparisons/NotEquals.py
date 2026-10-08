@@ -31,6 +31,14 @@ class NotEquals(Rule):
         return value != self.forbidden
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return f"not equal to {self.forbidden!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -85,4 +93,12 @@ specific forbidden object or value.
   `ValueError`.
 * **Fix Guidance:** Provides immediate actionable advice to substitute the
   forbidden value.
+
+---
+
+## 3. Description
+
+`describe()` returns "not equal to 0" — the relation and the forbidden value. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

@@ -17,6 +17,8 @@ def test_is_alpha_contract(subtests):
         rule=rule,
         valid_values=["abc", "Hello", "Příliš"],
         invalid_values=["", "abc1", "hello world", "a-b", 123, None, True],
+        expected_description="alphabetic string",
+        rule_factory=IsAlpha,
         deep_check=True,
         verbose=False,
     )
@@ -60,3 +62,8 @@ def test_is_alpha_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_alpha_describe():
+    """Verify the description phrase."""
+    assert IsAlpha().describe() == "alphabetic string"

@@ -28,6 +28,14 @@ class IsPrimitiveNumber(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "primitive number"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -84,4 +92,12 @@ excluding booleans).
 
 * **Error Classification:** Uses `IS_PRIMITIVE_NUMBER_ERROR` wrapping a
   `TypeError`.
+
+---
+
+## 3. Description
+
+`describe()` returns "primitive number" — not "int | float", so the text never needs parentheses inside an `&`. A short fragment that containers and
+the typing layer compose into larger texts ("not primitive number", "primitive number | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

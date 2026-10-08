@@ -18,6 +18,7 @@ def test_is_true_contract(subtests):
         rule=rule,
         valid_values=[True],
         invalid_values=[False, 1, "True", [1], None],
+        expected_description="True",
         rule_factory=IsTrue,
         deep_check=True,
         verbose=False,
@@ -42,3 +43,8 @@ def test_is_true_exception_details(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_true_describe():
+    """Verify the description phrase."""
+    assert IsTrue().describe() == "True"

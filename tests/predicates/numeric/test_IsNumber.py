@@ -18,6 +18,8 @@ def test_is_number_contract(subtests):
         rule=rule,
         valid_values=[10, 10.5, Decimal("10.5"), complex(1, 2)],
         invalid_values=[True, False, "10", None, []],
+        expected_description="number",
+        rule_factory=IsNumber,
         deep_check=True,
         verbose=False,
     )
@@ -48,3 +50,8 @@ def test_is_number_helper():
     assert is_number(10) is True
     assert is_number(Decimal("1.2")) is True
     assert is_number(True) is False
+
+
+def test_is_number_describe():
+    """Verify the description phrase."""
+    assert IsNumber().describe() == "number"

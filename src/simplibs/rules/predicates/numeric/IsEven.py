@@ -29,6 +29,14 @@ class IsEven(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "even int"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -104,4 +112,12 @@ Not(IsOdd())"), rather than deriving one from the other's negation.
 * **Dual Diagnostic Path:** `TypeError` when the value isn't an integer
   at all (mirrors `IsInteger`'s own message); `ValueError`
   (`IS_EVEN_ERROR`) when it is an integer, just an odd one.
+
+---
+
+## 4. Description
+
+`describe()` returns "even int" — the type name plus the property. A short fragment that containers and
+the typing layer compose into larger texts ("not even int", "even int | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

@@ -25,6 +25,14 @@ class IsFalse(Rule):
         return value is False
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Fixed phrase
+        return "False"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -78,4 +86,12 @@ boolean object `False`.
 * **Error Classification:** Uses `IS_FALSE_ERROR` wrapping a `ValueError`.
 * **Fix Guidance:** Clear instruction specifying the boolean literal
   `False`.
+
+---
+
+## 3. Description
+
+`describe()` returns "False" — the literal the rule requires. A short fragment that containers and
+the typing layer compose into larger texts ("not False", "False | ..."); the
+longer sentence form stays in `expected` of the failure card.
 """

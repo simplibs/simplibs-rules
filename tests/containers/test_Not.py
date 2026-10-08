@@ -11,7 +11,7 @@ from simplibs.rules.testing import assert_rule_contract
 from simplibs.exception import ValidationError
 
 # Rules
-from simplibs.rules.containers import Not
+from simplibs.rules.containers import AllOf, AnyOf, Compose, Not
 from simplibs.rules.predicates.numeric import IsZero
 from simplibs.rules.predicates.strings import IsString
 from simplibs.rules.predicates.checkers import IsNone
@@ -47,7 +47,10 @@ def test_not_contract(subtests):
 
 def test_not_exception_details(subtests):
     """Verify exact diagnostic card details when a value satisfies the forbidden rule."""
-    rule = Not(IsZero())
+    # Expected texts are built from describe(), so the test stays valid
+    # whenever a predicate changes its description.
+    zero = IsZero()
+    rule = Not(zero)
 
     assert_exception_function(
         subtests,
@@ -57,9 +60,9 @@ def test_not_exception_details(subtests):
         label="counter",
         value=0,
         error_name="NOT_RULE_ERROR",
-        expected="value NOT satisfying IsZero",
-        problem="Value unexpectedly satisfied forbidden rule/condition: IsZero.",
-        how_to_fix="Provide a value that does not satisfy IsZero.",
+        expected=f"value NOT satisfying {zero.describe()}",
+        problem=f"Value unexpectedly satisfied forbidden rule/condition: {zero.describe()}.",
+        how_to_fix=f"Provide a value that does not satisfy {zero.describe()}.",
         exception=ValueError,
         verbose=False,
     )
@@ -85,3 +88,31 @@ def test_not_with_custom_predicate():
     assert rule.is_valid(5) is True
     assert rule.is_valid(10) is True
     assert rule.is_valid(15) is False
+
+
+# ==============================================================================
+# 4. DESCRIPTION TEST
+# ==============================================================================
+
+def is_a(value: Any) -> bool:
+    return True
+
+
+def is_b(value: Any) -> bool:
+    return True
+
+
+def test_not_describe(subtests):
+    """Verify that Not describes itself as 'not <rule>', parenthesizing compound operands."""
+
+    with subtests.test("simple operand"):
+        assert Not(is_a).describe() == "not is_a"
+
+    with subtests.test("AnyOf operand is parenthesized"):
+        assert Not(AnyOf(is_a, is_b)).describe() == "not (is_a | is_b)"
+
+    with subtests.test("AllOf operand is parenthesized"):
+        assert Not(AllOf(is_a, is_b)).describe() == "not (is_a & is_b)"
+
+    with subtests.test("Compose operand is parenthesized"):
+        assert Not(Compose(str.strip, is_a)).describe() == "not (after strip: is_a)"

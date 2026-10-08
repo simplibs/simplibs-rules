@@ -21,6 +21,17 @@ keeps each rule's `is_valid` a clean boolean expression rather than a `try/excep
 AttributeError` — a non-string input simply fails the first condition and never
 reaches the second.
 
+## A note on descriptions
+
+Every rule here overrides [`Rule.describe()`](README_RULE_CLASS.md#describe) with a short
+fragment that containers and the typing layer compose into larger texts. The rules with
+a parameter use the phrase their failure card reports as `expected`
+(`string starting with 'https://'`, `string matching /^[a-z]+$/`); the character-class
+rules name the string they require (`alphabetic string`, `ASCII string`,
+`title-cased string`). `NotBlank` reads `non-blank string` rather than `not blank`, so
+negating it never produces "not not blank". The `expected` sentence of each failure
+card is unchanged.
+
 ---
 
 ## 🧭 Table of Contents
@@ -66,6 +77,8 @@ def is_valid(self, value: Any) -> bool:
     return isinstance(value, str)
 ```
 
+**Description:** `"str"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -90,6 +103,8 @@ def is_valid(self, value: Any) -> bool:
         and self.substring in value
     )
 ```
+
+**Description:** `"string containing '@'"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -117,6 +132,8 @@ def is_valid(self, value: Any) -> bool:
     )
 ```
 
+**Description:** `"substring of 'ADMIN_ROLE_FULL_ACCESS'"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -142,6 +159,8 @@ def is_valid(self, value: Any) -> bool:
     )
 ```
 
+**Description:** `"string starting with 'https://'"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -166,6 +185,8 @@ def is_valid(self, value: Any) -> bool:
         and value.endswith(self.suffix)
     )
 ```
+
+**Description:** `"string ending with '.py'"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -195,6 +216,8 @@ def is_valid(self, value: Any) -> bool:
     )
 ```
 
+**Description:** `"string matching /^[a-z]+$/"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -219,6 +242,8 @@ def is_valid(self, value: Any) -> bool:
         and value.strip() == ""
     )
 ```
+
+**Description:** `"blank string"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -245,6 +270,8 @@ def is_valid(self, value: Any) -> bool:
         and value.strip() != ""
     )
 ```
+
+**Description:** `"non-blank string"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -273,6 +300,8 @@ def is_valid(self, value: Any) -> bool:
 ```
 
 On failure, the diagnostic distinguishes non-string types from empty or non-alphanumeric strings.
+
+**Description:** `"alphanumeric string"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -304,6 +333,8 @@ def is_valid(self, value: Any) -> bool:
 
 On failure, the diagnostic distinguishes non-string types from empty or non-alphabetic strings.
 
+**Description:** `"alphabetic string"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -333,6 +364,8 @@ def is_valid(self, value: Any) -> bool:
 ```
 
 On failure, the diagnostic distinguishes non-string types from strings containing non-ASCII characters.
+
+**Description:** `"ASCII string"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -364,6 +397,8 @@ def is_valid(self, value: Any) -> bool:
 
 On failure, the diagnostic distinguishes non-string types from empty or non-digit strings.
 
+**Description:** `"digit string"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -393,6 +428,8 @@ def is_valid(self, value: Any) -> bool:
 ```
 
 On failure, the diagnostic distinguishes non-string types from strings containing uppercase characters or lacking cased characters.
+
+**Description:** `"lowercase string"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -424,6 +461,8 @@ def is_valid(self, value: Any) -> bool:
 
 On failure, the diagnostic distinguishes non-string types from non-title-cased strings.
 
+**Description:** `"title-cased string"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -453,6 +492,8 @@ def is_valid(self, value: Any) -> bool:
 ```
 
 On failure, the diagnostic distinguishes non-string types from strings containing lowercase characters or lacking cased characters.
+
+**Description:** `"uppercase string"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -486,6 +527,8 @@ def is_valid(self, value: Any) -> bool:
 
 On failure, the diagnostic distinguishes non-string types from invalid Python identifier strings.
 
+**Description:** `"Python identifier"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -518,6 +561,8 @@ def is_valid(self, value: Any) -> bool:
 
 On failure, the diagnostic distinguishes non-string types from strings containing unprintable/control characters.
 
+**Description:** `"printable string"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -549,6 +594,8 @@ def is_valid(self, value: Any) -> bool:
 ```
 
 On failure, the diagnostic distinguishes non-string types from empty or non-whitespace strings.
+
+**Description:** `"whitespace string"`.
 
 [▲ Back to top](#-table-of-contents)
 

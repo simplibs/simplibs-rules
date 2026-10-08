@@ -55,6 +55,24 @@ class IsIn(Rule):
             return False
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Membership in the (deterministically formatted) collection
+        return f"one of {self._format_options()}"
+
+    def _format_options(self) -> str:
+
+        # 1. Format the collection representation deterministically
+        opts_repr = format_container(self.options)
+
+        # 2. Abbreviate long collections to their type and size
+        if len(opts_repr) > 60:
+            opts_repr = f"{type(self.options).__name__}(size={len(self.options)})"
+        return opts_repr
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -65,9 +83,7 @@ class IsIn(Rule):
     ) -> Exception:
 
         # 1. Format the collection representation deterministically
-        opts_repr = format_container(self.options)
-        if len(opts_repr) > 60:
-            opts_repr = f"{type(self.options).__name__}(size={len(self.options)})"
+        opts_repr = self._format_options()
 
         # 2. Prepare data
         try:
@@ -141,4 +157,14 @@ specific set or sequence of allowed options.
 
 * **Error Classification:** Uses `IS_IN_ERROR` wrapping a `ValueError`.
 * **Fix Guidance:** Displays expected member collection options clearly.
+
+---
+
+## 3. Description
+
+`describe()` returns "one of (...)", the same phrase the failure card uses as
+`expected`. The collection text comes from `_format_options()`, which
+`build_exception` shares: deterministic ordering for sets, and abbreviation to
+"type(size=N)" past 60 characters, so long option lists never make a composed
+description unreadable.
 """

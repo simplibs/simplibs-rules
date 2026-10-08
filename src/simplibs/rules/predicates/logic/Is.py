@@ -31,6 +31,14 @@ class Is(Rule):
         return value is self.expected
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Identity with the expected object
+        return f"identical to {self.expected!r}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -85,4 +93,11 @@ sentinel values, singletons, or exact object references (such as `None`,
 * **Error Classification:** Uses `IS_ERROR` wrapping a `ValueError`.
 * **Fix Guidance:** Explicitly instructs providing the exact object
   instance rather than an equal-value copy.
+
+---
+
+## 3. Description
+
+`describe()` returns "identical to None" — the phrase from `expected` without
+the leading "value", so it reads naturally after "not" and inside "a | b".
 """

@@ -23,6 +23,8 @@ def test_ends_with_contract(subtests):
             ((True,), {}),      # Boolean suffix -> ParamError
             (([],), {}),        # List suffix -> ParamError
         ],
+        expected_description="string ending with '.py'",
+        rule_factory=EndsWith,
         deep_check=True,
         verbose=False,
     )
@@ -66,3 +68,9 @@ def test_ends_with_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_ends_with_describe():
+    """Verify the description phrase."""
+    assert EndsWith(".py").describe() == "string ending with '.py'"
+    assert EndsWith("txt").describe() == "string ending with 'txt'"

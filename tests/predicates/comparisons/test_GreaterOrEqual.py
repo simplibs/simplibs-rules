@@ -18,6 +18,8 @@ def test_greater_or_equal_contract(subtests):
         rule=rule,
         valid_values=[10, 11, 10.0, 100],
         invalid_values=[9.9, 9, 0, -5, "10", None, [10]],
+        expected_description=">= 10",
+        rule_factory=GreaterOrEqual,
         deep_check=True,
         verbose=False,
     )
@@ -60,3 +62,8 @@ def test_greater_or_equal_incomparable_type_exception(subtests):
         how_to_fix="Provide a value of a type comparable with 'int'.",
         exception=TypeError,
     )
+
+
+def test_greater_or_equal_describe():
+    """Verify the description phrase."""
+    assert GreaterOrEqual(10).describe() == ">= 10"

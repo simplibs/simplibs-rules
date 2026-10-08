@@ -26,6 +26,15 @@ applies: "the types are comparable, but the value is on the wrong side" vs. "the
 types can't be compared with each other at all" — the latter reported as a `TypeError`
 naming both types involved, the former as an ordinary `ValueError`.
 
+## A note on descriptions
+
+Every rule here overrides [`Rule.describe()`](README_RULE_CLASS.md#describe) with a short
+fragment that containers and the typing layer compose into larger texts. The ordering
+rules use the operator itself (`> 0`, `<= 100`), `InRange` uses interval notation
+(`in [1, 10]`, `in [0.0, 1.0)`) shared with its failure card, and the equality rules
+spell the relation out (`equal to 'active'`, `not equal to 0`). The `expected`
+sentence of each failure card is unchanged.
+
 ---
 
 ## 🧭 Table of Contents
@@ -60,6 +69,8 @@ def is_valid(self, value: Any) -> bool:
     return value == self.expected_value
 ```
 
+**Description:** `"equal to 'active'"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -81,6 +92,8 @@ validate(value, NotEquals(0))
 def is_valid(self, value: Any) -> bool:
     return value != self.forbidden
 ```
+
+**Description:** `"not equal to 0"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -107,6 +120,8 @@ def is_valid(self, value: Any) -> bool:
         return False
 ```
 
+**Description:** `"> 0"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -131,6 +146,8 @@ def is_valid(self, value: Any) -> bool:
     except TypeError:
         return False
 ```
+
+**Description:** `">= 0"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -157,6 +174,8 @@ def is_valid(self, value: Any) -> bool:
         return False
 ```
 
+**Description:** `"< 100"`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---
@@ -181,6 +200,8 @@ def is_valid(self, value: Any) -> bool:
     except TypeError:
         return False
 ```
+
+**Description:** `"<= 100"`.
 
 [▲ Back to top](#-table-of-contents)
 
@@ -233,6 +254,8 @@ On failure, the reported diagnostic renders the range using standard interval br
 notation matching each boundary's inclusivity — `[1, 10]` for fully inclusive,
 `[0.0, 1.0)` for an excluded upper bound, and so on — alongside the same "incomparable
 types" vs. "out of range" distinction the other comparison rules in this package draw.
+
+**Description:** `"in [1, 10]"` — brackets follow `include_min` / `include_max` (`"in [0.0, 1.0)"`).
 
 [▲ Back to top](#-table-of-contents)
 

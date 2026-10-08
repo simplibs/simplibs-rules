@@ -17,6 +17,8 @@ def test_is_digit_string_contract(subtests):
         rule=rule,
         valid_values=["123", "007", "0"],
         invalid_values=["", "12.3", "-5", "123a", "abc", 123, None, True],
+        expected_description="digit string",
+        rule_factory=IsDigitString,
         deep_check=True,
         verbose=False,
     )
@@ -60,3 +62,8 @@ def test_is_digit_string_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_digit_string_describe():
+    """Verify the description phrase."""
+    assert IsDigitString().describe() == "digit string"

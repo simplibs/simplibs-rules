@@ -17,6 +17,8 @@ def test_is_identifier_contract(subtests):
         rule=rule,
         valid_values=["var_name", "myFunc1", "_private", "CLASS", "def"],
         invalid_values=["", "123var", "var-name", "var name", 123, None, True, []],
+        expected_description="Python identifier",
+        rule_factory=IsIdentifier,
         deep_check=True,
         verbose=False,
     )
@@ -68,3 +70,8 @@ def test_is_identifier_helper(subtests):
         assert is_identifier("valid_var") is True
         assert is_identifier("123invalid") is False
         assert is_identifier(123) is False
+
+
+def test_is_identifier_describe():
+    """Verify the description phrase."""
+    assert IsIdentifier().describe() == "Python identifier"

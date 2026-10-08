@@ -18,6 +18,8 @@ def test_is_zero_contract(subtests):
         rule=rule,
         valid_values=[0, 0.0, Decimal("0"), complex(0, 0)],
         invalid_values=[1, 0.1, Decimal("0.1"), complex(1, 0), True, False, "0", None],
+        expected_description="zero",
+        rule_factory=IsZero,
         deep_check=True,
         verbose=False,
     )
@@ -61,3 +63,8 @@ def test_is_zero_exception_value_error(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+def test_is_zero_describe():
+    """Verify the description phrase."""
+    assert IsZero().describe() == "zero"

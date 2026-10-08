@@ -21,14 +21,10 @@ def test_is_callable_contract(subtests):
     assert_rule_contract(
         subtests,
         rule=rule,
-        valid_values=[
-            print,
-            lambda x: x,
-            CallableClass(),
-            int,
-            str.upper,
-        ],
+        valid_values=[print, lambda x: x, CallableClass(), int, str.upper],
         invalid_values=[123, "text", [1, 2], {"a": 1}, None, 3.14],
+        expected_description="callable",
+        rule_factory=IsCallable,
         deep_check=True,
         verbose=False,
     )
@@ -52,3 +48,8 @@ def test_is_callable_exception(subtests):
         exception=TypeError,
         verbose=False,
     )
+
+
+def test_is_callable_describe():
+    """Verify the description phrase."""
+    assert IsCallable().describe() == "callable"

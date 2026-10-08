@@ -11,7 +11,7 @@ contract.
 
 ## Internal Components Registry
 
-| Component | Type  | Description                                                                     |
-| :-------- | :---- | :------------------------------------------------------------------------------|
-| `Rule`    | Class | Abstract base class defining `is_valid`, `build_exception`, `__call__`, `validate`. |
+| Component | Type  | Description                                                                                          |
+| :-------- | :---- | :--------------------------------------------------------------------------------------------------- |
+| `Rule`    | Class | Abstract base class defining `is_valid`, `build_exception`, `__call__`, `validate` and `describe`.    |
 """

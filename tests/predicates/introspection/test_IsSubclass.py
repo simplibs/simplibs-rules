@@ -26,6 +26,8 @@ def test_is_subclass_contract(subtests):
         rule=rule,
         valid_values=[Derived, Base],
         invalid_values=[int, str, Derived(), "text", 123, None],
+        expected_description="subclass of Base",
+        rule_factory=IsSubclass,
         invalid_init_params=[
             ((), {}),             # No type -> ParamError
             ((123,), {}),         # Parameter is not a type -> ParamError
@@ -74,3 +76,8 @@ def test_is_subclass_exception_wrong_class(subtests):
         exception=TypeError,
         verbose=False,
     )
+
+
+def test_is_subclass_describe():
+    """Verify the description phrase."""
+    assert IsSubclass(Base).describe() == "subclass of Base"

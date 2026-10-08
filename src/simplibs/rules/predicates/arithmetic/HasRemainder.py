@@ -60,6 +60,14 @@ class HasRemainder(Rule):
         )
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. Phrase built from the rule's parameters
+        return f"remainder {self.remainder} when divided by {self.divisor}"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -134,4 +142,12 @@ specific remainder when divided by a target divisor
   format problem/fix strings as `ValueError` (`HAS_REMAINDER_ERROR`),
   displaying both the actual evaluated remainder (`value % divisor`) and
   the expected remainder.
+
+---
+
+## 3. Description
+
+`describe()` returns "remainder 1 when divided by 3" — the same phrase the failure card uses as `expected`. A short fragment that containers and
+the typing layer compose into larger texts ("not ...", "... | ..."); the failure
+card keeps its own `expected` sentence.
 """

@@ -2,30 +2,14 @@ from collections import abc as collections_abc
 import types
 import typing
 
-from simplibs.rules.predicates.typing._builders.build_annotated_rule import (
-    build_annotated_rule,
-)
-from simplibs.rules.predicates.typing._builders.build_any_of_rule import (
-    build_any_of_rule,
-)
-from simplibs.rules.predicates.typing._builders.build_callable_rule import (
-    build_callable_rule,
-)
-from simplibs.rules.predicates.typing._builders.build_elements_rule import (
-    build_elements_rule,
-)
-from simplibs.rules.predicates.typing._builders.build_key_value_rule import (
-    build_key_value_rule,
-)
-from simplibs.rules.predicates.typing._builders.build_literal_rule import (
-    build_literal_rule,
-)
-from simplibs.rules.predicates.typing._builders.build_tuple_rule import (
-    build_tuple_rule,
-)
-from simplibs.rules.predicates.typing._builders.build_type_rule import (
-    build_type_rule,
-)
+from simplibs.rules.predicates.typing._builders.build_annotated_rule import build_annotated_rule
+from simplibs.rules.predicates.typing._builders.build_any_of_rule import build_any_of_rule
+from simplibs.rules.predicates.typing._builders.build_callable_rule import build_callable_rule
+from simplibs.rules.predicates.typing._builders.build_elements_rule import build_elements_rule
+from simplibs.rules.predicates.typing._builders.build_key_value_rule import build_key_value_rule
+from simplibs.rules.predicates.typing._builders.build_literal_rule import build_literal_rule
+from simplibs.rules.predicates.typing._builders.build_tuple_rule import build_tuple_rule
+from simplibs.rules.predicates.typing._builders.build_type_rule import build_type_rule
 from simplibs.rules.predicates.typing._builders.ORIGIN_TABLE import ORIGIN_TABLE
 
 

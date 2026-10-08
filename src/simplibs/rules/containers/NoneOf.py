@@ -47,6 +47,14 @@ class NoneOf(Rule):
         return not any(as_predicate(rule)(value) for rule in self.rules)
 
     # ----------------------------------------------------------------------
+    # Description definition
+    # ----------------------------------------------------------------------
+    def describe(self) -> str:
+
+        # 1. List every forbidden rule
+        return "none of (" + ", ".join(describe_rule(rule) for rule in self.rules) + ")"
+
+    # ----------------------------------------------------------------------
     # Exception definition
     # ----------------------------------------------------------------------
     def build_exception(
@@ -109,4 +117,16 @@ specified child rules or predicate functions.
   were unexpectedly matched by `value`, providing crystal-clear diagnostic
   information in the `problem` section.
 * **Error Classification:** Uses `NONE_OF_ERROR` wrapping a `ValueError`.
+
+---
+
+## 3. Description
+
+* **List Form:**
+  `describe()` returns "none of (a, b)" ("none of (None, callable)"). The
+  operands are comma-separated inside the brackets, so none of them needs
+  parentheses of its own.
+* **Matches The Failure Card:**
+  `build_exception` lists the same operand texts ("value satisfying none of:
+  a, b"), so the summary and the card never disagree.
 """
