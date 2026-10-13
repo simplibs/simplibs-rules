@@ -9,6 +9,10 @@ from simplibs.exception import ValidationError
 from simplibs.rules.predicates.collections import AllUnique
 
 
+def _generator(*items):
+    yield from items
+
+
 # ==============================================================================
 # 1. CONTRACT TEST (Master Contract)
 # ==============================================================================
@@ -26,6 +30,7 @@ def test_all_unique_contract(subtests):
             {10, 20, 30},
             [],
             "abc",
+            range(3),
         ],
         invalid_values=[
             [1, 2, 2, 3],
@@ -33,6 +38,8 @@ def test_all_unique_contract(subtests):
             "aba",
             123,
             None,
+            _generator(1, 2, 3),   # one-shot iterator — rejected even though its items are unique
+            iter([1, 2, 3]),
         ],
         expected_description="all unique",
         rule_factory=AllUnique,
@@ -85,6 +92,30 @@ def test_all_unique_non_iterable_exception(subtests):
     )
 
 
+def test_all_unique_one_shot_iterator_exception(subtests):
+    """Verify diagnosis (TypeError) when the value is a one-shot iterator."""
+    rule = AllUnique()
+    generator = _generator(1, 1)
+
+    assert_exception_function(
+        subtests,
+        func=rule.validate,
+        invalid_params=(generator, Kwargs(value_name="items")),
+        exception_type=ValidationError,
+        label="items",
+        error_name="ALL_UNIQUE_ERROR",
+        expected="all-unique items",
+        problem=(
+            "Value of type 'generator' is a one-shot iterator: "
+            "checking its items would consume it."
+        ),
+        how_to_fix="Pass a list, tuple or set (e.g. list(value)) instead of the iterator.",
+        exception=TypeError,
+        verbose=False,
+    )
+    assert list(generator) == [1, 1]   # still untouched after the failed validation
+
+
 # ==============================================================================
 # 3. SPECIFIC EDGE CASES & UNHASHABLE TYPES
 # ==============================================================================
@@ -103,3 +134,54 @@ def test_all_unique_unhashable_items():
 def test_all_unique_describe():
     """Verify the description phrase."""
     assert AllUnique().describe() == "all unique"
+
+
+# ==============================================================================
+# 4. ONE-SHOT ITERATORS & NON-LIST CONTAINERS
+# ==============================================================================
+
+def test_all_unique_rejects_one_shot_iterator_untouched():
+    """Verify an iterator is rejected before it is consumed (even when its items are unique)."""
+    rule = AllUnique()
+    generator = _generator(1, 2, 3)
+
+    assert rule.is_valid(generator) is False
+    assert list(generator) == [1, 2, 3]
+
+
+def test_all_unique_rejects_every_kind_of_one_shot_iterator(subtests):
+    """Verify generators and the common iterator-returning builtins are all rejected."""
+    rule = AllUnique()
+    factories = {
+        "generator": lambda: _generator(1, 2, 3),
+        "iter(list)": lambda: iter([1, 2, 3]),
+        "map": lambda: map(int, "123"),
+        "filter": lambda: filter(None, [1, 2, 3]),
+        "zip": lambda: zip("abc", "xyz"),
+    }
+
+    for name, factory in factories.items():
+        with subtests.test(name):
+            assert rule.is_valid(factory()) is False
+
+
+def test_all_unique_accepts_non_list_reiterable_containers(subtests):
+    """Verify re-iterable containers other than list/tuple/set are still validated by their items."""
+    rule = AllUnique()
+
+    with subtests.test("range"):
+        assert rule.is_valid(range(5)) is True
+
+    with subtests.test("dict iterates its (unique) keys"):
+        assert rule.is_valid({"a": 1, "b": 1}) is True
+
+    with subtests.test("dict view with unique items"):
+        assert rule.is_valid({"a": 1, "b": 2}.values()) is True
+
+    with subtests.test("dict view with duplicate items"):
+        assert rule.is_valid({"a": 1, "b": 1}.values()) is False
+
+
+def test_all_unique_class_object_is_not_iterable_and_does_not_raise():
+    """Verify a class object (hasattr(list, '__iter__') is True) is rejected instead of raising."""
+    assert AllUnique().is_valid(list) is False

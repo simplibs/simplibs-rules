@@ -85,6 +85,14 @@ failing sub-rule. The visible result is a readable failure instead of
 Expected:  value satisfying at least one of: list[int], set[int], str
 ```
 
+## One-shot iterators and `Iterable[T]`
+
+`Iterable[T]` is decomposed like the other element generics: the value is checked item by
+item. A generator (or any other one-shot iterator) cannot be checked without being
+consumed, so `Iterable[T]` **rejects it** with a clear error instead of validating it and
+handing the receiving code an empty iterator. To accept a generator, annotate plain
+`Iterable`; to validate its items, pass a `list`/`tuple`/`set` (or annotate `Collection[T]`).
+
 ---
 
 ## 🧭 Table of Contents

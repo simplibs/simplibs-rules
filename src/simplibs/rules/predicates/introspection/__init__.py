@@ -5,6 +5,7 @@ from .IsDataclass import IsDataclass
 from .IsHashable import IsHashable
 from .IsInstance import IsInstance
 from .IsIterable import IsIterable
+from .IsReiterable import IsReiterable
 from .IsSubclass import IsSubclass
 from .IsType import IsType
 
@@ -20,15 +21,16 @@ concrete contents.
 
 ## Internal Components Registry
 
-| Component         | Type  | Description                                                              |
-| :--------------------| :---- | :---------------------------------------------------------------------------|
-| `HasAttribute`       | Class | Value must have a given attribute or method (duck typing).              |
-| `HasLength`          | Class | Value's `len()` must equal a target, or fall within min/max bounds.     |
-| `IsCallable`         | Class | Value must be callable.                                                 |
-| `IsDataclass`        | Class | Value must be a dataclass instance or class.                            |
-| `IsHashable`         | Class | Value must be hashable.                                                 |
-| `IsInstance`         | Class | Value must be an instance of one or more given types.                   |
-| `IsIterable`         | Class | Value must be iterable.                                                 |
-| `IsSubclass`         | Class | Value must be a class that is a subclass of one or more given types.    |
-| `IsType`             | Class | Value must itself be a class/type object, not an instance.              |
+| Component            | Type  | Description                                                                 |
+| :------------------- | :---- | :-------------------------------------------------------------------------- |
+| `HasAttribute`       | Class | Value must have a given attribute or method (duck typing).                  |
+| `HasLength`          | Class | Value's `len()` must equal a target, or fall within min/max bounds.         |
+| `IsCallable`         | Class | Value must be callable.                                                     |
+| `IsDataclass`        | Class | Value must be a dataclass instance or class.                                |
+| `IsHashable`         | Class | Value must be hashable.                                                     |
+| `IsInstance`         | Class | Value must be an instance of one or more given types.                       |
+| `IsIterable`         | Class | Value must be iterable.                                                     |
+| `IsReiterable`       | Class | Value must be iterable and not a one-shot iterator (safe to walk twice).    |
+| `IsSubclass`         | Class | Value must be a class that is a subclass of one or more given types.        |
+| `IsType`             | Class | Value must itself be a class/type object, not an instance.                  |
 """

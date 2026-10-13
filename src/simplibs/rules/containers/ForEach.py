@@ -141,4 +141,14 @@ every individual element within an input iterable container.
 * **Failure Cards Unchanged:**
   `build_exception` still points at the exact failing item; only the summary
   text used by other containers comes from `describe()`.
+  
+---
+
+## 4. One-Shot Iterators Are Consumed
+
+`ForEach` walks the value with `iter(value)`, so a generator or any other iterator is
+exhausted by validation (and `build_exception` then re-reads an already consumed value).
+This is inherent to checking items. Callers that must keep such a value intact put
+`IsReiterable` in front (`IsReiterable() & ForEach(rule)`); `Iterable[T]` does this
+automatically in the typing layer.
 """

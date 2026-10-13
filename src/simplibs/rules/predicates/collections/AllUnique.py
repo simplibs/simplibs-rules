@@ -1,3 +1,4 @@
+from collections.abc import Iterable, Iterator
 from typing import Any
 from simplibs.exception import ValidationError
 # Outers
@@ -22,18 +23,22 @@ class AllUnique(Rule):
     def is_valid(self, value: Any) -> bool:
 
         # 1. Handling for when value is not iterable
-        if not hasattr(value, "__iter__"):
+        if not isinstance(value, Iterable):
             return False
 
-        # 2. Convert to a list for repeated inspection
+        # 2. A one-shot iterator would be consumed by this check — reject it untouched
+        if isinstance(value, Iterator):
+            return False
+
+        # 3. Convert to a list for repeated inspection
         items = list(value)
 
-        # 3. Evaluate item uniqueness
-        # 3.1 Fast path for hashable items — O(n)
+        # 4. Evaluate item uniqueness
+        # 4.1 Fast path for hashable items — O(n)
         try:
             return len(set(items)) == len(items)
 
-        # 3.2 Fallback for unhashable items — O(n^2)
+        # 4.2 Fallback for unhashable items — O(n^2)
         except TypeError:
             seen: list[Any] = []
             for item in items:
@@ -62,12 +67,21 @@ class AllUnique(Rule):
 
         # 1. Prepare data
         # 1.1 When value is not iterable
-        if not hasattr(value, "__iter__"):
+        if not isinstance(value, Iterable):
             problem = f"Value {value!r} of type '{type(value).__name__}' is not iterable."
             how_to_fix = "Provide an iterable container (e.g., list, tuple, set)."
             exception_type = TypeError
 
-        # 1.2 When value contains duplicates
+        # 1.2 When value is a one-shot iterator (validating it would have consumed it)
+        elif isinstance(value, Iterator):
+            problem = (
+                f"Value of type '{type(value).__name__}' is a one-shot iterator: "
+                "checking its items would consume it."
+            )
+            how_to_fix = "Pass a list, tuple or set (e.g. list(value)) instead of the iterator."
+            exception_type = TypeError
+
+        # 1.3 When value contains duplicates
         else:
             items = list(value)
             duplicates: list[Any] = []
@@ -107,8 +121,9 @@ duplicate elements.
 ## 1. Execution Rationale & Safeguards
 
 * **Explicit Interface Guard (`is_valid`):**
-  Uses explicit `hasattr(value, "__iter__")` check to safely reject
-  non-iterable objects without catching unrelated runtime errors.
+  Uses an explicit `isinstance(value, Iterable)` check to safely reject
+  non-iterable objects without catching unrelated runtime errors, and
+  rejects one-shot iterators (see section 4).
 * **Hybrid Uniqueness Inspection:**
   * Fast-path set inspection (`O(n)`) for hashable elements (integers,
     strings, tuples).
@@ -117,6 +132,7 @@ duplicate elements.
 * **Dual Diagnostic Path (`build_exception`):**
   Uses internal `if/else` branching to assemble:
   * A `TypeError` when the input is not iterable.
+  * A `TypeError` when the input is a one-shot iterator (the check would consume it).
   * A `ValueError` (`ALL_UNIQUE_ERROR`) when the input contains duplicates,
     explicitly listing all duplicate items.
 
@@ -137,4 +153,22 @@ duplicate elements.
 `describe()` returns "all unique" — what the value must be. A short fragment that containers and
 the typing layer compose into larger texts ("not ...", "... | ..."); the failure
 card keeps its own `expected` sentence.
+
+---
+
+## 4. One-Shot Iterators Are Rejected, Not Consumed
+
+This rule has to walk the whole value, and walking a generator (or any other
+iterator) consumes it: the caller would get an exhausted iterator back, and
+when the check fails, the diagnostics would re-read the already consumed value
+and report nothing useful (an empty list of items). An iterator therefore
+never reaches the check — `is_valid` returns `False` for it, and
+`build_exception` explains why (`TypeError`, same `error_name` as the other
+failures of this rule). Re-iterable containers (list, tuple, set, dict, range,
+...) are unaffected.
+
+The iterable test is `isinstance(value, Iterable)` rather than
+`hasattr(value, "__iter__")`: `hasattr` is also true for a class object such as
+`list` itself, which `list(value)` then rejects with a `TypeError` raised out of
+`is_valid`. Same reasoning as `IsReiterable` and `Iterable[T]`.
 """

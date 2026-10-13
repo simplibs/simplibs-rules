@@ -91,7 +91,7 @@ rule = is_integer & greater_than(0)
 rule.validate(5)                          # -> True
 rule.validate(5, return_value=True)       # -> 5
 rule.validate(-5, return_bool=True)       # -> False
-rule.validate(-5)                         # -> raises ValidateError
+rule.validate(-5)                         # -> raises ValidationError
 ```
 
 ### Level 3: Annotation-driven rules
@@ -136,7 +136,7 @@ src/simplibs/rules/
 │   ├── checkers/         ◄── IsEmpty, NotEmpty, IsNone, IsTrue, IsFalse
 │   ├── collections/      ◄── IsContainer, HasItem, HasKey, HasKeys, AllUnique, IsSubsetOf, IsSupersetOf
 │   ├── comparisons/      ◄── Equals, NotEquals, GreaterThan, GreaterOrEqual, LessThan, LessOrEqual, InRange
-│   ├── introspection/    ◄── IsInstance, IsType, IsSubclass, IsDataclass, IsCallable, IsHashable, IsIterable, HasAttribute, HasLength
+│   ├── introspection/    ◄── IsInstance, IsType, IsSubclass, IsDataclass, IsCallable, IsHashable, IsIterable, IsReiterable, HasAttribute, HasLength
 │   ├── logic/            ◄── Is, IsNot, IsIn, NotIn, UserRule
 │   ├── numeric/          ◄── IsBool, IsInteger, IsFloat, IsDecimal, IsNumber, IsPrimitiveNumber, IsZero, IsNan, IsInfinity, IsPi, IsEven, IsOdd, IsFinite
 │   ├── strings/          ◄── IsString, Contains, IsSubstringOf, StartsWith, EndsWith, Regex, IsBlank, NotBlank, IsAlnum, IsAlpha, IsAscii, IsDigitString, IsLowercase, IsTitlecase, IsUppercase, IsIdentifier, IsPrintable, IsWhitespace
@@ -258,7 +258,7 @@ Both are fully interchangeable.
 [README_RULE_PREDICATE_COMPARISONS](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_COMPARISONS.md)
 
 * **`introspection/`**: `IsInstance`, `IsType`, `IsSubclass`, `IsDataclass`, 
-`IsCallable`, `IsHashable`, `IsIterable`, `HasAttribute`, `HasLength`  
+`IsCallable`, `IsHashable`, `IsIterable`, `IsReiterable`, `HasAttribute`, `HasLength`  
 [README_RULE_PREDICATE_INTROSPECTION](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_INTROSPECTION.md)
 
 * **`logic/`**: `Is`, `IsNot`, `IsIn`, `NotIn`, `UserRule`  
@@ -284,6 +284,13 @@ Both are fully interchangeable.
 `IsTyping` recursively decomposes an arbitrary type annotation (`list[int]`, `dict[str,
 int] | None`, `Literal[...]`, `Callable[...]`, ...) into a composed `Rule` tree — the
 mechanism that also powers `simplibs-validate`'s `validate_call`/`validate_dataclass`.
+
+> **One-shot iterators:** `Iterable[T]` checks the value item by item, which would consume
+> a generator, so a generator (or any other one-shot iterator) is **rejected** with a clear
+> error instead of being passed on exhausted — see
+> [`IsReiterable`](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_PREDICATE_INTROSPECTION.md#isreiterable).
+> Plain `Iterable` still accepts generators; use a `list`/`tuple`/`set` (or `Collection[T]`)
+> to have items checked.
 
 ➡️ [README_RULE_TYPING](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_TYPING.md) — the public `IsTyping`/`build_typing_rule` entry points  
 ➡️ [README_RULE_TYPING_BUILDERS](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_TYPING_BUILDERS.md) — the internal per-construct decomposition engine

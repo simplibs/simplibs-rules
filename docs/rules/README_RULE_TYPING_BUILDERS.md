@@ -150,6 +150,9 @@ every item satisfy one shared item rule" fully describes the annotation — `lis
 build_elements_rule(list[int])
 # -> AllOf(IsInstance(list), ForEach(IsInstance(int)))
 
+build_elements_rule(Iterable[int])
+# -> AllOf(IsInstance(Iterable), IsReiterable(), ForEach(IsInstance(int)))
+
 build_typing_rule(list)
 # -> IsInstance(list)   (bare generic — no item constraint)
 ```
@@ -162,6 +165,9 @@ def build_elements_rule(annotation: Any, *, container_type: type | None = None) 
 
     args = get_args(annotation)
     if args:
+        if origin is Iterable:
+            parts.append(IsReiterable())
+
         item_rule = build_typing_rule(args[0])
         parts.append(ForEach(item_rule))
 
@@ -170,6 +176,14 @@ def build_elements_rule(annotation: Any, *, container_type: type | None = None) 
 
 A bare, unsubscripted generic (`list` with no `[...]`) falls back to just the container
 check — equivalent to `list[Any]`, since no item constraint was ever specified.
+
+**`Iterable[T]` rejects one-shot iterators.** `ForEach` has to walk the value to check its
+items, and walking a generator consumes it — the function would receive it exhausted, with
+no error. So for `Iterable[T]` (and only there) an `IsReiterable` check sits between
+`IsInstance` and `ForEach`; `AllOf` stops at the first failing part, so a generator is
+rejected while still untouched. `list`, `set`, `Sequence`, `Collection` and `tuple[T, ...]`
+cannot be iterators and need no guard. Plain `Iterable` (no item type) checks no items and
+therefore still accepts a generator — that is the way to accept one on purpose.
 
 [▲ Back to top](#-table-of-contents)
 

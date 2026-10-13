@@ -1,6 +1,7 @@
 """Tests for the IsTyping rule."""
 
 from typing import Annotated, TypeVar
+from collections.abc import Iterable
 import pytest
 
 # Testing tools and Kwargs wrapper
@@ -118,3 +119,52 @@ def test_is_typing_describe_uses_the_annotation_spelling(subtests):
 
     with subtests.test("nested generics"):
         assert IsTyping(dict[str, list[int]]).describe() == "dict[str, list[int]]"
+
+
+def _generator(*items):
+    yield from items
+
+
+def test_is_typing_contract_iterable(subtests):
+    """Verify IsTyping contract for Iterable[int]: re-iterable containers pass, iterators are rejected."""
+    rule = IsTyping(Iterable[int])
+
+    assert_rule_contract(
+        subtests,
+        rule=rule,
+        valid_values=[[1, 2, 3], [], (1, 2), {1, 2}, range(3)],
+        invalid_values=[_generator(1, 2), iter([1, 2]), [1, "2"], "abc", 123, None],
+        expected_description="Iterable[int]",
+        rule_factory=lambda: IsTyping(Iterable[int]),
+        deep_check=True,
+        check_value=False,  # failing items / delegated cards report the child value, not the whole input
+        verbose=False,
+    )
+
+
+def test_is_typing_iterable_rejection_card_and_untouched_iterator(subtests):
+    """Verify the card of a rejected generator, and that the generator is not consumed."""
+    rule = IsTyping(Iterable[int])
+    generator = _generator(1, 2, 3)
+
+    assert_exception_function(
+        subtests,
+        func=rule.validate,
+        invalid_params=(generator, Kwargs(value_name="items")),
+        exception_type=ValidationError,
+        label="items",
+        error_name="IS_REITERABLE_ERROR",
+        exception=TypeError,
+        verbose=False,
+    )
+
+    assert list(generator) == [1, 2, 3]
+
+
+def test_is_typing_bare_iterable_accepts_iterator_untouched():
+    """Verify plain Iterable accepts a generator without consuming it."""
+    rule = IsTyping(Iterable)
+    generator = _generator(1, 2)
+
+    assert rule.is_valid(generator) is True
+    assert list(generator) == [1, 2]

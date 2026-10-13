@@ -14,6 +14,7 @@ from simplibs.exception import ValidationError
 from simplibs.rules.containers import AllOf, AnyOf, Compose, ForEach
 from simplibs.rules.predicates.numeric import IsInteger
 from simplibs.rules.predicates.comparisons import GreaterThan
+from simplibs.rules.predicates.introspection import IsReiterable
 
 
 # ==============================================================================
@@ -145,3 +146,27 @@ def test_for_each_describe(subtests):
 
     with subtests.test("Compose operand is parenthesized"):
         assert ForEach(Compose(str.strip, is_a)).describe() == "each (after strip: is_a)"
+
+
+def test_for_each_consumes_a_one_shot_iterator():
+    """Document the behavior: ForEach walks the value, so a generator is exhausted afterwards.
+
+    This is why Iterable[T] puts IsReiterable in front of ForEach (see build_elements_rule).
+    """
+    rule = ForEach(IsInteger())
+    generator = (x for x in range(3))
+
+    assert rule.is_valid(generator) is True
+    assert list(generator) == []
+
+
+def test_for_each_behind_is_reiterable_guard_leaves_iterators_untouched():
+    """Verify the guard pattern: IsReiterable & ForEach rejects an iterator before it is walked."""
+    rule = AllOf(IsReiterable(), ForEach(IsInteger()))
+    generator = (x for x in range(3))
+
+    assert rule.is_valid(generator) is False
+    assert list(generator) == [0, 1, 2]
+
+    assert rule.is_valid([1, 2, 3]) is True
+    assert rule.is_valid([1, "2"]) is False

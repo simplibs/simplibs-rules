@@ -1,8 +1,9 @@
+from collections.abc import Iterable
 from typing import Any, get_args, get_origin
 # Outers
 from ....base_class import Rule
 from ....containers import AllOf, ForEach
-from ....predicates.introspection import IsInstance
+from ....predicates.introspection import IsInstance, IsReiterable
 
 
 def build_elements_rule(annotation: Any, *, container_type: type | None = None) -> Rule:
@@ -25,7 +26,9 @@ def build_elements_rule(annotation: Any, *, container_type: type | None = None) 
     Returns:
         A single Rule — IsInstance(container) alone if the annotation has
         no type arguments (e.g. bare `list`), otherwise an AllOf adding
-        ForEach(item_rule).
+        ForEach(item_rule). For `Iterable[T]` an IsReiterable check sits
+        between the two, so a one-shot iterator is rejected before ForEach
+        could consume it (see section 5 of the design notes).
     """
 
     # 1. Recursive build_typing_rule import — deferred, see elements_builder's notes
@@ -40,6 +43,13 @@ def build_elements_rule(annotation: Any, *, container_type: type | None = None) 
     # 4. Per-item rule, if the annotation specifies an item type
     args = get_args(annotation)
     if args:
+
+        # 4.1 Iterable[T] also accepts one-shot iterators, which ForEach would
+        #     consume — reject them first, while they are still untouched
+        if origin is Iterable:
+            parts.append(IsReiterable())
+
+        # 4.2 Every item must satisfy the item rule
         item_rule = build_typing_rule(args[0])
         parts.append(ForEach(item_rule))
 
@@ -71,7 +81,8 @@ already handles `list`, `set`, `frozenset`, or any ABC (`Iterable`,
 The origin table maps every one of these keys to this same function; the
 "which ABC" distinction only matters for building the correct
 `IsInstance` argument, which the dispatcher already provides via
-`get_origin(annotation)`.
+`get_origin(annotation)`. The single exception is `Iterable[T]`, see
+section 5.
 
 ---
 
@@ -95,7 +106,8 @@ something the caller already computed is unnecessary indirection.
 skipped entirely and `build_elements_rule` returns just
 `IsInstance(list)` — equivalent to writing `list[Any]`, which is exactly
 the right behavior: no item type was specified, so nothing about item
-content should be constrained.
+content should be constrained. This also holds for bare `Iterable`: no
+item is ever inspected, so a one-shot iterator passes through untouched.
 
 ---
 
@@ -106,4 +118,29 @@ load time; if this file imported `build_typing_rule` from `_dispatch` at its own
 top level, that would be a genuine circular import. Importing it inside
 the function body breaks the cycle at import time while still resolving
 correctly the first time this function actually runs.
+
+---
+
+## 5. `Iterable[T]` Rejects One-Shot Iterators
+
+`ForEach` has to walk the value to check its items, and walking a generator
+(or any other iterator) consumes it. Without a guard, `Iterable[int]` would
+check a generator, exhaust it, and hand the function an empty one — no
+error, just silently missing data. When a check fails, the diagnostics
+would re-evaluate the rules against the already-consumed value and report
+an internal "unreachable" error instead of the real failing item.
+
+So for `Iterable[T]` (and only there) an `IsReiterable` check is placed
+between `IsInstance` and `ForEach`. `AllOf` stops at the first failing part,
+both when validating and when building the exception, so a one-shot
+iterator is rejected by `IsReiterable` while still untouched, with a clear
+card, and `ForEach` never runs on it.
+
+* **Why Only `Iterable`:** `list`, `set`, `frozenset`, `Sequence`,
+  `Collection` and `tuple` can never be iterators, so a guard there would
+  be dead weight; `IsInstance` already rejects an iterator for them.
+* **Why Not Bare `Iterable`:** it checks no items, so nothing is consumed;
+  it stays the way to accept a generator.
+* **Escape Hatches for the User:** pass a list/tuple/set, or annotate plain
+  `Iterable` and let the function consume the iterator itself.
 """

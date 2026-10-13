@@ -1,11 +1,12 @@
-from typing import Annotated, Any, Callable, Generic, Literal, NewType, TypeVar, Union
-
 import pytest
+import typing
+from typing import Annotated, Any, Callable, Generic, Literal, NewType, TypeVar, Union
+from collections.abc import Collection, Iterable, Sequence
 
-from simplibs.exception import ParamError
+from simplibs.exception import ParamError, ValidationError
 from simplibs.rules.containers import AllOf, AnyOf, Described
 from simplibs.rules.predicates.comparisons import GreaterThan
-from simplibs.rules.predicates.introspection import IsInstance
+from simplibs.rules.predicates.introspection import IsInstance, IsReiterable
 from simplibs.rules.predicates.typing.IsAny import IsAny
 from simplibs.rules.predicates.typing.build_typing_rule import build_typing_rule
 
@@ -109,6 +110,9 @@ def test_build_typing_rule_wraps_generics_in_described(subtests) -> None:
         Literal["a", "b"]: "Literal['a', 'b']",
         Callable[[int], str]: "Callable[[int], str]",
         type[int]: "type[int]",
+        Iterable[int]: "Iterable[int]",
+        typing.Iterable[int]: "Iterable[int]",
+
     }
 
     for annotation, text in expected_texts.items():
@@ -160,3 +164,96 @@ def test_build_typing_rule_describe_of_union_members() -> None:
     """Verify a Union describes its members (needs IsInstance.describe(), see the introspection batch)."""
     assert build_typing_rule(int | None).describe() == "int | None"
     assert build_typing_rule(list[int] | set[int] | str).describe() == "list[int] | set[int] | str"
+
+
+def _generator(*items):
+    yield from items
+
+
+def test_build_typing_rule_iterable_accepts_reiterable_containers(subtests) -> None:
+    """Verify Iterable[int] still validates re-iterable containers by their items."""
+    rule = build_typing_rule(Iterable[int])
+
+    for value in ([1, 2], (1, 2), {1, 2}, frozenset({1}), range(3), {1: "a"}.keys(), []):
+        with subtests.test(repr(value)):
+            assert rule.is_valid(value) is True
+
+    for value in ([1, "2"], "abc", 123, None):
+        with subtests.test(repr(value)):
+            assert rule.is_valid(value) is False
+
+
+def test_build_typing_rule_iterable_rejects_one_shot_iterators(subtests) -> None:
+    """Verify generators and other iterators are rejected, for both spellings of Iterable."""
+    for annotation in (Iterable[int], typing.Iterable[int]):
+        rule = build_typing_rule(annotation)
+
+        for factory in (lambda: _generator(1, 2), lambda: iter([1, 2]), lambda: map(int, "12")):
+            with subtests.test(f"{annotation} {factory()!r}"):
+                assert rule.is_valid(factory()) is False
+
+
+def test_build_typing_rule_iterable_does_not_consume_a_rejected_iterator() -> None:
+    """Verify the rejected generator reaches the caller untouched (the original silent-data-loss bug)."""
+    rule = build_typing_rule(Iterable[int])
+    generator = _generator(1, 2, 3)
+
+    assert rule.is_valid(generator) is False
+    assert list(generator) == [1, 2, 3]
+
+
+def test_build_typing_rule_iterable_failure_card_names_the_iterator() -> None:
+    """Verify the failure card is the IsReiterable one, even when the iterator holds bad items."""
+    rule = build_typing_rule(Iterable[int])
+    generator = _generator(1, "a", 3)
+
+    exc = rule.build_exception(generator, "items")
+
+    assert isinstance(exc, ValidationError)
+    assert exc.error_name == "IS_REITERABLE_ERROR"
+    assert exc.exception is TypeError
+    assert list(generator) == [1, "a", 3]
+
+
+def test_build_typing_rule_bare_iterable_still_accepts_iterators(subtests) -> None:
+    """Verify bare Iterable (no item type) is the way to accept a generator, and leaves it untouched."""
+    for annotation in (Iterable, typing.Iterable):
+        with subtests.test(repr(annotation)):
+            rule = build_typing_rule(annotation)
+            generator = _generator(1, 2)
+
+            assert rule.is_valid(generator) is True
+            assert list(generator) == [1, 2]
+            assert rule.is_valid(123) is False
+
+
+def test_build_typing_rule_sequence_and_collection_reject_iterators_by_type(subtests) -> None:
+    """Verify Sequence[T]/Collection[T] reject generators on their own (no extra guard needed)."""
+    for annotation in (Sequence[int], Collection[int]):
+        with subtests.test(repr(annotation)):
+            rule = build_typing_rule(annotation)
+            generator = _generator(1, 2)
+
+            assert rule.is_valid(generator) is False
+            assert list(generator) == [1, 2]
+            assert rule.is_valid([1, 2]) is True
+
+
+def test_build_typing_rule_nested_iterable_guard_applies_at_every_level() -> None:
+    """Verify nested Iterable[T] slots reject iterators too, without consuming them."""
+    rule = build_typing_rule(list[Iterable[int]])
+    inner = _generator(1, 2)
+
+    assert rule.is_valid([[1, 2], (3,)]) is True
+    assert rule.is_valid([inner]) is False
+    assert list(inner) == [1, 2]
+
+
+def test_build_typing_rule_optional_iterable() -> None:
+    """Verify Iterable[int] | None keeps the guard inside the Union."""
+    rule = build_typing_rule(Iterable[int] | None)
+
+    assert rule.is_valid(None) is True
+    assert rule.is_valid([1, 2]) is True
+    assert rule.is_valid(_generator(1, 2)) is False
+    assert rule.describe() == "Iterable[int] | None"

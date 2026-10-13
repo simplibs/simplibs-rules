@@ -265,6 +265,10 @@ failing item by index and reports it with a positional label (`value_name[2]`, e
 iterable in the first place, it delegates to `IsIterable`'s own diagnostic instead of
 reporting a fabricated item failure.
 
+`ForEach` walks the value, so a one-shot iterator (a generator, a file object) is
+consumed by validation. When the value must stay intact, put [`IsReiterable`](README_RULE_PREDICATE_INTROSPECTION.md#isreiterable)
+in front: `IsReiterable() & ForEach(rule)`. The typing layer does this for `Iterable[T]`.
+
 [▲ Back to top](#-table-of-contents)
 
 ---

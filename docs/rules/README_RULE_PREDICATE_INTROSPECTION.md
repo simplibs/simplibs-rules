@@ -2,7 +2,7 @@
 
 The `introspection` package holds rules that inspect a value's *shape* rather than its
 specific content — whether it has a given attribute, supports `len()`, is callable,
-hashable, iterable, a dataclass, an instance of specific types, or a type/class object
+hashable, iterable, re-iterable, a dataclass, an instance of specific types, or a type/class object
 itself. These rules answer "what kind of thing is this" rather than "does this thing
 satisfy a specific value constraint."
 
@@ -21,6 +21,15 @@ direct wrappers around a single built-in Python capability check — `callable(v
 return a boolean (`hash()` and `iter()` both raise `TypeError` on unsupported input),
 `is_valid` catches that and reports `False` instead of letting it propagate — the same
 "never raise from `is_valid`" contract every rule in this library upholds.
+
+## A note on `IsIterable` vs. `IsReiterable`
+
+`IsIterable` answers "can I loop over this?" — it calls `iter(value)`, so generators and
+other iterators pass. `IsReiterable` answers "can I loop over this **more than once**?":
+it accepts iterables that hand out a fresh iterator every time (list, tuple, set, dict,
+range, string, ...) and rejects one-shot iterators (generators, file objects, `map`/`zip`/
+`filter`/`enumerate` results). Use it in front of any check that has to walk the whole
+value, because walking a one-shot iterator consumes it.
 
 ## A note on descriptions
 
@@ -42,6 +51,7 @@ its own*.
 * [`IsCallable`](#iscallable)
 * [`IsHashable`](#ishashable)
 * [`IsIterable`](#isiterable)
+* [`IsReiterable`](#isreiterable)
 * [`HasAttribute`](#hasattribute)
 * [`HasLength`](#haslength)
 
@@ -240,6 +250,50 @@ def is_valid(self, value: Any) -> bool:
 ```
 
 **Description:** `"iterable"`.
+
+[▲ Back to top](#-table-of-contents)
+
+---
+
+### `IsReiterable`
+
+Value must be iterable **and** safe to iterate more than once — a list, tuple, set, dict,
+`range`, string or dict view — as opposed to a one-shot iterator such as a generator, a
+file object, or the result of `map`/`zip`/`filter`/`enumerate`. It exists because every
+rule that checks the *items* of a value has to walk it, and walking an iterator consumes
+it: the value would reach the validated code exhausted, silently empty.
+
+**Parameters:**
+* *(none — takes only `self`)*
+
+**Example usage:**
+```python
+validate(value, IsReiterable())
+
+validate([1, 2, 3], IsReiterable())          # passes
+validate((x for x in range(3)), IsReiterable())   # fails — a generator is one-shot
+```
+
+**Under the hood** *(`is_valid`)*:
+```python
+def is_valid(self, value: Any) -> bool:
+    return (
+        isinstance(value, Iterable)
+        and not isinstance(value, Iterator)
+    )
+```
+
+The checks are structural (`collections.abc`), so validating never creates or advances an
+iterator — a rejected generator reaches the caller untouched. Objects iterable only through
+the legacy `__getitem__` protocol are not recognized, matching `IsInstance(Iterable)` used
+by the typing layer.
+
+On failure, the diagnostic (`IS_REITERABLE_ERROR`, `TypeError`) distinguishes two mistakes:
+a value that is not iterable at all, and a one-shot iterator — the latter explains that
+checking its items would consume it and suggests passing a list/tuple/set, or annotating
+the parameter as plain `Iterable`.
+
+**Description:** `"re-iterable"`.
 
 [▲ Back to top](#-table-of-contents)
 

@@ -61,6 +61,7 @@ from .predicates.introspection import (
     IsHashable,
     IsInstance,
     IsIterable,
+    IsReiterable,
     IsSubclass,
     IsType,
 )
@@ -197,6 +198,7 @@ is_dataclass        = IsDataclass()
 is_hashable         = IsHashable()
 is_instance         = IsInstance        # *types
 is_iterable         = IsIterable()
+is_reiterable       = IsReiterable()
 is_subclass         = IsSubclass        # *types
 is_type             = IsType()
 
@@ -311,6 +313,7 @@ rule_class = SimpleNamespace(
     IsHashable=IsHashable,
     IsInstance=IsInstance,
     IsIterable=IsIterable,
+    IsReiterable=IsReiterable,
     IsSubclass=IsSubclass,
     IsType=IsType,
 
@@ -423,6 +426,7 @@ rules = SimpleNamespace(
     is_hashable=is_hashable,
     is_instance=is_instance,
     is_iterable=is_iterable,
+    is_reiterable=is_reiterable,
     is_subclass=is_subclass,
     is_type=is_type,
 
@@ -535,6 +539,7 @@ __all__ = [
     "IsHashable",
     "IsInstance",
     "IsIterable",
+    "IsReiterable",
     "IsSubclass",
     "IsType",
 
@@ -631,6 +636,7 @@ __all__ = [
     "is_hashable",
     "is_instance",
     "is_iterable",
+    "is_reiterable",
     "is_subclass",
     "is_type",
     "same_as",
@@ -889,6 +895,7 @@ are compound names rather than the keywords themselves.
 | `is_hashable`   | —                                                  | Value is hashable.                          |
 | `is_instance`   | `*types`                                           | `isinstance(value, types)`                  |
 | `is_iterable`   | —                                                  | Value is iterable.                          |
+| `is_reiterable` | —                                                  | Value is iterable, not a one-shot iterator. |
 | `is_subclass`   | `*types`                                           | Value is a subclass of the specified types. |
 | `is_type`       | —                                                  | Value is a type object.                     |
 

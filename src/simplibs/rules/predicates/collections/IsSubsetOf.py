@@ -1,3 +1,4 @@
+from collections.abc import Iterable, Iterator
 from typing import Any, Collection
 from simplibs.exception import ValidationError
 # Outers
@@ -37,14 +38,18 @@ class IsSubsetOf(Rule):
     def is_valid(self, value: Any) -> bool:
 
         # 1. Handling for when value is not iterable
-        if not hasattr(value, "__iter__"):
+        if not isinstance(value, Iterable):
             return False
 
-        # 2. Evaluate whether the input is a subset of the reference collection
+        # 2. A one-shot iterator would be consumed by this check — reject it untouched
+        if isinstance(value, Iterator):
+            return False
+
+        # 3. Evaluate whether the input is a subset of the reference collection
         try:
             return set(value) <= self.reference
 
-        # 3. Fallback for unhashable items
+        # 4. Fallback for unhashable items
         except TypeError:
             return False
 
@@ -76,12 +81,21 @@ class IsSubsetOf(Rule):
 
         # 1. Prepare data
         # 1.1 When value is not iterable
-        if not hasattr(value, "__iter__"):
+        if not isinstance(value, Iterable):
             problem = f"Value {value!r} of type '{type(value).__name__}' is not iterable."
             how_to_fix = "Provide an iterable container (e.g., list, tuple, set)."
             exception_type = TypeError
 
-        # 1.2 When value contains elements outside the reference (or unhashable elements)
+        # 1.2 When value is a one-shot iterator (validating it would have consumed it)
+        elif isinstance(value, Iterator):
+            problem = (
+                f"Value of type '{type(value).__name__}' is a one-shot iterator: "
+                "checking its items would consume it."
+            )
+            how_to_fix = "Pass a list, tuple or set (e.g. list(value)) instead of the iterator."
+            exception_type = TypeError
+
+        # 1.3 When value contains elements outside the reference (or unhashable elements)
         else:
             try:
                 extra = set(value) - self.reference
@@ -131,11 +145,13 @@ reference).
   ordering in Python's native `set.__repr__`, guaranteeing stable exception
   messages for assertions, unit testing, and logging aggregation.
 * **Explicit Interface Guard (`is_valid`):**
-  Uses explicit `hasattr(value, "__iter__")` check to safely reject
-  non-iterable objects. Catches `TypeError` only for unhashable elements.
+  Uses an explicit `isinstance(value, Iterable)` check to safely reject
+  non-iterable objects, and rejects one-shot iterators (see section 4).
+  Catches `TypeError` only for unhashable elements.
 * **Dual Diagnostic Path (`build_exception`):**
   Uses internal `if/else` branching to assemble:
   * A `TypeError` when the input is not iterable.
+  * A `TypeError` when the input is a one-shot iterator (the check would consume it).
   * A `ValueError` (`IS_SUBSET_OF_ERROR`) when the input contains
     disallowed items, explicitly displaying extraneous elements
     (`set(value) - self.reference`).
@@ -159,4 +175,22 @@ reference).
 characters are abbreviated to "set(size=N)" in the description only, so a
 large reference never makes a composed text unreadable; the failure card keeps
 the full list in `expected`, where it is the useful detail.
+
+---
+
+## 4. One-Shot Iterators Are Rejected, Not Consumed
+
+This rule has to walk the whole value, and walking a generator (or any other
+iterator) consumes it: the caller would get an exhausted iterator back, and
+when the check fails, the diagnostics would re-read the already consumed value
+and report nothing useful (an empty list of items). An iterator therefore
+never reaches the check — `is_valid` returns `False` for it, and
+`build_exception` explains why (`TypeError`, same `error_name` as the other
+failures of this rule). Re-iterable containers (list, tuple, set, dict, range,
+...) are unaffected.
+
+The iterable test is `isinstance(value, Iterable)` rather than
+`hasattr(value, "__iter__")`: `hasattr` is also true for a class object such as
+`list` itself, which `list(value)` then rejects with a `TypeError` raised out of
+`is_valid`. Same reasoning as `IsReiterable` and `Iterable[T]`.
 """

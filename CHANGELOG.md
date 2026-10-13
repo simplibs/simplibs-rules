@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.4.0] - 2026-10-13
+
+### ⚠️ Breaking Changes
+
+* **`Iterable[T]` now rejects one-shot iterators** (generators, `iter(...)`, `map`/`zip`/...
+  results, file objects). Previously the item check silently consumed them, so the receiving
+  code got an exhausted iterator — and a failing check ended in an internal "unreachable"
+  error instead of a real diagnostic. Plain `Iterable` still accepts them.
+* **`AllUnique`, `IsSubsetOf` and `IsSupersetOf` reject one-shot iterators** (`TypeError`
+  card, same `error_name` as before) instead of consuming them and reporting misleading
+  contents.
+
+### ✨ Added
+
+* **`IsReiterable`** (`predicates/introspection`): value must be iterable and not a one-shot
+  iterator. Includes the `is_reiterable` shortcut and namespace exports.
+
+### 🐛 Fixed
+
+* `AllUnique`, `IsSubsetOf`, `IsSupersetOf`: a class object (e.g. `list`) is no longer
+  treated as iterable (`hasattr(value, "__iter__")` was true for it), which made
+  `AllUnique.is_valid` raise instead of returning `False`.
+
+### 🔄 Changed
+
+* `build_typing_rule(Iterable[T])` builds `AllOf(IsInstance, IsReiterable, ForEach)`.
+
+### 📚 Documentation
+
+* Documented `IsReiterable`, the `Iterable[T]` behavior and the one-shot-iterator note on
+  `ForEach`.
+
+---
+
 ## [0.3.0] - 2026-10-08
 
 ### 📋 Improved
