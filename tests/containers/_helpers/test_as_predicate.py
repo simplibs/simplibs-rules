@@ -1,4 +1,6 @@
 import pytest
+from simplibs.exception import ParamError
+from simplibs.exception.testing import assert_exception_function
 from simplibs.rules.base_class import Rule
 from simplibs.rules.containers._helpers.as_predicate import as_predicate
 
@@ -49,3 +51,21 @@ def test_as_predicate_with_lambda() -> None:
     assert predicate is is_even
     assert predicate(4) is True
     assert predicate(5) is False
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["text", 5, None, [1, 2]],
+    ids=["str", "int", "None", "list"],
+)
+def test_as_predicate_rejects_what_is_neither_a_rule_nor_callable(subtests, value) -> None:
+    """Verify the safeguard: anything that cannot be evaluated raises ParamError instead of passing on."""
+    assert_exception_function(
+        subtests,
+        as_predicate,
+        invalid_params=(value,),
+        exception_type=ParamError,
+        error_name="INVALID_PREDICATE_TARGET",
+        value=type(value).__name__,
+        verbose=False,
+    )

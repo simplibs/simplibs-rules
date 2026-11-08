@@ -123,3 +123,22 @@ def test_compose_describe(subtests):
 
     with subtests.test("compound validator needs no parentheses"):
         assert Compose(len, AnyOf(is_a, is_b)).describe() == "after len: is_a | is_b"
+
+
+# ==============================================================================
+# Unreachable fallback
+# ==============================================================================
+
+def test_compose_unreachable_fallback() -> None:
+    """Verify fallback exception (COMPOSE_UNREACHABLE_ERROR) when transformation and validation both pass."""
+    rule = Compose(len, GreaterThan(0))
+
+    # Manually calling build_exception with a value that passes both steps:
+    exc = rule.build_exception("abc", value_name="valid_value", context="checking")
+
+    assert isinstance(exc, ValidationError)
+    assert exc.error_name == "COMPOSE_UNREACHABLE_ERROR"
+    assert exc.label == "valid_value"
+    assert exc.value == "abc"
+    assert exc.context == "checking"
+    assert exc.exception is RuntimeError

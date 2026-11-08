@@ -77,3 +77,24 @@ def test_is_pi_describe():
     """Verify the description phrase with parameters."""
     assert IsPi(decimal_places=3).describe() == "pi to 3 decimals"
     assert IsPi(decimal_places=5).describe() == "pi to 5 decimals"
+
+
+@pytest.mark.parametrize(
+    "value",
+    [10**400, -(10**400)],
+    ids=["huge positive int", "huge negative int"],
+)
+def test_is_pi_huge_int_is_rejected_without_raising(value) -> None:
+    """Verify an int too large for a float (OverflowError) is simply not pi."""
+    assert IsPi(decimal_places=2).is_valid(value) is False
+
+
+def test_is_pi_exception_for_a_huge_int_keeps_the_value_as_it_is() -> None:
+    """Verify the diagnostic copes with a value that cannot be rounded: it reports the value itself."""
+    huge = 10**400
+
+    exc = IsPi(decimal_places=2).build_exception(huge, value_name="number")
+
+    assert isinstance(exc, ValidationError)
+    assert exc.value == huge
+    assert "rounds to" in str(exc.problem)

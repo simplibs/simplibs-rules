@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.0] - 2026-11-08
+
+### ✨ Added
+
+* **`ForEachKey`** and **`ForEachValue`** (`containers`): every key / every value of a mapping
+  must satisfy a rule. The mapping itself is walked, so a failing entry can be named by its
+  key: `opts['b']` for a value, `opts[key 'zz']` for a key (`['b']` / `[key 'zz']` without a
+  `value_name`). Long keys are shortened to 40 characters in the label. Includes the
+  `for_each_key` and `for_each_value` shortcuts and the `rule_class` / `rules` / `__all__`
+  exports.
+* Internal helpers in `containers/_helpers/`: `format_value_label`, `format_key_label` and
+  `shorten_repr` — each with its own test.
+
+### 🐛 Fixed
+
+* **A failing entry of a mapping was labelled by its position, not by its key.**
+  `dict[K, V]`, `Mapping[K, V]`, `MutableMapping[K, V]`, `typing.Dict` and the like reported
+  `opts[1]` for a bad value and `opts[0]` for a bad key, so the label could not tell a key from
+  a value and, with `**kwargs: X` in `validate_call`, did not name the parameter. The label is
+  now `opts['b']` for the value and `opts[key 'zz']` for the key. It applies to `IsTyping`,
+  `build_typing_rule` and everything built on them.
+* `"is_typing"` was listed twice in `__all__`.
+
+### 🔄 Changed
+
+* **The text of the label changed** for mapping annotations (see above). Only the label
+  differs — the message, `describe()` and the exception types are the same. Code that parses
+  the label text will need an update.
+* `build_key_value_rule` builds `AllOf(IsInstance, ForEachKey, ForEachValue)` instead of two
+  `Compose(..., ForEach(...))` parts. Keys are still checked before values.
+* Project tooling: `pytest-cov` in the `dev` extra, coverage configuration and `-rs` in the
+  pytest options, a GitHub Actions workflow that runs the tests, and a tests badge in the README.
+
+### 📋 Improved
+
+* Test suite for the new rules and helpers, for the label of every mapping spelling and for
+  nested annotations; a test of the package exports (`__all__`, shortcuts, `rule_class`,
+  `rules`). Branch coverage is now measured and the suite reaches 100 %.
+
+### 📚 Documentation
+
+* `README_RULE_CONTAINERS.md` documents `ForEachKey` and `ForEachValue` and points out from
+  `ForEach` that a mapping needs them; `README_RULE_TYPING_BUILDERS.md` describes the new
+  `build_key_value_rule`; the main README lists both rules and shows the label. `_DESIGN_NOTES`
+  of the new files and of `build_key_value_rule` updated.
+
+---
+
 ## [0.4.0] - 2026-10-13
 
 ### ⚠️ Breaking Changes

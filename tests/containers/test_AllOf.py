@@ -8,7 +8,7 @@ from simplibs.exception.testing import assert_exception_function, Kwargs
 from simplibs.rules.testing import assert_rule_contract
 
 # Exceptions
-from simplibs.exception import ValidationError
+from simplibs.exception import ParamError, ValidationError
 
 # Rules
 from simplibs.rules.containers import AllOf, AnyOf, Compose, Not
@@ -146,3 +146,30 @@ def test_all_of_describe(subtests):
 
     with subtests.test("Not operand needs no parentheses"):
         assert AllOf(Not(is_a), is_b).describe() == "not is_a & is_b"
+
+
+# ==============================================================================
+# Constructor guard & unreachable fallback
+# ==============================================================================
+
+def test_all_of_rejects_a_non_callable_among_the_rules() -> None:
+    """Verify one non-callable operand is named in a ParamError, even after valid ones."""
+    with pytest.raises(ParamError) as info:
+        AllOf(IsInteger(), "not_callable")
+
+    assert info.value.label == "AllOf.rule"
+
+
+def test_all_of_unreachable_fallback() -> None:
+    """Verify fallback exception (ALL_OF_UNREACHABLE_ERROR) when every rule passes during error construction."""
+    rule = AllOf(IsInteger(), GreaterThan(0))
+
+    # Manually calling build_exception with a value that satisfies every rule:
+    exc = rule.build_exception(5, value_name="valid_value", context="checking")
+
+    assert isinstance(exc, ValidationError)
+    assert exc.error_name == "ALL_OF_UNREACHABLE_ERROR"
+    assert exc.label == "valid_value"
+    assert exc.value == 5
+    assert exc.context == "checking"
+    assert exc.exception is RuntimeError

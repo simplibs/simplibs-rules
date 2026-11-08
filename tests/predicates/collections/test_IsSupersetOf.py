@@ -191,3 +191,8 @@ def test_is_superset_of_accepts_non_list_reiterable_containers(subtests):
 def test_is_superset_of_class_object_is_rejected():
     """Verify a class object is not treated as an iterable value."""
     assert IsSupersetOf({1}).is_valid(list) is False
+
+
+def test_is_superset_of_describe_abbreviates_a_long_reference() -> None:
+    """Verify a reference too long to read is described by its size, so composed descriptions stay readable."""
+    assert IsSupersetOf(set(range(100))).describe() == "superset of set(size=100)"

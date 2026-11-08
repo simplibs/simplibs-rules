@@ -18,6 +18,6 @@ fail-fast on invalid configuration, raising structured `ValidationError` or
 | :----------------------------------------- | :------- | :----------------------------------------------------------------------------|
 | `raise_container_param_not_type_error`      | Function | Raises when a constructor parameter does not have the expected type.       |
 | `raise_requires_at_least_one_rule_error`    | Function | Raises when a variadic container was initialized without any rules.        |
-| `raise_rule_param_not_callable`             | Function | Raises when a single-rule container (`ForEach`, `Not`) got a non-callable. |
+| `raise_rule_param_not_callable`             | Function | Raises when a single-rule container (`ForEach`, `ForEachKey`, `ForEachValue`, `Not`) got a non-callable. |
 | `validate_compose_param_is_callable`        | Function | Validates `Compose`'s `transformer`/`validator` parameters are callable.   |
 """

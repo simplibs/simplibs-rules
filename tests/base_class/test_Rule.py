@@ -341,3 +341,36 @@ def test_rule_complex_operator_composition() -> None:
     complex_rule = (p1 & f1) | (~f1)
     assert isinstance(complex_rule, AnyOf)
     assert complex_rule.is_valid("test") is True
+
+
+# ==============================================================================
+# Abstract bodies reached through super()
+# ==============================================================================
+
+class SuperCallingRule(Rule):
+    """Rule whose methods defer straight to the abstract bodies of the base class."""
+
+    __slots__ = ()
+
+    def is_valid(self, value: object) -> bool:
+        return super().is_valid(value)
+
+    def build_exception(
+        self,
+        value: object,
+        value_name: str | None = None,
+        context: str | None = None,
+    ) -> Exception:
+        return super().build_exception(value, value_name, context)
+
+
+def test_rule_abstract_is_valid_body_raises_not_implemented() -> None:
+    """Verify a subclass that defers to the base is_valid gets NotImplementedError, not a silent None."""
+    with pytest.raises(NotImplementedError):
+        SuperCallingRule().is_valid("anything")
+
+
+def test_rule_abstract_build_exception_body_raises_not_implemented() -> None:
+    """Verify a subclass that defers to the base build_exception gets NotImplementedError."""
+    with pytest.raises(NotImplementedError):
+        SuperCallingRule().build_exception("anything", "name", "context")

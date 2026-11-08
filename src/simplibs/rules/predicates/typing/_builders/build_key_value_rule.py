@@ -1,7 +1,7 @@
 from typing import Any, get_args, get_origin
 # Outers
 from ....base_class import Rule
-from ....containers import AllOf, Compose, ForEach
+from ....containers import AllOf, ForEachKey, ForEachValue
 from ....predicates.introspection import IsInstance
 
 
@@ -25,11 +25,11 @@ def build_key_value_rule(annotation: Any) -> Rule:
         key_rule = build_typing_rule(key_type)
         value_rule = build_typing_rule(value_type)
 
-        # 3.1 Every key must satisfy key_rule — extracted via .keys() and checked via ForEach
-        parts.append(Compose(lambda mapping: mapping.keys(), ForEach(key_rule)))
+        # 3.1 Every key must satisfy key_rule — a failing key is labelled opts[key 'zz']
+        parts.append(ForEachKey(key_rule))
 
-        # 3.2 Every value must satisfy value_rule — extracted via .values() and checked via ForEach
-        parts.append(Compose(lambda mapping: mapping.values(), ForEach(value_rule)))
+        # 3.2 Every value must satisfy value_rule — a failing value is labelled opts['b']
+        parts.append(ForEachValue(value_rule))
 
     # 4. Collapse to a single Rule
     return (
@@ -48,16 +48,28 @@ check with element-wise rules for keys and values.
 
 ---
 
-## 1. Composition via `Compose` and `ForEach`
+## 1. Composition via `ForEachKey` and `ForEachValue`
 
-Instead of raw closures, `Compose` extracts iterable views (`mapping.keys()` and
-`mapping.values()`) and passes them to `ForEach(rule)`. This guarantees that
-full `Rule` semantics, error reporting, and exception generation (`build_exception`)
-are preserved for failing keys or values.
+The mapping itself is handed to `ForEachKey(rule)` and `ForEachValue(rule)`, so
+the key stays available when an exception is built. A failing value is labelled
+by its key (`opts['b']`), a failing key is marked as such (`opts[key 'zz']`).
+Full `Rule` semantics, error reporting, and exception generation
+(`build_exception`) are preserved for failing keys or values.
+
+The earlier composition, `Compose(mapping.values(), ForEach(rule))`, passed a bare
+view to `ForEach`, which could only report the position of the item
+(`opts[1]`) — and could not tell a failing key from a failing value.
 
 ---
 
-## 2. Unsubscripted Generic Fallback
+## 2. Check Order
+
+`AllOf` checks the mapping type first, then the keys, then the values, so a
+wrong key is reported before a wrong value.
+
+---
+
+## 3. Unsubscripted Generic Fallback
 
 Unsubscripted mappings (`dict`, `Mapping`) yield `args == ()`. Step 3 is skipped,
 returning a single `IsInstance(mapping)` rule equivalent to `dict[Any, Any]`.

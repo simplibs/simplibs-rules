@@ -12,8 +12,12 @@ from simplibs.rules.containers._init_validators import (
     "rule_name, rule_param, example",
     [
         ("ForEach", "not_callable", "IsInteger()"),
+        ("ForEachKey", "not_callable", "IsString()"),
+        ("ForEachValue", None, "IsInteger()"),
         ("Not", 12345, "IsNone()"),
+        ("SomeOtherRule", 12345, "IsInteger()"),  # unknown name falls back to the default example
     ],
+    ids=["ForEach", "ForEachKey", "ForEachValue", "Not", "unknown rule name"],
 )
 def test_raise_rule_param_not_callable_contract(
     subtests,

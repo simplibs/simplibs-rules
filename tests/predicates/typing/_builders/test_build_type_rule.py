@@ -72,3 +72,9 @@ def test_build_type_rule_unsupported_base_raises() -> None:
     """Verify unsupported type parameters (like generic list[int]) raise ParamError."""
     with pytest.raises(ParamError):
         build_type_rule(type[list[int]])
+
+
+def test_build_type_rule_union_with_a_non_class_member_raises() -> None:
+    """Verify type[A | B] with a member that is not a class (here a forward reference) raises ParamError."""
+    with pytest.raises(ParamError):
+        build_type_rule(type[Union[int, "Foo"]])

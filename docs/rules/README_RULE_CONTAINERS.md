@@ -54,15 +54,17 @@ by class name:
 (~IsNone()).describe()                           # -> "not None"
 ```
 
-| Container  | `describe()` form             | Operand wrapped in parentheses                    |
-|------------|-------------------------------|---------------------------------------------------|
-| `AllOf`    | `a & b & c`                   | `AnyOf`, `Compose`                                |
-| `AnyOf`    | `a \| b \| c`                 | `Compose`                                         |
-| `NoneOf`   | `none of (a, b)`              | — (operands are comma-separated)                  |
-| `Not`      | `not a`                       | `AllOf`, `AnyOf`, `Compose`                       |
-| `ForEach`  | `each a`                      | `AllOf`, `AnyOf`, `Compose`                       |
-| `Compose`  | `after f: v`                  | — (prefix form; embedding containers wrap it)     |
-| `Described`| fixed text                    | —                                                 |
+| Container      | `describe()` form | Operand wrapped in parentheses                |
+|----------------|-------------------|-----------------------------------------------|
+| `AllOf`        | `a & b & c`       | `AnyOf`, `Compose`                            |
+| `AnyOf`        | `a \| b \| c`     | `Compose`                                     |
+| `NoneOf`       | `none of (a, b)`  | — (operands are comma-separated)              |
+| `Not`          | `not a`           | `AllOf`, `AnyOf`, `Compose`                   |
+| `ForEach`      | `each a`          | `AllOf`, `AnyOf`, `Compose`                   |
+| `ForEachKey`   | `each key: a`     | `AllOf`, `AnyOf`, `Compose`                   |
+| `ForEachValue` | `each value: a`   | `AllOf`, `AnyOf`, `Compose`                   |
+| `Compose`      | `after f: v`      | — (prefix form; embedding containers wrap it) |
+| `Described`    | fixed text        | —                                             |
 
 `&` binds tighter than `|`, so only an `AnyOf` needs parentheses inside an `AllOf`
 (`(a | b) & c`), while an `AllOf` inside an `AnyOf` reads naturally (`a & b | c`).
@@ -82,6 +84,8 @@ would otherwise read as covering everything to its right.
 * [`NoneOf`](#noneof)
 * [`Not`](#not)
 * [`ForEach`](#foreach)
+* [`ForEachKey`](#foreachkey)
+* [`ForEachValue`](#foreachvalue)
 * [`Compose`](#compose)
 * [`Described`](#described)
 
@@ -268,6 +272,107 @@ reporting a fabricated item failure.
 `ForEach` walks the value, so a one-shot iterator (a generator, a file object) is
 consumed by validation. When the value must stay intact, put [`IsReiterable`](README_RULE_PREDICATE_INTROSPECTION.md#isreiterable)
 in front: `IsReiterable() & ForEach(rule)`. The typing layer does this for `Iterable[T]`.
+
+Over a **mapping**, `ForEach` walks the keys (Python's own iteration contract for a
+`dict`) and names a failing one by its position (`opts[1]`), not by what it is. To check
+the keys or the values of a mapping, and to have a failing entry named by its key, use
+[`ForEachKey`](#foreachkey) and [`ForEachValue`](#foreachvalue).
+
+[▲ Back to top](#-table-of-contents)
+
+---
+
+### `ForEachKey`
+
+Every **key** of a mapping must satisfy the given rule — the way to validate what a
+mapping is indexed by (`dict`, `Mapping`, `MappingProxyType`, any
+`collections.abc.Mapping`). A failing key is named as a *key* in the diagnostic, so it
+cannot be mistaken for a value.
+
+**Parameters:**
+* `rule` (*Rule | Callable[[Any], bool]*): The rule every key must satisfy.
+
+**Example usage:**
+```python
+validate({"host": "localhost", "port": 8080}, ForEachKey(IsString()))
+
+rule = ForEachKey(IsString())
+rule.validate({"a": 1, 2: 2}, value_name="opts")    # fails at opts[key 2]
+```
+
+**Under the hood** *(`is_valid`)*:
+```python
+def is_valid(self, value: Any) -> bool:
+    if not isinstance(value, Mapping):
+        return False
+
+    predicate = as_predicate(self.rule)
+    return all(predicate(key) for key in value.keys())
+```
+
+**Description:** `"each key: a"`, with an `AllOf`, `AnyOf` or `Compose` operand in
+parentheses — `"each key: (a | b)"`.
+
+A value that isn't a mapping simply fails (`is_valid` returns `False`); `build_exception`
+then delegates to the diagnostic of `IsInstance(Mapping)` instead of inventing a failing
+key. An empty mapping passes. On failure, `build_exception` finds the *first* failing key
+and labels it `value_name[key <repr>]` (`opts[key 2]`, or just `[key 2]` without a
+`value_name`); the exception card itself carries the failing key as its `value`.
+
+The key is written as its `repr` and cut to 40 characters (ending in `...`) when it is
+longer, so an unusually large key cannot swamp the message. A rule applied to the key
+continues the label — a tuple key `(1, 'x')` checked with `ForEach(IsInteger())` fails as
+`opts[key (1, 'x')][1]`.
+
+[▲ Back to top](#-table-of-contents)
+
+---
+
+### `ForEachValue`
+
+Every **value** of a mapping must satisfy the given rule, and a failing value is named by
+its **key** — `opts['b']` — the way a person looks it up, instead of by its position in
+the iteration order. This is what makes `**kwargs: int` in a `validate_call` report the
+offending parameter by name.
+
+**Parameters:**
+* `rule` (*Rule | Callable[[Any], bool]*): The rule every value must satisfy.
+
+**Example usage:**
+```python
+validate({"a": 1, "b": 2}, ForEachValue(IsInteger()))
+
+rule = ForEachValue(IsInteger())
+rule.validate({"a": 1, "b": "x"}, value_name="opts")    # fails at opts['b']
+```
+
+**Under the hood** *(`is_valid`)*:
+```python
+def is_valid(self, value: Any) -> bool:
+    if not isinstance(value, Mapping):
+        return False
+
+    predicate = as_predicate(self.rule)
+    return all(predicate(item) for item in value.values())
+```
+
+**Description:** `"each value: a"`, with an `AllOf`, `AnyOf` or `Compose` operand in
+parentheses — `"each value: (a | b)"`.
+
+A value that isn't a mapping simply fails (`is_valid` returns `False`); `build_exception`
+then delegates to the diagnostic of `IsInstance(Mapping)`. An empty mapping passes. The
+happy path walks only the values; the keys are looked up (through `.items()`) just when a
+diagnostic has to be built, for the *first* failing value.
+
+The label is spelled like the access in Python — `opts['b']`, `opts[2]`,
+`opts[('x', 1)]`, or only `['b']` without a `value_name` — and the key is cut to 40
+characters (ending in `...`) when it is longer. A rule applied to the value continues the
+label: a list stored under `'a'`, checked with `ForEach(IsInteger())`, fails as
+`opts['a'][1]`, and a mapping inside a mapping as `config['db']['port']`.
+
+The typing layer uses `ForEachKey` and `ForEachValue` for `dict[K, V]`, `Mapping[K, V]`
+and their relatives — see
+[`build_key_value_rule`](README_RULE_TYPING_BUILDERS.md#build_key_value_rule).
 
 [▲ Back to top](#-table-of-contents)
 

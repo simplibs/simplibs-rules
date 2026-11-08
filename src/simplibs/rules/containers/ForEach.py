@@ -151,4 +151,13 @@ exhausted by validation (and `build_exception` then re-reads an already consumed
 This is inherent to checking items. Callers that must keep such a value intact put
 `IsReiterable` in front (`IsReiterable() & ForEach(rule)`); `Iterable[T]` does this
 automatically in the typing layer.
+
+---
+
+## 5. Mappings
+
+Over a mapping `ForEach` walks its keys, by the iteration contract of Python, and
+labels a failing item by its position (`opts[1]`), not by its key. To check the keys
+or the values of a mapping, and to have a failing entry named by its key, use
+`ForEachKey` (`opts[key 'zz']`) and `ForEachValue` (`opts['b']`).
 """

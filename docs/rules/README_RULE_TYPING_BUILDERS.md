@@ -203,8 +203,8 @@ and one applied to every value.
 build_key_value_rule(dict[str, int])
 # -> AllOf(
 #      IsInstance(dict),
-#      Compose(lambda m: m.keys(), ForEach(IsInstance(str))),
-#      Compose(lambda m: m.values(), ForEach(IsInstance(int))),
+#      ForEachKey(IsInstance(str)),
+#      ForEachValue(IsInstance(int)),
 #    )
 ```
 
@@ -220,16 +220,30 @@ def build_key_value_rule(annotation: Any) -> Rule:
         key_rule = build_typing_rule(key_type)
         value_rule = build_typing_rule(value_type)
 
-        parts.append(Compose(lambda mapping: mapping.keys(), ForEach(key_rule)))
-        parts.append(Compose(lambda mapping: mapping.values(), ForEach(value_rule)))
+        parts.append(ForEachKey(key_rule))
+        parts.append(ForEachValue(value_rule))
 
     return AllOf(*parts) if len(parts) > 1 else parts[0]
 ```
 
-`ForEach` alone validates a mapping's own iteration (its keys, by Python's `dict`
-contract) — reaching a mapping's *values* needs an extraction step first, which is
-exactly what `Compose(extractor, ForEach(...))` provides: `.keys()`/`.values()` as the
-transformer, `ForEach(item_rule)` as the validator applied to that extracted view.
+[`ForEachKey`](README_RULE_CONTAINERS.md#foreachkey) and
+[`ForEachValue`](README_RULE_CONTAINERS.md#foreachvalue) receive the mapping itself, so
+the key is still known when a diagnostic is built: a failing value is labelled by its key
+(`opts['b']`) and a failing key is marked as a key (`opts[key 'zz']`). Wrapping
+`.keys()` / `.values()` in a `Compose` would hand `ForEach` a bare view and lose that
+information, leaving only the position of the item (`opts[1]`).
+
+```python
+rule = build_typing_rule(dict[str, int])
+
+rule.validate({"a": 1, "b": "x"}, value_name="opts")   # fails at opts['b']
+rule.validate({1: 1}, value_name="opts")                 # fails at opts[key 1]
+```
+
+The label is the same for every mapping spelling (`dict`, `Dict`, `Mapping`,
+`MutableMapping`, ...) and it continues into nested annotations: `dict[str, list[int]]`
+fails as `opts['a'][1]`, `dict[str, dict[str, int]]` as `config['db']['port']`. The keys
+are checked before the values, so an entry with both wrong is reported as a key.
 
 [▲ Back to top](#-table-of-contents)
 

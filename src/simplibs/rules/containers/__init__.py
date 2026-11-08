@@ -3,6 +3,8 @@ from .AnyOf import AnyOf
 from .Compose import Compose
 from .Described import Described
 from .ForEach import ForEach
+from .ForEachKey import ForEachKey
+from .ForEachValue import ForEachValue
 from .NoneOf import NoneOf
 from .Not import Not
 
@@ -25,6 +27,8 @@ predicate rules.
 | `NoneOf`   | Class | Value must satisfy none of the given rules.                                     |
 | `Not`      | Class | Inverts the result of a single wrapped rule or predicate.                       |
 | `ForEach`  | Class | Applies a rule to every item in an iterable value.                              |
+| `ForEachKey` | Class | Applies a rule to every key of a mapping value.                               |
+| `ForEachValue` | Class | Applies a rule to every value of a mapping; a failure is named by its key.  |
 | `Compose`  | Class | Transforms the value, then validates the transformed result.                    |
 | `Described` | Class | Behaves like the wrapped rule, but describes itself with a fixed text.         |
 """

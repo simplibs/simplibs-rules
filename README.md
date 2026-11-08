@@ -3,6 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/simplibs-rules)](https://pypi.org/project/simplibs-rules/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
 [![Licence](https://img.shields.io/badge/licence-MIT-green)](https://github.com/simplibs/simplibs-rules/blob/main/LICENSE)
+[![tests](https://github.com/simplibs/simplibs-rules/actions/workflows/tests.yml/badge.svg)](https://github.com/simplibs/simplibs-rules/actions)
 
 **Composable, explicit validation rules — pure predicates, zero transformation.**
 
@@ -104,6 +105,9 @@ typing_rule = IsTyping(dict[str, int])
 
 typing_rule.is_valid({"apples": 5, "oranges": 10})   # -> True
 typing_rule.is_valid({"apples": "5"})                # -> False
+
+# A failing entry is named by its key, not by its position:
+typing_rule.validate({"apples": "5"}, value_name="stock")   # fails at stock['apples']
 ```
 
 ### Level 4: Readable descriptions
@@ -130,7 +134,7 @@ src/simplibs/rules/
 ├── base_class/           ◄── Abstract base class Rule & internal helpers (_NotARule)
 │   ├── Rule.py
 │   └── _NotARule.py
-├── containers/           ◄── Rule combinators (AllOf, AnyOf, Not, NoneOf, ForEach, Compose, Described)
+├── containers/           ◄── Rule combinators (AllOf, AnyOf, Not, NoneOf, ForEach, ForEachKey, ForEachValue, Compose, Described)
 ├── predicates/           ◄── Single-purpose predicate rules
 │   ├── arithmetic/       ◄── CloseTo, DivisibleBy, HasRemainder
 │   ├── checkers/         ◄── IsEmpty, NotEmpty, IsNone, IsTrue, IsFalse
@@ -229,15 +233,17 @@ Both are fully interchangeable.
 
 ### `containers/` — Composing other rules
 
-| Class       | Shortcut    | Description / Parameters                                                              |
-|-------------|-------------|---------------------------------------------------------------------------------------|
-| `AllOf`     | `all_of`    | Logical AND across multiple rules (`*rules`). Behind `&`.                             |
-| `AnyOf`     | `any_of`    | Logical OR across multiple rules (`*rules`). Behind `\|`.                             |
-| `Compose`   | `compose`   | Transforms value before checking (`transformer, validator`).                          |
-| `ForEach`   | `for_each`  | Validates every item in an iterable (`rule`).                                         |
-| `NoneOf`    | `none_of`   | Value must satisfy none of the given rules (`*rules`).                                |
-| `Not`       | `negate`    | Logical NOT for a single rule (`rule`). Behind `~`.                                   |
-| `Described` | -           | Behaves like the wrapped rule, but describes itself with a fixed text (`rule, text`). |
+| Class          | Shortcut         | Description / Parameters                                                              |
+|----------------|------------------|---------------------------------------------------------------------------------------|
+| `AllOf`        | `all_of`         | Logical AND across multiple rules (`*rules`). Behind `&`.                             |
+| `AnyOf`        | `any_of`         | Logical OR across multiple rules (`*rules`). Behind `\|`.                             |
+| `Compose`      | `compose`        | Transforms value before checking (`transformer, validator`).                          |
+| `ForEach`      | `for_each`       | Validates every item in an iterable (`rule`).                                         |
+| `ForEachKey`   | `for_each_key`   | Validates every key of a mapping (`rule`).                                            |
+| `ForEachValue` | `for_each_value` | Validates every value of a mapping; a failing one is named by its key (`rule`).       |
+| `NoneOf`       | `none_of`        | Value must satisfy none of the given rules (`*rules`).                                |
+| `Not`          | `negate`         | Logical NOT for a single rule (`rule`). Behind `~`.                                   |
+| `Described`    | -                | Behaves like the wrapped rule, but describes itself with a fixed text (`rule, text`). |
 
 ➡️ [README_RULE_CONTAINERS](https://github.com/simplibs/simplibs-rules/blob/main/docs/rules/README_RULE_CONTAINERS.md)
 

@@ -8,7 +8,7 @@ from simplibs.exception.testing import assert_exception_function, Kwargs
 from simplibs.rules.testing import assert_rule_contract
 
 # Exceptions
-from simplibs.exception import ValidationError
+from simplibs.exception import ParamError, ValidationError
 
 # Rules
 from simplibs.rules.containers import AllOf, AnyOf, Compose
@@ -154,3 +154,15 @@ def test_any_of_exception_describes_composed_operands(subtests):
         exception=ValueError,
         verbose=False,
     )
+
+
+# ==============================================================================
+# Constructor guard
+# ==============================================================================
+
+def test_any_of_rejects_a_non_callable_among_the_rules() -> None:
+    """Verify one non-callable operand is named in a ParamError, even after valid ones."""
+    with pytest.raises(ParamError) as info:
+        AnyOf(IsInteger(), "not_callable")
+
+    assert info.value.label == "AnyOf.rule"

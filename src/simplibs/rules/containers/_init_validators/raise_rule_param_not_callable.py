@@ -3,7 +3,9 @@ from simplibs.exception import ParamError
 
 
 def raise_rule_param_not_callable(
-    rule_name: Literal["AllOf", "AnyOf", "NoneOf", "ForEach", "Not"] | str,
+    rule_name: Literal[
+        "AllOf", "AnyOf", "NoneOf", "ForEach", "ForEachKey", "ForEachValue", "Not"
+    ] | str,
     rule_param: Any,
 ) -> None:
     """Check that the child rule is callable/Rule. If not, raise a ParamError."""
@@ -11,6 +13,8 @@ def raise_rule_param_not_callable(
     # 1. Prepare data
     examples = {
         "ForEach": "IsInteger()",
+        "ForEachKey": "IsString()",
+        "ForEachValue": "IsInteger()",
         "Not": "IsNone()",
         "AllOf": "IsInteger(), GreaterThan(0)",
         "AnyOf": "IsInteger(), IsFloat()",
@@ -38,7 +42,8 @@ _DESIGN_NOTES = """
 # raise_rule_param_not_callable — Container Single-Rule Parameter Guard
 
 ## Purpose
-Enforces that single-rule container classes (`ForEach`, `Not`) receive a
+Enforces that single-rule container classes (`ForEach`, `ForEachKey`,
+`ForEachValue`, `Not`) receive a
 valid `Rule` instance or callable predicate upon instantiation.
 
 ---
@@ -50,5 +55,6 @@ valid `Rule` instance or callable predicate upon instantiation.
   happy-path instantiation overhead down to a single C-API check.
 * **Contextual Examples:**
   Dynamically provides relevant code examples (`IsInteger()` for `ForEach`,
+  `IsString()` for `ForEachKey`, `IsInteger()` for `ForEachValue`,
   `IsNone()` for `Not`) based on `rule_name`.
 """

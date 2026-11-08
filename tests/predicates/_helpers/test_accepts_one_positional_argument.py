@@ -1,3 +1,5 @@
+import inspect
+
 import pytest
 from simplibs.rules.predicates._helpers.accepts_one_positional_argument import (
     accepts_one_positional_argument,
@@ -68,3 +70,16 @@ def test_accepts_one_positional_argument_uninspectable_builtin() -> None:
     """Verify uninspectable callables (e.g., C builtins) default to True."""
     # len accepts 1 argument, but inspect.signature fails on some C builtins
     assert accepts_one_positional_argument(abs) is True
+
+
+@pytest.mark.parametrize("error", [TypeError, ValueError], ids=["TypeError", "ValueError"])
+def test_accepts_one_positional_argument_signature_failure_defaults_to_true(monkeypatch, error) -> None:
+    """Verify a callable whose signature cannot be read is given the benefit of the doubt (True)."""
+
+    def failing_signature(rule):
+        raise error("no signature available")
+
+    monkeypatch.setattr(inspect, "signature", failing_signature)
+
+    # Without the patch this lambda would be refused: it takes no argument at all
+    assert accepts_one_positional_argument(lambda: None) is True

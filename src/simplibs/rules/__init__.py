@@ -9,6 +9,8 @@ from .containers import (
     AnyOf,
     Compose,
     ForEach,
+    ForEachKey,
+    ForEachValue,
     NoneOf,
     Not,
     Described
@@ -146,6 +148,8 @@ all_of              = AllOf             # *rules
 any_of              = AnyOf             # *rules
 compose             = Compose           # transformer, validator
 for_each            = ForEach           # rule
+for_each_key        = ForEachKey        # rule
+for_each_value      = ForEachValue      # rule
 none_of             = NoneOf            # *rules
 negate              = Not               # rule
 described           = Described         # rule, text
@@ -271,6 +275,8 @@ rule_class = SimpleNamespace(
     AnyOf=AnyOf,
     Compose=Compose,
     ForEach=ForEach,
+    ForEachKey=ForEachKey,
+    ForEachValue=ForEachValue,
     NoneOf=NoneOf,
     Not=Not,
     Described=Described,
@@ -377,6 +383,8 @@ rules = SimpleNamespace(
     any_of=any_of,
     compose=compose,
     for_each=for_each,
+    for_each_key=for_each_key,
+    for_each_value=for_each_value,
     none_of=none_of,
     negate=negate,
     described=described,
@@ -497,6 +505,8 @@ __all__ = [
     "AnyOf",
     "Compose",
     "ForEach",
+    "ForEachKey",
+    "ForEachValue",
     "NoneOf",
     "Not",
     "Described",
@@ -597,6 +607,8 @@ __all__ = [
     "any_of",
     "compose",
     "for_each",
+    "for_each_key",
+    "for_each_value",
     "none_of",
     "negate",
     "described",
@@ -682,7 +694,6 @@ __all__ = [
     "always_false",
     "always_true",
     "is_any",
-    "is_typing",
 ]
 
 
@@ -821,15 +832,17 @@ are compound names rather than the keywords themselves.
 
 ### `containers/`
 
-| Shortcut    | Parameters                | Logic                                   |
-|-------------|---------------------------|-----------------------------------------|
-| `all_of`    | `*rules`                  | All rules must pass.                    |
-| `any_of`    | `*rules`                  | At least one rule must pass.            |
-| `compose`   | `transformer, validator`  | Validate the transformed value.         |
-| `for_each`  | `rule`                    | The rule must pass for every item.      |
-| `none_of`   | `*rules`                  | No rule may pass.                       |
-| `negate`    | `rule`                    | The rule must fail.                     |
-| `described` | `rule`, `text`            | Wrap the rule with a fixed description. |
+| Shortcut         | Parameters               | Logic                                            |
+|------------------|--------------------------|--------------------------------------------------|
+| `all_of`         | `*rules`                 | All rules must pass.                             |
+| `any_of`         | `*rules`                 | At least one rule must pass.                     |
+| `compose`        | `transformer, validator` | Validate the transformed value.                  |
+| `for_each`       | `rule`                   | The rule must pass for every item.               |
+| `for_each_key`   | `rule`                   | The rule must pass for every key of a mapping.   |
+| `for_each_value` | `rule`                   | The rule must pass for every value of a mapping. |
+| `none_of`        | `*rules`                 | No rule may pass.                                |
+| `negate`         | `rule`                   | The rule must fail.                              |
+| `described`      | `rule`, `text`           | Wrap the rule with a fixed description.          |
 
 
 ### `predicates/arithmetic/`

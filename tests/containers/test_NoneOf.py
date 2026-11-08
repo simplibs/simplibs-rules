@@ -8,7 +8,7 @@ from simplibs.exception.testing import assert_exception_function, Kwargs
 from simplibs.rules.testing import assert_rule_contract
 
 # Exceptions
-from simplibs.exception import ValidationError
+from simplibs.exception import ParamError, ValidationError
 
 # Rules
 from simplibs.rules.containers import AllOf, AnyOf, NoneOf
@@ -138,3 +138,15 @@ def test_none_of_describe(subtests):
 
     with subtests.test("AllOf operand needs no parentheses"):
         assert NoneOf(AllOf(is_a, is_b), is_c).describe() == "none of (is_a & is_b, is_c)"
+
+
+# ==============================================================================
+# Constructor guard
+# ==============================================================================
+
+def test_none_of_rejects_a_non_callable_among_the_rules() -> None:
+    """Verify one non-callable operand is named in a ParamError, even after valid ones."""
+    with pytest.raises(ParamError) as info:
+        NoneOf(IsInteger(), "not_callable")
+
+    assert info.value.label == "NoneOf.rule"
