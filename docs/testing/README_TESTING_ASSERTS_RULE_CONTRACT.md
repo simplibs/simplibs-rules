@@ -159,6 +159,8 @@ assert_rule_contract(subtests, rule=IsString(), valid_values=["a"], invalid_valu
   Default: `None`.
   `(args, kwargs)` pairs expected to raise `ParamError` when passed to `rule_factory`.
   Required together with `rule_factory`.
+  Passing it with `deep_check=False` is a mistake of the test and raises `AssertionError`:
+  the sweep would never run.
 * **`sample_label`** (`str`):
   Default: `"target_var"`.
   The `value_name` used when probing `build_exception()`.

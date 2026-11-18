@@ -67,6 +67,11 @@ def assert_rule_contract(
             name when left empty).
         deep_check: Enables the `expected`/`problem`/`how_to_fix` content check and the
             constructor `ParamError` sweep.
+
+    Raises:
+        AssertionError: A mistake of the test itself, raised before any check runs:
+            `rule` is not a Rule instance; `invalid_init_params` without `rule_factory`;
+            `invalid_init_params` with `deep_check=False` (the sweep would never run).
     """
     assert isinstance(rule, Rule), (
         f"assert_rule_contract expects a Rule instance, got {type(rule).__name__}."
@@ -75,9 +80,13 @@ def assert_rule_contract(
         "assert_rule_contract received invalid_init_params without rule_factory — "
         "the constructor ParamError check would be silently skipped."
     )
+    assert not (invalid_init_params and not deep_check), (
+        "assert_rule_contract received invalid_init_params with deep_check=False — "
+        "the constructor ParamError sweep only runs with deep_check=True and would be silently skipped."
+    )
 
     rule_name = type(rule).__name__
-    prefix = f"{intro}[{rule_name}] " if intro == "" else f"{intro} "
+    prefix = f"[{rule_name}] " if intro == "" else f"{intro} "
 
     # 1. Test is_valid() and __call__()
     assert_rule_is_valid(
@@ -192,9 +201,9 @@ worth misuse-testing (e.g. `IsNone`, `IsTrue`).
   every delegated call is what provides the grouping/readability benefit,
   without a redundant, effectively-always-green wrapper subtest.
 * **No Silently Skipped Check:**
-  `invalid_init_params` without `rule_factory` fails immediately. Check 6 needs
-  both, so with only one of them it used to be skipped without a word and a
-  test looked green while testing nothing.
+  `invalid_init_params` without `rule_factory`, or together with `deep_check=False`, fails
+  immediately. Check 6 needs both and only runs with `deep_check=True`, so with anything less it
+  used to be skipped without a word and a test looked green while testing nothing.
 * **Flexible Diagnostic Card Matching:**
   `expected_error_name` and `expected_exception_type` pass straight through to
   `assert_rule_build_exception`. Accepting `Sequence` allows callers testing compound

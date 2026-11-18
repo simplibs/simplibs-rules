@@ -112,9 +112,15 @@ def assert_rule_build_exception(
                 name=f"{intro}test_build_exception_diagnostics_#index_{index}",
                 verbose=verbose,
             ):
-                assert isinstance(exc.expected, str) and len(exc.expected) > 0
-                assert isinstance(exc.problem, str) and len(exc.problem) > 0
-                assert isinstance(exc.how_to_fix, (str, tuple, list)) and len(exc.how_to_fix) > 0
+                assert isinstance(exc.expected, str) and len(exc.expected) > 0, (
+                    f"Expected exc.expected to be a non-empty str, got {exc.expected!r}."
+                )
+                assert isinstance(exc.problem, str) and len(exc.problem) > 0, (
+                    f"Expected exc.problem to be a non-empty str, got {exc.problem!r}."
+                )
+                assert isinstance(exc.how_to_fix, (str, tuple, list)) and len(exc.how_to_fix) > 0, (
+                    f"Expected exc.how_to_fix to be a non-empty str, tuple or list, got {exc.how_to_fix!r}."
+                )
 
 
 _DESIGN_NOTES = """
@@ -156,7 +162,8 @@ re-implementing raise/type/field checking here.
   than `tuple` alone, since built-in rules use either a single string
   (`how_to_fix = "Provide ..."`) or a tuple of strings, depending on the
   rule — asserting `tuple` only would false-fail on the majority of rules
-  in this library that pass a plain string.
+  in this library that pass a plain string. Each of the three checks has its own
+  message, because a bare `assert` in an installed package fails with an empty one.
 
 ---
 

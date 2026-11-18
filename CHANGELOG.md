@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.1] - 2026-11-17
+
+### 🐛 Fixed
+
+* **`assert_rule_contract` no longer skips the constructor sweep silently with `deep_check=False`.**
+  `invalid_init_params` together with `deep_check=False` was dropped without a word (the `ParamError`
+  sweep runs only with `deep_check=True`), so a test looked green while checking nothing. It now fails
+  with `AssertionError`, as the check for `invalid_init_params` without `rule_factory` already did.
+* **Failure messages in `assert_rule_build_exception` and `assert_rule_validate`**: the checks of
+  `expected`, `problem` and `how_to_fix`, and the `validate` mode checks, were plain `assert` statements
+  without a message. pytest does not rewrite the asserts of an installed package, so they failed with an
+  empty text. They now name the field or the mode and the actual value.
+
+### 📋 Improved
+
+* **Tests**: new tests for the `invalid_init_params` + `deep_check=False` guard.
+
+---
+
 ## [0.5.0] - 2026-11-08
 
 ### ✨ Added

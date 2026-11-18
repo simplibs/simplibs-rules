@@ -28,11 +28,15 @@ def assert_rule_validate(
     """
 
     def check_valid(value: Any) -> None:
-        assert rule.validate(value) is True
-        assert rule.validate(value, return_value=True) == value
+        assert rule.validate(value) is True, f"Expected validate({value!r}) to return True."
+        assert rule.validate(value, return_value=True) == value, (
+            f"Expected validate({value!r}, return_value=True) to return the original value."
+        )
 
     def check_return_bool_false(value: Any) -> None:
-        assert rule.validate(value, return_bool=True) is False
+        assert rule.validate(value, return_bool=True) is False, (
+            f"Expected validate({value!r}, return_bool=True) to return False."
+        )
 
     # 1. Positive checks (pass without exception, in both return modes)
     for index, val in enumerate(valid_values):
@@ -94,6 +98,10 @@ the method-level counterpart to the standalone `validate()` function.
   in standard mode, and confirms `validate(val, return_bool=True) is
   False` — verifying the exception-suppression escape hatch works
   independently of the raising path.
+
+* **Failure Messages:**
+  The closures carry their own assertion messages (value and mode). Plain `assert` statements in an
+  installed package are not rewritten by pytest, so a bare `assert` would fail with an empty message.
 
 ---
 
